@@ -8,7 +8,7 @@ import Animated, {
   } from 'react-native-reanimated';
 import 'react-native-gesture-handler';
 
-
+import ChooseRole from '../accounts/ChooseRole';
 import themes from '../../../themes'
 import { useEffect, useState } from 'react';
 
@@ -28,7 +28,8 @@ const Waitview = ({navigation}) => {
         clearInterval(intervalId); 
         navigation.navigate('Login')
       } else {
-        console.log(`Countdown: ${count}`);
+        console.clear();
+        console.log(`${count}`);
         setCount((prevCount) => prevCount - 1);
       }
     }, 1000);

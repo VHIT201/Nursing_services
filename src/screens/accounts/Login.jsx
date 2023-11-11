@@ -1,9 +1,23 @@
-import { StyleSheet, Text, View, TextInput, Image, Dimensions,TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  TextInput,
+  ScrollView,
+  FlatList,
+  Dimensions,
+  Image
+} from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import Foundation from "react-native-vector-icons/Foundation";
+import Fontisto from "react-native-vector-icons/Fontisto";
+import Entypo from "react-native-vector-icons/Entypo";
 import Feather from "react-native-vector-icons/Feather";
 import themes from '../../../themes';
-
+import Register from './Register';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
@@ -63,7 +77,7 @@ const Login = ({navigation}) => {
 
         <View style={[styles.textInput, isPassWordFocused && styles.focusedTextInput]}>
           <View style={{ height: '100%', width: '10%', justifyContent: "center", alignItems: 'center', }}>
-            <Feather name='mail' size={20} color={isPassWordFocused|| inputPasswordValue!=''?  themes.green : themes.gray } />
+            <FontAwesome name='lock' size={20} color={isPassWordFocused|| inputPasswordValue!=''?  themes.green : themes.gray } />
           </View>
           <TextInput
             placeholder='Mật khẩu'
@@ -73,18 +87,18 @@ const Login = ({navigation}) => {
             style={{ height: '100%', width: '90%', paddingLeft: 4, paddingRight: 20, borderTopRightRadius: 10, borderBottomRightRadius: 10, color: isPassWordFocused ? 'black' : 'black' }}
           />
         </View>
-        
+
         <View style={{width:'100%',height:30,marginTop:4}}>
             <TouchableOpacity style={{height:'100%',justifyContent:'center',alignItems:'flex-end'}}>
                 <Text style={{fontSize:14,color:themes.green}}>Quên mật khẩu ?</Text>
             </TouchableOpacity>
         </View>
-        <TouchableOpacity style={{width:'100%',height:50,borderRadius:10,backgroundColor:themes.green,marginTop:30,justifyContent:'center',alignItems:"center"}}>
+        <TouchableOpacity onPress={()=>navigation.navigate('ChooseRole')} style={{width:'100%',height:50,borderRadius:10,backgroundColor:themes.green,marginTop:30,justifyContent:'center',alignItems:"center"}}>
             <Text style={{fontSize:15,fontWeight:"500",color:'white'}}>ĐĂNG NHẬP</Text>
         </TouchableOpacity>
         <View style={styles.bottomText}>
             <Text>Chưa có tài khoản? </Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={()=>navigation.navigate('Register')}>
                 <Text style={{color:themes.green}}>Đăng ký</Text>
             </TouchableOpacity>
         </View>

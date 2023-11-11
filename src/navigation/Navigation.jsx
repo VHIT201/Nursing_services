@@ -9,6 +9,8 @@ import 'react-native-gesture-handler';
 import Login from '../screens/accounts/Login';
 import Register from '../screens/accounts/Register';
 import Waitview from '../screens/waitviews/Waitview';
+import ChooseRole from '../screens/accounts/ChooseRole';
+
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -17,7 +19,7 @@ const Navigation = () => {
     const DrawerNavigator = ()=>{
         return(
             <Drawer.Navigator>
-                {/* <Drawer.Screen name="Login" component={Login} /> */}
+                
             </Drawer.Navigator>
         )
     }
@@ -41,6 +43,20 @@ const Navigation = () => {
                 },
                 headerShown: false, 
                 }} name="Login" component={Login} />
+            <Stack.Screen options={{
+                title: 'Register', 
+                headerStyle: {
+                    backgroundColor: 'green', 
+                },
+                headerShown: false, 
+                }} name="Register" component={Register} />
+            <Stack.Screen options={{
+                title: 'ChooseRole', 
+                headerStyle: {
+                    backgroundColor: 'green', 
+                },
+                headerShown: false, 
+                }} name="ChooseRole" component={ChooseRole} />
             <Stack.Screen name="DrawerNavigator" component={DrawerNavigator} />
         </Stack.Navigator>
     </NavigationContainer> 
