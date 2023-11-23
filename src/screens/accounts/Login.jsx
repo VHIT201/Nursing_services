@@ -58,7 +58,7 @@ const Login = ({navigation}) => {
   return (
     <View style={styles.container}>
       <View style={styles.top}>
-        <Image source={require('../../assets/Icon/logo.png')} style={{ height: '100%', width: '100%' }} resizeMode='contain' />
+        <Image source={require('../../assets/Icon/logo.png')} style={{ height: '60%', width: '60%' }} resizeMode='contain' />
       </View>
       <View style={styles.bottom}>
         <View style={[styles.textInput, isUserNameFocused && styles.focusedTextInput]}>
@@ -113,12 +113,15 @@ const styles = StyleSheet.create({
     width: windowWidth,
     justifyContent: "flex-start",
     alignItems: "center",
-    backgroundColor: "#F3F4F6"
+    backgroundColor: "#F3F4F6",
+
   },
   top:{
     height: '32%', 
     width: '40%', 
     overflow: 'hidden',
+    justifyContent:"center",
+    alignItems:"center"
     
   },
   bottom: {

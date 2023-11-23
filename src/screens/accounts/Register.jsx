@@ -103,7 +103,7 @@ const Register = ({navigation}) => {
       };
 
   return (
-    <KeyboardAwareScrollView enableOnAndroid={true} enableAutomaticScroll={true} style={{height:windowHeight,width:windowWidth}}>
+    <KeyboardAwareScrollView enableOnAndroid={true} enableAutomaticScroll={true} style={{flex:1,width:windowWidth}}>
     <View style={styles.container}>
         <Text style={{fontSize:24,fontWeight:"600"}}>Create account</Text>
         <Text style={{fontSize:14,fontWeight:"400",marginBottom:30}}>Create new account</Text>
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingLeft:'4%',
         paddingRight:'4%',
-        paddingBottom:'8%'
+        paddingBottom:'8%',
     },
     textInput: {
         width: "100%",
