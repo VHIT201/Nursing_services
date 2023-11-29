@@ -39,7 +39,7 @@ const NursesNotification = ({navigation}) => {
       <View style={styles.body}>
         <TouchableOpacity style={{flexDirection:"row",width:"100%",height:120,borderBottomWidth:1, borderBottomColor:themes.green}}>
           <View style={{width:'10%',height:"100%",justifyContent:"flex-start",alignItems:"center"}}>
-            <Image resizeMode="contain" style={{height:"50%",width:"100%",justifyContent:"flex-start",alignItems:"center"}} source={require('../../assets/Icon/logo.png')}></Image>
+            <Image resizeMode="contain" style={{height:"40%",width:"70%",justifyContent:"flex-start",alignItems:"center"}} source={require('../../assets/Icon/logo.png')}></Image>
           </View> 
           <View style={{width:'90%',height:"100%",paddingRight:'5%',justifyContent:"space-evenly",paddingTop:'2%',paddingBottom:'2%'}}>
             <Text style={{fontWeight:"600",color:'#1F2937'}}>Tiêm vắc xin phòng bệnh covid-19</Text>
@@ -49,7 +49,7 @@ const NursesNotification = ({navigation}) => {
         </TouchableOpacity>
         <TouchableOpacity style={{flexDirection:"row",width:"100%",height:120,borderBottomWidth:1, borderBottomColor:themes.green}}>
           <View style={{width:'10%',height:"100%",justifyContent:"flex-start",alignItems:"center"}}>
-            <Image resizeMode="contain" style={{height:"50%",width:"100%",justifyContent:"flex-start",alignItems:"center"}} source={require('../../assets/Icon/logo.png')}></Image>
+            <Image resizeMode="contain" style={{height:"50%",width:"70%",justifyContent:"flex-start",alignItems:"center"}} source={require('../../assets/Icon/logo.png')}></Image>
           </View> 
           <View style={{width:'90%',height:"100%",paddingRight:'5%',justifyContent:"space-evenly",paddingTop:'2%',paddingBottom:'2%'}}>
             <Text style={{fontWeight:"600",color:'#1F2937'}}>Tiêm vắc xin phòng bệnh covid-19</Text>
@@ -59,7 +59,7 @@ const NursesNotification = ({navigation}) => {
         </TouchableOpacity>
         <TouchableOpacity style={{flexDirection:"row",width:"100%",height:120,borderBottomWidth:1, borderBottomColor:themes.green}}>
           <View style={{width:'10%',height:"100%",justifyContent:"flex-start",alignItems:"center"}}>
-            <Image resizeMode="contain" style={{height:"50%",width:"100%",justifyContent:"flex-start",alignItems:"center"}} source={require('../../assets/Icon/logo.png')}></Image>
+            <Image resizeMode="contain" style={{height:"50%",width:"70%",justifyContent:"flex-start",alignItems:"center"}} source={require('../../assets/Icon/logo.png')}></Image>
           </View> 
           <View style={{width:'90%',height:"100%",paddingRight:'5%',justifyContent:"space-evenly",paddingTop:'2%',paddingBottom:'2%'}}>
             <Text style={{fontWeight:"600",color:'#1F2937'}}>Tiêm vắc xin phòng bệnh covid-19</Text>

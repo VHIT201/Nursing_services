@@ -31,7 +31,7 @@ const CalendarListItem = ({handleOnpress}) => {
         <Text style={{fontWeight:"500",color:themes.green}}>Chăm sóc bệnh nhân tại nhà</Text>
       </View>
       <View style={{height:"84%",width:"100%",justifyContent:'center',alignItems:'flex-start',paddingLeft:'11%',paddingRight:"1%",gap:4}}>
-            <Text style={styles.text}>Mã đặt <Text style={{fontWeight:"400"}}>1234</Text></Text>
+            <Text style={styles.text}>Mã đặt : <Text style={{fontWeight:"400"}}>1234</Text></Text>
             <Text style={styles.text}>Ngày bắt đầu : <Text style={{fontWeight:"400"}}>2023/11/10</Text></Text>
             <Text style={styles.text}>Giờ bắt đầu : <Text style={{fontWeight:"400"}}>8:00</Text></Text>
             <Text style={styles.text}>Công việc : <Text style={{fontWeight:"400"}}>Chăm sóc - Điều dưỡng</Text></Text>

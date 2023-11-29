@@ -18,15 +18,34 @@ import Entypo from "react-native-vector-icons/Entypo";
 import Feather from "react-native-vector-icons/Feather";
 import themes from '../../../themes';
 import Register from './Register';
+import { useDispatch,useSelector } from 'react-redux';
+import * as userService from '../../services/userService'
+import Loading from "../../components/Progress/Loading";
+import { updateUser } from "../../redux/slices/userSlice";
+import { StatusBar } from "expo-status-bar";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const Login = ({navigation}) => {
+  //redux
+  const dispatch = useDispatch()
+  const userDataRedux = useSelector((state) => state.user)
+
+  // trang loading
+  const [isLoading,setIsLoading] = useState(false)
+  const [notification,setNotification] = useState(false)
+
+// kiểm tra sự kiện focus
   const [isUserNameFocused, setisUserNameFocused] = useState(false);
   const [isPassWordFocused, setisPassWordFocused] = useState(false);
+
+  // kiểm tra nội dung
   const [inputUserNameValue, setInputUserNameValue] = useState('');
   const [inputPasswordValue, setInputPasswordValue] = useState('');
 
+  // dữ liệu 
+  const [user,setUser] = useState({email:'',password:''})
+  const [data,setData] = useState([])
 
   const handleFocusUser = () => {
     setisUserNameFocused(true);
@@ -35,25 +54,57 @@ const Login = ({navigation}) => {
   const handleBlurUser = () => {
     setisUserNameFocused(false);
   };
+  const handleBlurPassword = () => {
+    setisPassWordFocused(false);
+  };
 
   const handleChangeUserName = (text) => {
     setInputUserNameValue(text);
     setisUserNameFocused(true);
-  };
-
-  const handleFocusPassword = () => {
-    setisPassWordFocused(true);
-  };
-
-  const handleBlurPassword = () => {
-    setisPassWordFocused(false);
+    setUser(prevUser => ({ ...prevUser, email: text }));
   };
 
   const handleChangePassword = (text) => {
     setInputPasswordValue(text);
     setisPassWordFocused(true);
+    setUser(prevUser => ({ ...prevUser, password: text }));
   };
 
+
+  const handleFocusPassword = () => {
+    setisPassWordFocused(true);
+  };
+
+
+  // xử lý login
+  const handleLogin = async () => {
+    // setIsLoading(true)
+    const response = await userService.loginUser(user)
+    setData(response)
+    console.log(response)
+    // setIsLoading(false)
+    
+    
+  }
+
+  //Xử lý data
+  const loginSuccess = () =>{
+    setNotification(data.message)
+    const updatedUser = {
+      accessToken: data.accessToken,
+      _id: data.data.user._id,
+      fullname : data.data.user.fullname,
+      email : data.data.user.email,
+      phoneNumber : data.data.user.phoneNumber,
+      avatar : data.data.user.avatar,
+      role : data.data.user.role,
+    }
+    dispatch(updateUser(updatedUser))
+    navigation.navigate()
+  }
+
+
+  
 
   return (
     <View style={styles.container}>
@@ -80,7 +131,7 @@ const Login = ({navigation}) => {
             <FontAwesome name='lock' size={20} color={isPassWordFocused|| inputPasswordValue!=''?  themes.green : themes.gray } />
           </View>
           <TextInput
-            placeholder='Mật khẩu'
+            placeholder='Mật khẩu' 
             onFocus={handleFocusPassword}
             onBlur={handleBlurPassword}
             onChangeText={handleChangePassword}
@@ -93,7 +144,7 @@ const Login = ({navigation}) => {
                 <Text style={{fontSize:14,color:themes.green}}>Quên mật khẩu ?</Text>
             </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={()=>navigation.navigate('ChooseRole')} style={{width:'100%',height:50,borderRadius:10,backgroundColor:themes.green,marginTop:30,justifyContent:'center',alignItems:"center"}}>
+        <TouchableOpacity onPress={handleLogin} style={{width:'100%',height:50,borderRadius:10,backgroundColor:themes.green,marginTop:30,justifyContent:'center',alignItems:"center"}}>
             <Text style={{fontSize:15,fontWeight:"500",color:'white'}}>ĐĂNG NHẬP</Text>
         </TouchableOpacity>
         <View style={styles.bottomText}>
@@ -103,17 +154,35 @@ const Login = ({navigation}) => {
             </TouchableOpacity>
         </View>
       </View>
+      {
+        isLoading && 
+        (<View style={styles.modal}>
+          <Loading/>
+         </View>)
+      }
+      {
+        notification &&(
+        <View style={styles.modal}>
+          <View style={{height:40,width:200,justifyContent:"center",alignItems:"center"}}>
+              <Text style={{fontWeight:"600",color:themes.green}}>{data.message}</Text>
+          </View>
+         </View>
+         )
+        
+      }
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop:'20%',
     height: windowHeight,
     width: windowWidth,
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "#F3F4F6",
+    position:"relative"
 
   },
   top:{
@@ -162,6 +231,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop:40
   },
+  modal:{
+    position:"absolute",
+    height:windowHeight*1.2,
+    width:"100%",
+    alignItems: "center",
+    
+  }
 });
 
 export default Login;

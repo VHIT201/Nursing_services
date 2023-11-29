@@ -40,13 +40,13 @@ const CustomerSettings = ({navigation}) => {
   const [beingSelected, setBeingSelected] = useState(6)
   const [language,setLanguage] = useState('vi')
   const listSettings = [
-    {key:0,name:'profile',label:'Chi tiết tài khoản'},
-    {key:1,name:'changePassword',label:'Đổi mật khẩu'},
-    {key:2,name:'language',label:'Ngôn ngữ'},
-    {key:3,name:'rules',label:'Điều khoản sử dụng'},
-    {key:4,name:'privacyPolicy',label:'Chính sách bảo mật'},
-    {key:5,name:'exit',label:'Thoát'},
-  ]
+    { key: 0, name: 'profile', label: 'Chi tiết tài khoản', icon: 'person' },
+    { key: 1, name: 'changePassword', label: 'Đổi mật khẩu', icon: 'key' },
+    { key: 2, name: 'language', label: 'Ngôn ngữ', icon: 'language' },
+    { key: 3, name: 'rules', label: 'Điều khoản sử dụng', icon: 'document-text' },
+    { key: 4, name: 'privacyPolicy', label: 'Chính sách bảo mật', icon: 'shield-checkmark' },
+    { key: 5, name: 'exit', label: 'Thoát', icon: 'log-out' },
+  ];
   console.log(beingSelected)
 
   if(beingSelected===0){
@@ -202,8 +202,12 @@ const CustomerSettings = ({navigation}) => {
         
         <FlatList data={listSettings} renderItem={({item})=>(
           <TouchableOpacity onPress={()=>setBeingSelected(item.key)} style={{height:60,width:"100%",justifyContent:"space-between",flexDirection:"row",alignItems:'center',borderBottomWidth:1,borderBottomColor:themes.green}}>
-            <Text style={{fontWeight:'500',fontSize:15}}>{item.label}</Text>
-            <AntDesign name={'right'} />
+            <View style={{width:"60%",flexDirection:"row", gap:20,alignItems:"center"}}>
+              <Ionicons name={item.icon} size={20} color={themes.green}/>
+              <Text style={{fontWeight:'500',fontSize:15}}>{item.label}</Text>
+            </View>
+
+            <AntDesign name={'right'} size={16} color={themes.green}/>
           </TouchableOpacity>
         )} keyExtractor={item => item.key}>
         

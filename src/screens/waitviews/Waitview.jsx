@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View,Dimensions } from 'react-native'
+import { StyleSheet, Text, View,Dimensions,Image } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 import Animated, {
     useSharedValue,

@@ -24,6 +24,7 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import InfoService from "../../components/selectionbar/InfoService";
 import Header from "../../components/header/Header";
 import themes from "../../../themes";
+import ServiceDetails from "../../components/ServiceDetails/ServiceDetails";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
@@ -39,6 +40,12 @@ const NursesCalendar = ({navigation}) => {
   }
   const handleRightButton = () =>{
     setAppointmentList(false)
+  }
+  const hanldeModalButton = () =>{
+    setVisibleModal(false)
+  }
+  const handlePressInfoService = () =>{
+    setVisibleModal(true)
   }
   return (
     <View style={styles.container}>
@@ -61,7 +68,7 @@ const NursesCalendar = ({navigation}) => {
             (
               <>
               <ScrollView style={{flex:1,width:'100%',paddingLeft:'1%',paddingRight:"1%"}}>
-              <InfoService state={'notReceived'}/>
+              <InfoService handlePress={handlePressInfoService} state={'notReceived'}/>
               <InfoService state={'happening'}/>
               <InfoService state={'complete'}/>
               <InfoService state={'cancelled'}/>
@@ -81,6 +88,14 @@ const NursesCalendar = ({navigation}) => {
           
         
       </View>
+      {
+        visibleModal&&(
+          <View style={styles.modal}>
+            <ServiceDetails handleHeaderLeftButton={hanldeModalButton}/>
+          </View>
+        )
+      }
+      
     </View>
   )
 }
@@ -116,6 +131,7 @@ const styles = StyleSheet.create({
   modal:{
     height:"100%",
     width:"100%",
-    position:"absolute"
+    position:"absolute",
+    backgroundColor:"white"
   }
 })

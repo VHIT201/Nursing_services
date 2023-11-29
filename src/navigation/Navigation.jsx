@@ -40,7 +40,11 @@ import CustomerStatistic from '../screens/customers/CustomerStatistic';
 import RelativeInfomation from '../screens/customers/RelativeInfomation';
 import CustomerChooseSerVice from '../screens/customers/CustomerChooseSerVice';
 
+//import redux
+import { store } from '../redux/Store';
 import themes from '../../themes';
+import { Provider } from 'react-redux';
+
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -140,24 +144,100 @@ const Navigation = () => {
 
     const CustomerDrawerNavigation = () =>{
         return (
-            <Drawer.Navigator screenOptions={{headerShown:false}} initialRouteName='CustomerHome'>
-                <Drawer.Screen name='CustomerHome' component={CustomerHome}/>
-                <Drawer.Screen name='CustomerCalendar' component={CustomerCalendar}/>
-                <Drawer.Screen name='RelativeInfomation' component={RelativeInfomation}/>
-                <Drawer.Screen name='CustomerServices' component={CustomerServices}/>
-                <Drawer.Screen name='CustomerStatistic' component={CustomerStatistic}/>
-                <Drawer.Screen name='CustomerNotification' component={CustomerNotification}/>
-                <Drawer.Screen name='CustomerSettings' component={CustomerSettings}/>
-            </Drawer.Navigator>
+            <Drawer.Navigator
+  initialRouteName='CustomerHome' 
+  screenOptions={{
+    drawerStyle: {
+      backgroundColor: 'white',
+    },
+    headerShown: false,
+    drawerActiveTintColor: themes.green,
+    drawerLabelStyle: {
+      textAlign: 'left',
+    },
+  }}
+>
+  <Drawer.Screen
+    name='CustomerHome'
+    component={CustomerHome}
+    options={{
+      drawerLabel: 'Trang chủ',
+      drawerIcon: ({ color, size }) => (
+        <Ionicons name='home-outline' size={size} color={color} />
+      ),
+    }}
+  />
+  <Drawer.Screen
+    name='CustomerCalendar'
+    component={CustomerCalendar}
+    options={{
+      drawerLabel: 'Lịch hẹn',
+      drawerIcon: ({ color, size }) => (
+        <Ionicons name='calendar-outline' size={size} color={color} />
+      ),
+    }}
+  />
+  <Drawer.Screen
+    name='RelativeInfomation'
+    component={RelativeInfomation}
+    options={{
+      drawerLabel: 'Thông tin người thân',
+      drawerIcon: ({ color, size }) => (
+        <Ionicons name='person-outline' size={size} color={color} />
+      ),
+    }}
+  />
+  <Drawer.Screen
+    name='CustomerServices'
+    component={CustomerServices}
+    options={{
+      drawerLabel: 'Dịch vụ',
+      drawerIcon: ({ color, size }) => (
+        <Ionicons name='briefcase-outline' size={size} color={color} />
+      ),
+    }}
+  />
+  <Drawer.Screen
+    name='CustomerStatistic'
+    component={CustomerStatistic}
+    options={{
+      drawerLabel: 'Thống kê',
+      drawerIcon: ({ color, size }) => (
+        <Ionicons name='bar-chart-outline' size={size} color={color} />
+      ),
+    }}
+  />
+  <Drawer.Screen
+    name='CustomerNotification'
+    component={CustomerNotification}
+    options={{
+      drawerLabel: 'Thông báo',
+      drawerIcon: ({ color, size }) => (
+        <Ionicons name='notifications-outline' size={size} color={color} />
+      ),
+    }}
+  />
+  <Drawer.Screen
+    name='CustomerSettings'
+    component={CustomerSettings}
+    options={{
+      drawerLabel: 'Cài đặt',
+      drawerIcon: ({ color, size }) => (
+        <Ionicons name='settings-outline' size={size} color={color} />
+      ),
+    }}
+  />
+</Drawer.Navigator>
         )
     }
 
     
 
   return (
+    <Provider store={store}>
     <NavigationContainer>
        
-        <Stack.Navigator initialRouteName='Waitview'>
+        <Stack.Navigator initialRouteName='Login'>
             <Stack.Screen options={{title: 'Waitview Title', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="Waitview" component={Waitview} />
             <Stack.Screen options={{title: 'Login', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="Login" component={Login} />
             <Stack.Screen options={{title: 'Register', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="Register" component={Register} />
@@ -171,9 +251,12 @@ const Navigation = () => {
        
         </Stack.Navigator>
     </NavigationContainer> 
+    </Provider>
   )
 }
 
 export default Navigation
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  // 
+})

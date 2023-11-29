@@ -49,11 +49,11 @@ const CustomerServices = ({navigation}) => {
       <Header nameLeftIcon={'navicon'} namePage={'Công việc'} handleLeftButton={openDrawer}/>
       <View style={styles.body}>
         <View style={{height:"6%",width:"100%",flexDirection:'row',alignItems:'center',justifyContent:"space-between"}}>
-          <TouchableOpacity onPress={()=>setIsSelecting(0)} style={ isSelecting===0 ?styles.btnAct:styles.btn}>
+          <TouchableOpacity onPress={()=>setIsSelecting(0)} style={ isSelecting===0 ?[styles.btnAct,{borderBottomColor:themes.yellow}]:styles.btn}>
             <Text style={{fontSize:12}}>Đang chờ duyệt</Text>
           </TouchableOpacity>
           <View style={{height:"40%",width:1,backgroundColor:themes.gray}}></View>
-          <TouchableOpacity onPress={()=>setIsSelecting(1)} style={ isSelecting===1 ?styles.btnAct:styles.btn}>
+          <TouchableOpacity onPress={()=>setIsSelecting(1)} style={ isSelecting===1 ?[styles.btnAct,{borderBottomColor:themes.blue}]:styles.btn}>
             <Text style={{fontSize:12}}>Đang thực hiện</Text>
           </TouchableOpacity>
           <View style={{height:"40%",width:1,backgroundColor:themes.gray}}></View>
@@ -61,7 +61,7 @@ const CustomerServices = ({navigation}) => {
             <Text style={{fontSize:12}}>Đã hoàn thành</Text>
           </TouchableOpacity>
           <View style={{height:"40%",width:1,backgroundColor:themes.gray}}></View>
-          <TouchableOpacity onPress={()=>setIsSelecting(3)} style={ isSelecting===3 ?styles.btnAct:styles.btn}>
+          <TouchableOpacity onPress={()=>setIsSelecting(3)} style={ isSelecting===3 ?[styles.btnAct,{borderBottomColor:themes.red}]:styles.btn}>
             <Text style={{fontSize:12}}>Đã hủy bỏ</Text>
           </TouchableOpacity>
           

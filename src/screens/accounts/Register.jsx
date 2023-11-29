@@ -19,7 +19,7 @@ import Fontisto from "react-native-vector-icons/Fontisto";
 import Entypo from "react-native-vector-icons/Entypo";
 import Feather from "react-native-vector-icons/Feather";
 import themes from '../../../themes';
-
+import * as userService from '../../services/userService'
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
@@ -35,6 +35,9 @@ const Register = ({navigation}) => {
     const [inputPasswordValue, setInputPasswordValue] = useState('');
     const [isConfirmPasswordFocused, setisConfirmPasswordFocused] = useState(false);
     const [inputConfirmPasswordValue, setInputConfirmPasswordValue] = useState('');
+    
+    const [registerData, setRegisterData] = useState({fullname:'',email:'',phoneNumber:'',password:'',confirmPassword:''})
+    const [data,setData] = useState([])
     //function
     //Name
     const handleFocusName = () => {
@@ -45,10 +48,7 @@ const Register = ({navigation}) => {
         setisNameFocused(false);
       };
     
-      const handleChangeName = (text) => {
-        setInputNameValue(text);
-        setisNameFocused(!!text);
-      };
+      
       //Email
     const handleFocusEmail = () => {
         setisEmailFocused(true);
@@ -58,10 +58,7 @@ const Register = ({navigation}) => {
         setisEmailFocused(false);
       };
     
-      const handleChangeEmail = (text) => {
-        setInputEmailValue(text);
-        setisEmailFocused(!!text);
-      };
+      
       //Phone
     const handleFocusPhone = () => {
         setisPhoneFocused(true);
@@ -71,10 +68,7 @@ const Register = ({navigation}) => {
         setisPhoneFocused(false);
       };
     
-      const handleChangePhone = (text) => {
-        setInputPhoneValue(text);
-        setisPhoneFocused(!!text);
-      };
+      
       //Password
     const handleFocusPassword = () => {
         setisPasswordFocused(true);
@@ -84,10 +78,7 @@ const Register = ({navigation}) => {
         setisPasswordFocused(false);
       };
     
-      const handleChangePassword = (text) => {
-        setInputPasswordValue(text);
-        setisPasswordFocused(!!text);
-      };
+      
       //ConfirmPassword
     const handleFocusConfirmPassword = () => {
         setisConfirmPasswordFocused(true);
@@ -97,11 +88,47 @@ const Register = ({navigation}) => {
         setisConfirmPasswordFocused(false);
       };
     
+      
+      
+      const handleChangeName = (text) => {
+        setInputNameValue(text);
+        setisNameFocused(!!text);
+        setRegisterData(prevRegiterData => ({ ...prevRegiterData, fullname: text }));
+        
+      };
+      
+      const handleChangeEmail = (text) => {
+        setInputEmailValue(text);
+        setisEmailFocused(!!text);
+        setRegisterData(prevRegiterData => ({ ...prevRegiterData, email: text }));
+        
+      };
+      const handleChangePhone = (text) => {
+        setInputPhoneValue(text);
+        setisPhoneFocused(!!text);
+        setRegisterData(prevRegiterData => ({ ...prevRegiterData, phoneNumber: text }));
+        
+      };
+      const handleChangePassword = (text) => {
+        setInputPasswordValue(text);
+        setisPasswordFocused(!!text);
+        setRegisterData(prevRegiterData => ({ ...prevRegiterData, password: text }));
+      };
       const handleChangeConfirmPassword = (text) => {
         setInputConfirmPasswordValue(text);
         setisConfirmPasswordFocused(!!text);
+        setRegisterData(prevRegiterData => ({ ...prevRegiterData, confirmPassword: text }));
+        
       };
 
+      
+      const handleRegister = async () => {
+        console.log(registerData)
+        const response = await userService.registerUser(registerData)
+        setData(response)
+        
+      }
+      
   return (
     <KeyboardAwareScrollView enableOnAndroid={true} enableAutomaticScroll={true} style={{flex:1,width:windowWidth}}>
     <View style={styles.container}>
@@ -175,7 +202,7 @@ const Register = ({navigation}) => {
                     style={{ height: '100%', width: '90%', paddingLeft: 4, paddingRight: 20, borderTopRightRadius: 10, borderBottomRightRadius: 10, color: isConfirmPasswordFocused ? 'black' : 'black' }}
                 />
                 </View>
-        <TouchableOpacity style={{width:'100%',height:50,borderRadius:10,backgroundColor:themes.green,marginTop:30,justifyContent:'center',alignItems:"center"}}>
+        <TouchableOpacity onPress={handleRegister} style={{width:'100%',height:50,borderRadius:10,backgroundColor:themes.green,marginTop:30,justifyContent:'center',alignItems:"center"}}>
             <Text style={{fontSize:15,fontWeight:"500",color:'white'}}>TẠO TÀI KHOẢN</Text>
         </TouchableOpacity>
         <View style={styles.bottomText}>

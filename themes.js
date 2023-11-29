@@ -9,8 +9,12 @@ const themes = {
     white1:'#E5E7EB',
     yellow:'#FCD34D',
     blue:'#4287f5',
-    red:'#ff4b4b'
-    
+    red:'#ff4b4b' 
+   
+        // notReceived yellow
+        // happening blue
+        // complete green
+        // cancelled red
 }
 
 export default themes

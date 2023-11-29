@@ -24,6 +24,7 @@ const InfoService = ({state,service,startDay,startTime, address, user, totalMone
         <Text style={styles.text}>Giờ bắt đầu : 09:00</Text>
         <Text style={styles.text}>Địa chỉ : <Text style={{fontWeight:"400",fontSize:13}}>298, hẻm 7, tổ 39, khu phố 11, P.Tân Phong, Biên Hòa, Đồng Nai</Text></Text>
         <Text style={styles.text}>Người đặt dịch vụ : Ngọc</Text>
+        <Text style={styles.text}>Trạng thái : Đang chờ</Text>
         <Text style={styles.text}>Tổng tiền : <Text style={{fontWeight:'500',color:themes.green}}>300.000 đ</Text></Text>
       </View>
     </TouchableOpacity>
