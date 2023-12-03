@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect,useContext } from "react";
 import {
   View,
   StyleSheet,
@@ -8,7 +8,8 @@ import {
   ScrollView,
   FlatList,
   Dimensions,
-  Image
+  Image,
+  TouchableWithoutFeedback
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
@@ -19,20 +20,38 @@ import Feather from "react-native-vector-icons/Feather";
 import themes from '../../../themes';
 import Register from './Register';
 import { useDispatch,useSelector } from 'react-redux';
-import * as userService from '../../services/userService'
+import { createAsyncThunk } from "@reduxjs/toolkit";
 import Loading from "../../components/Progress/Loading";
-import { updateUser } from "../../redux/slices/userSlice";
+import { loginUser, updateUser, forgotPassword } from "../../redux/slices/userSlice";
 import { StatusBar } from "expo-status-bar";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNSecureStorage, { ACCESSIBLE } from 'rn-secure-storage'
 
 const Login = ({navigation}) => {
+  // biến tạm
+  const error1 = 'Password must be at least 6 characters long and contain at least one lowercase letter, one uppercase letter, one digit.'
+  const error2 = 'Password does not match!'
+  const error3 = 'Invalid value'
+  const error4 = 'Phone number not found!'
+  const error5 = 'Email not found!'
+  // kiểm thử
+  const now = new Date();
+  const time = now.toLocaleTimeString();
+
   //redux
   const dispatch = useDispatch()
-  const userDataRedux = useSelector((state) => state.user)
 
+  //lấy data redux
+  const userDataRedux = useSelector((state) => state.user)
+  const isLoggedIn = useSelector((state) => state.user.success);
+  const error = useSelector((state) => state.user.error)
+
+  // console.log('error : ',error[0].message)
+
+  // console.log('user data redux : ',userDataRedux.user)
   // trang loading
-  const [isLoading,setIsLoading] = useState(false)
   const [notification,setNotification] = useState(false)
 
 // kiểm tra sự kiện focus
@@ -42,10 +61,27 @@ const Login = ({navigation}) => {
   // kiểm tra nội dung
   const [inputUserNameValue, setInputUserNameValue] = useState('');
   const [inputPasswordValue, setInputPasswordValue] = useState('');
+    //sai mật khẩu
+  const [wrongPassword,setWrongPassword] = useState(false)
+  const [showWrongPassword,setShowWrongPassword] = useState(false)
+  const [showWrongPassword1,setShowWrongPassword1] = useState(false)
+  const [showWrongPassword2,setShowWrongPassword2] = useState(false)
+  const [showWrongUsername,setShowWrongUsername] = useState(false)
+  const [showWrongUsername1,setShowWrongUsername1] = useState(false)
+  
 
+  //Quên mật khẩu
+  const [verifyEmail, setVerifyEmail] = useState({email:''})
+
+  const handleVerifyEmail = (text)=>{
+    setVerifyEmail(prevVerifyEmail => ({ ...prevVerifyEmail, email: text }));
+  }
+
+
+  // forgotPassword
+    const [modalForgotPassword,setModalForgotPassword] = useState(false)
   // dữ liệu 
-  const [user,setUser] = useState({email:'',password:''})
-  const [data,setData] = useState([])
+  const [user,setUser] = useState({email:'',phoneNumber:'',password:''})
 
   const handleFocusUser = () => {
     setisUserNameFocused(true);
@@ -61,7 +97,16 @@ const Login = ({navigation}) => {
   const handleChangeUserName = (text) => {
     setInputUserNameValue(text);
     setisUserNameFocused(true);
-    setUser(prevUser => ({ ...prevUser, email: text }));
+    if(text.includes('@'))
+    {
+      setUser(prevUser => ({ ...prevUser, email: text }));
+      setUser(prevUser => ({ ...prevUser, phoneNumber: '' }));
+    }
+    else{
+      setUser(prevUser => ({ ...prevUser, phoneNumber: text }));
+      setUser(prevUser => ({ ...prevUser, email: '' }));
+    }
+    
   };
 
   const handleChangePassword = (text) => {
@@ -76,38 +121,126 @@ const Login = ({navigation}) => {
   };
 
 
-  // xử lý login
+  //SECTION - Xử lý login
   const handleLogin = async () => {
-    // setIsLoading(true)
-    const response = await userService.loginUser(user)
-    setData(response)
-    console.log(response)
-    // setIsLoading(false)
+    
+    console.log(time)
+    //đẩy thông tin login vào redux
+    if(user.phoneNumber.startsWith(1)){
+      const dataLogin = {phoneNumber:user.phoneNumber, password:user.password}
+      // console.log(dataLogin)
+      dispatch(loginUser(dataLogin))
+
+
+    }
+    if(user.email.includes('@')){
+      const dataLogin = {email:user.email, password:user.password}
+      console.log(dataLogin)
+      dispatch(loginUser(dataLogin))
+    }
     
     
+ 
+    const handleLoginSuccess = () => {
+      navigation.navigate('ChooseRole');
+    }
+
+
+    if(error[0]?.message === error1){
+      console.log(error[0].message)
+      setWrongPassword(true)
+    }
+    if(error[0]?.message === error2){
+      console.log(error[0].message)
+      setWrongPassword(true)
+    }
+    
+  }
+  
+  
+    useEffect(() => {
+      if(userDataRedux.success === true){
+      handleLoginSuccess() 
+      RNSecureStorage.set("user", JSON.stringify(userDataRedux), {accessible: ACCESSIBLE.WHEN_UNLOCKED})
+        .then((res) => {
+        console.log(res);
+        }, (err) => {
+        console.log(err);
+        });
+    }
+    }, [userDataRedux.success])
+  
+  
+  const handleLoginSuccess = () => {
+    navigation.navigate('ChooseRole');
   }
 
-  //Xử lý data
-  const loginSuccess = () =>{
-    setNotification(data.message)
-    const updatedUser = {
-      accessToken: data.accessToken,
-      _id: data.data.user._id,
-      fullname : data.data.user.fullname,
-      email : data.data.user.email,
-      phoneNumber : data.data.user.phoneNumber,
-      avatar : data.data.user.avatar,
-      role : data.data.user.role,
+  useEffect(() => {
+    if(error[0]?.message === error1) {
+      setShowWrongPassword(true);
+  
+      const timer = setTimeout(() => {
+        setShowWrongPassword(false);
+      }, 5000);
+  
+      return () => clearTimeout(timer);
     }
-    dispatch(updateUser(updatedUser))
-    navigation.navigate()
+    if(error[0]?.message === error2) {
+      setShowWrongPassword1(true);
+  
+      const timer = setTimeout(() => {
+        setShowWrongPassword1(false);
+      }, 5000);
+  
+      return () => clearTimeout(timer);
+    }
+    if(error[0]?.message === error3) {
+      setShowWrongPassword2(true);
+  
+      const timer = setTimeout(() => {
+        setShowWrongPassword2(false);
+      }, 5000);
+  
+      return () => clearTimeout(timer);
+    }
+    if(error[0]?.message === error4) {
+      setShowWrongUsername(true);
+  
+      const timer = setTimeout(() => {
+        setShowWrongUsername(false);
+      }, 5000);
+  
+      return () => clearTimeout(timer);
+    }
+    if(error[0]?.message === error5) {
+      setShowWrongUsername1(true);
+  
+      const timer = setTimeout(() => {
+        setShowWrongUsername1(false);
+      }, 5000);
+  
+      return () => clearTimeout(timer);
+    }
+
+
+  }, [error]);
+
+  //Xử lý quên mật khẩu
+  const hanldeVerifyEmail = async () =>{
+    // console.log(email)
+    dispatch(forgotPassword(verifyEmail))
+    navigation.navigate('ReceiveCode', {verifyEmail});
   }
+
+
+
 
 
   
 
   return (
     <View style={styles.container}>
+    <StatusBar hidden/>
       <View style={styles.top}>
         <Image source={require('../../assets/Icon/logo.png')} style={{ height: '60%', width: '60%' }} resizeMode='contain' />
       </View>
@@ -126,7 +259,7 @@ const Login = ({navigation}) => {
         </View>
         <View style={{height:20}}></View>
 
-        <View style={[styles.textInput, isPassWordFocused && styles.focusedTextInput]}>
+        <View style={[styles.textInput, wrongPassword===true ? styles.error : isPassWordFocused && styles.focusedTextInput]}>
           <View style={{ height: '100%', width: '10%', justifyContent: "center", alignItems: 'center', }}>
             <FontAwesome name='lock' size={20} color={isPassWordFocused|| inputPasswordValue!=''?  themes.green : themes.gray } />
           </View>
@@ -140,7 +273,7 @@ const Login = ({navigation}) => {
         </View>
 
         <View style={{width:'100%',height:30,marginTop:4}}>
-            <TouchableOpacity style={{height:'100%',justifyContent:'center',alignItems:'flex-end'}}>
+            <TouchableOpacity onPress={()=>setModalForgotPassword(true)} style={{height:'100%',justifyContent:'center',alignItems:'flex-end'}}>
                 <Text style={{fontSize:14,color:themes.green}}>Quên mật khẩu ?</Text>
             </TouchableOpacity>
         </View>
@@ -155,21 +288,87 @@ const Login = ({navigation}) => {
         </View>
       </View>
       {
-        isLoading && 
+        userDataRedux.loading && 
         (<View style={styles.modal}>
           <Loading/>
          </View>)
       }
       {
-        notification &&(
+        userDataRedux.success &&(
         <View style={styles.modal}>
-          <View style={{height:40,width:200,justifyContent:"center",alignItems:"center"}}>
-              <Text style={{fontWeight:"600",color:themes.green}}>{data.message}</Text>
+          <View style={{height:40,width:200,justifyContent:"center",alignItems:"center",marginTop:'30%'}}>
+              <Text style={{fontWeight:"600",color:themes.green}}>Đăng nhập thành công</Text>
           </View>
          </View>
          )
-        
       }
+      {
+        showWrongPassword &&(
+        <View style={styles.modal}>
+          <View style={{height:100,width:400,justifyContent:"center",alignItems:"center",marginTop:'30%'}}>
+              <Text style={{fontWeight:"600",color:'red',textAlign:"center"}}>Mật khẩu phải dài ít nhất 6 ký tự và chứa ít nhất một chữ thường, một chữ hoa, một chữ số.</Text>
+          </View>
+         </View>
+         )
+      }
+      {
+        showWrongPassword1 &&(
+        <View style={styles.modal}>
+          <View style={{height:100,width:400,justifyContent:"center",alignItems:"center",marginTop:'30%'}}>
+              <Text style={{fontWeight:"600",color:'red',textAlign:"center"}}>Sai mật khẩu</Text>
+          </View>
+         </View>
+         )
+      }
+      {
+        showWrongPassword2 &&(
+        <View style={styles.modal}>
+          <View style={{height:100,width:400,justifyContent:"center",alignItems:"center",marginTop:'30%'}}>
+              <Text style={{fontWeight:"600",color:'red',textAlign:"center"}}>Bạn cần nhập đầy đủ thông tin !</Text>
+          </View>
+         </View>
+         )
+      }
+      {
+        showWrongUsername &&(
+        <View style={styles.modal}>
+          <View style={{height:100,width:400,justifyContent:"center",alignItems:"center",marginTop:'30%'}}>
+              <Text style={{fontWeight:"600",color:'red',textAlign:"center"}}>Không tìm thấy số điện thoại !</Text>
+          </View>
+         </View>
+         )
+      }
+      {
+        showWrongUsername1 &&(
+        <View style={styles.modal}>
+          <View style={{height:100,width:400,justifyContent:"center",alignItems:"center",marginTop:'30%'}}>
+              <Text style={{fontWeight:"600",color:'red',textAlign:"center"}}>Không tìm thấy email !</Text>
+          </View>
+         </View>
+         )
+      }
+      {
+        modalForgotPassword && (
+        <View style={styles.modalForgetPassword}>
+          <StatusBar hidden/>
+            <TouchableOpacity onPress={()=> setModalForgotPassword(false)} style={{height:"100%",width:"100%",backgroundColor:"rgba(156, 163, 175, 0.2)",justifyContent:"center",alignItems:"center",position:"absolute",zIndex:4}}>
+              <View style={styles.forgetPassword}>
+                <Text style={{fontSize:22,fontWeight:"600",color:themes.green,marginBottom:10,marginBottom:20}}>Quên mật khẩu</Text>
+                <View style={{height:"16%",borderRadius:10,width:'100%',backgroundColor:"rgba(156, 163, 175, 0.2)",justifyContent:"center",alignItems:"center",paddingLeft:"5%",paddingRight:"5%"}}>
+                  <TextInput onChangeText={handleVerifyEmail} style={{height:"100%",width:"100%"}} placeholder="Nhập email"/>
+                </View>
+                <TouchableOpacity onPress={hanldeVerifyEmail} style={{height:'14%',width:"100%",justifyContent:'center',alignItems:"center",backgroundColor:themes.green,borderRadius:10,marginTop:10}}>
+                  <Text style={{fontSize:16,fontWeight:"600",color:"white"}}>Đặt lại mật khẩu</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+        
+        
+      </View>
+        )
+      }
+      
+
     </View>
   );
 }
@@ -179,7 +378,7 @@ const styles = StyleSheet.create({
     paddingTop:'20%',
     height: windowHeight,
     width: windowWidth,
-    justifyContent: "flex-start",
+    justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#F3F4F6",
     position:"relative"
@@ -223,6 +422,18 @@ const styles = StyleSheet.create({
       shadowRadius: 10,
       elevation: 5,
   },
+  error: {
+    borderWidth:0.5,
+    borderBottomColor:'red',
+    shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.5,
+      shadowRadius: 10,
+      shadowColor: 'red',
+      elevation: 5,
+  },
   bottomText:{
     flexDirection:"row",
     height:20,
@@ -237,6 +448,24 @@ const styles = StyleSheet.create({
     width:"100%",
     alignItems: "center",
     
+  },
+  modalForgetPassword:{
+    height:windowHeight,
+    width:"100%",
+    justifyContent:"center",
+    alignItems:"center",
+    position:"absolute",
+    
+  },
+  forgetPassword:{
+    height:'40%',
+    width:"100%",
+    backgroundColor:"white",
+    justifyContent:"center",
+    alignItems:"center",
+    paddingLeft:"5%",
+    paddingRight:"5%",
+    gap:10
   }
 });
 

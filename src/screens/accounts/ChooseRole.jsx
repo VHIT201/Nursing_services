@@ -32,6 +32,7 @@ const windowHeight = Dimensions.get('window').height;
 const ChooseRole = ({navigation}) => {
   return (
     <View style={styles.container}>
+    <StatusBar/>
       <Header namePage={'Chọn vai trò'}/>
       <View style={{flex:1,width:"100%",paddingTop:"4%",paddingLeft:'4%',paddingRight:'4%'}}>
         <View style={{width:"100%",justifyContent:"center",alignItems:'center'}}>

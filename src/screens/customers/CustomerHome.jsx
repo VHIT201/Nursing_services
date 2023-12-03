@@ -74,6 +74,7 @@ const services = dataService
 
   return (
     <View style={styles.container}>
+      <StatusBar/>
       <Header nameLeftIcon={'navicon'} handleLeftButton={openDrawer} namePage={'Trang chủ'} />
       <View style={styles.body}>
       <FlatList

@@ -19,7 +19,8 @@ import Waitview from '../screens/waitviews/Waitview';
 import ChooseRole from '../screens/accounts/ChooseRole';
 import SelectServices from '../screens/accounts/Nurse/SelectServices';
 import SelectServicesDetail from '../screens/accounts/Nurse/SelectServicesDetail';
-
+import ReceiveCode from '../screens/accounts/ReceiveCode';
+import ChangePasswordForgot from '../screens/accounts/ChangePasswordForgot';
 //import Nurses View
 import NursesCalendar from '../screens/nurses/NursesCalendar';
 import NursesHome from '../screens/nurses/NursesHome';
@@ -44,6 +45,9 @@ import CustomerChooseSerVice from '../screens/customers/CustomerChooseSerVice';
 import { store } from '../redux/Store';
 import themes from '../../themes';
 import { Provider } from 'react-redux';
+
+
+import RNSecureStorage, { ACCESSIBLE } from 'rn-secure-storage'
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -245,6 +249,8 @@ const Navigation = () => {
             <Stack.Screen options={{title: 'SelectServices', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="SelectServices" component={SelectServices} />
             <Stack.Screen options={{title: 'SelectServicesDetail', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="SelectServicesDetail" component={SelectServicesDetail} />
             <Stack.Screen options={{title: 'JobsReceived', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="JobsReceived" component={JobsReceived} />
+            <Stack.Screen options={{title: 'ReceiveCode', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="ReceiveCode" component={ReceiveCode} />
+            <Stack.Screen options={{title: 'ChangePasswordForgot', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="ChangePasswordForgot" component={ChangePasswordForgot} />
             <Stack.Screen options={{headerShown:false}} name="NursingDrawerNavigation" component={NursingDrawerNavigation} />
             <Stack.Screen options={{headerShown:false}} name="CustomerDrawerNavigation" component={CustomerDrawerNavigation} />
             <Stack.Screen options={{headerShown:false}} name='CustomerChooseSerVice' component={CustomerChooseSerVice}/>
