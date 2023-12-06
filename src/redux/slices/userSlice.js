@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const initialState = {
   user: {
-    accessToken: "",
+    token: "",
     id: "",
     fullname: "",
     email: "",
@@ -17,9 +17,53 @@ const initialState = {
   loading: false,
   success: false,
   error:[],
-  messsageVerifyOtp:""
-  
+  messsageVerifyOtp:"",
+  dataRelativeUser : [],
+  RelativeUserDetails:{}
 };
+
+const storeData = async (value) => {
+  try {
+    const jsonValue = JSON.stringify(value);
+    await AsyncStorage.setItem('userStoreData', jsonValue);
+  } catch (e) {
+    // saving error
+  }
+};
+const storeToken = async (value) => {
+  try {
+    const jsonValue = JSON.stringify(value);
+    await AsyncStorage.setItem('userToken', jsonValue);
+  } catch (e) {
+    // saving error
+  }
+};
+
+//hàm persistent session
+
+
+export const persistentSession = createAsyncThunk(
+  "auth/login",
+  async (values, thunkAPI) => {
+    try {
+      const {data:result} = await http.post("/users/login", values, {
+        signal: thunkAPI.signal
+     });
+    //   console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+        return {
+            user: result.data.user ,
+            token: result.data.accessToken,
+            persistentSessionSuccess : result.success
+        };
+    } catch (error) {
+      // console.log(
+      //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+      //   error.response.data.error
+      // );
+      return thunkAPI.rejectWithValue(error.response.data.error);
+    }
+  }
+);
 
 
 //hàm login
@@ -30,7 +74,11 @@ export const loginUser = createAsyncThunk(
       const {data:result} = await http.post("/users/login", values, {
         signal: thunkAPI.signal
      });
-    //   console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+     const userData = result.data.user
+     const tokenData = result.data.accessToken
+     storeData(userData)
+     storeToken(tokenData)
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
         return {
             user: result.data.user ,
             token: result.data.accessToken,
@@ -122,7 +170,35 @@ export const update = createAsyncThunk(
         }
      });
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
-      
+      // storeData(result.data)
+        return {
+            user: result.data,
+        };
+    } catch (error) {
+      // console.log(
+      //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+      //   error.response.data.error
+      // );
+      return thunkAPI.rejectWithValue(error.response.data.error);
+    }
+  }
+);
+//hàm update password
+export const updatePassword = createAsyncThunk(
+  "auth/update-password",
+  async (values, thunkAPI) => {
+    try {
+      console.log(values.token)
+      const {data:result} = await http.patch("/users/reset-password", values, {
+        signal: thunkAPI.signal,
+        //truyền token
+        headers: {
+          Authorization : "Bearer " + values.token,
+          // "Content-Type" : "multipart/form-data"
+        }
+     });
+      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+      // storeData(result.data)
         return {
             user: result.data,
         };
@@ -138,6 +214,36 @@ export const update = createAsyncThunk(
 
 
 
+//tạo người thân
+export const createRelativeUser = createAsyncThunk(
+  "auth/createRelativeUser",
+  async (values, thunkAPI) => {
+    try {
+      console.log('data values : ',values.fullname)
+      const {data:result} = await http.post("/users/create-relative-user", values, {
+        signal: thunkAPI.signal,
+        headers: {
+          Authorization : "Bearer " + values.token,
+        }
+     });
+      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+
+        return {
+             result
+        };
+    } catch (error) {
+      // console.log(
+      //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+      //   error.response.data.error
+      // );
+      return thunkAPI.rejectWithValue(error.response.data.error);
+    }
+  }
+);
+
+
+
+
 export const userSlice = createSlice({
   name: "user", //tên
   initialState,
@@ -145,7 +251,7 @@ export const userSlice = createSlice({
     updateUser: (state, action) => {
       const { accessToken, _id, fullname, email, phoneNumber, avatar, role } =
         action.payload;
-      state.accessToken = accessToken;
+      state.token = accessToken;
       state.id = _id;
       state.fullname = fullname;
       state.email = email;
@@ -167,6 +273,7 @@ export const userSlice = createSlice({
         state.user.accessToken = action.payload.token
         state.loading = false
         state.success = true
+        // if(action.payload.success === true) 
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -229,6 +336,21 @@ export const userSlice = createSlice({
         state.error = action.payload;
         console.log(action.payload);
       })
+      .addCase(createRelativeUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createRelativeUser.fulfilled, (state, action) => {
+        console.log('payload : ' ,action.payload)
+        state.loading = false
+        state.message = action.payload.message
+        // state.success = true
+      })
+      .addCase(createRelativeUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        console.log(action.payload);
+      })
+      
   },
 });
 

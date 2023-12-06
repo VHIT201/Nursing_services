@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -27,17 +27,253 @@ import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
 import themes from "../../../themes";
 import InfoService from "../../components/selectionbar/InfoService";
 import ServiceDescription from "../../components/Customer/ServiceDescription";
+import { useSelector,useDispatch } from 'react-redux';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import moment from 'moment';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createRelativeUser, } from "../../redux/slices/userSlice";
+import { getRelativeUser,editRelativeUser,getRelativeUserData,deleteRelativeUser } from "../../redux/slices/relativeSlice";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const RelativeInfomation = ({navigation}) => {
   const [modalVisible,setModalVisible] = useState(false)
+    //data user redux
+    const userDataRedux = useSelector((state) => state.user)
+    const userDataRelativeRedux = useSelector((state) => state.dataRelativeUser)
+    const userDataRelativeReduxDetails = useSelector((state) => state.RelativeUserDetails)
+    // console.log("dataRedux : ",userDataRelativeReduxDetails)
 
+
+const [user,setUser] = useState({})
+const [tokenUser, setTokenUser] = useState({})
+//List người thân
+const [relatives, setRelatives] = useState([])
+//1 người thân
+const [relativesData, setRelativesData] = useState([])
+const [tempData, setTempData] = useState(null)
+const [tempData1, setTempData1] = useState(null)
+const [IdCheckData,setIdCheckData] = useState(null)
+
+
+//modal
+const [modalRelativesData,setModalRelativesData] = useState(false)
+
+useEffect(() => {
+  const getToken = async ()=>{
+    const value = await AsyncStorage.getItem('userToken')
+    if(value!== null){
+      const data = JSON.parse(value)
+      // console.log('Thông tin token : ',data)
+      setTokenUser(data)
+      setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, token : data }));
+      dispatch(getRelativeUser({token : data}))
+    }
+
+
+  }
+
+
+
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('userStoreData');
+      if (value !== null) {
+        const data = JSON.parse(value);
+        // console.log('Thông tin data : ',data)
+        setUser(data.user)
+      }
+      else{
+        navigation.navigate('Login')
+      }
+    } catch (error) {
+      console.log('Lỗi khi đọc dữ liệu:', error);
+      navigation.navigate('Login')
+    }
+  };
+
+  const userRelatives = async ()=>{
+    const value = await AsyncStorage.getItem('relativeUser')
+    if(value!== null){
+      const data = JSON.parse(value)
+      // console.log('Thông tin người thân : ',data)
+      setRelatives(data)
+  
+    }
+    else {
+      console.log('Không có data')
+    }
+  }
+
+
+  const userRelativesData = async ()=>{
+    const value = await AsyncStorage.getItem('relativeUserData')
+    if(value!== null){
+      const data = JSON.parse(value)
+      // console.log('Thông tin người thân : ',data)
+      setRelativesData(data)
+      setTempData(data)
+  
+    }
+    else {
+      // console.log('Không có data')
+    }
+  }
+
+  getToken();
+  getData();
+  userRelatives();
+  userRelativesData();
+}, []);
+
+const hanldeDeleteRelative = () =>{
+  dispatch(deleteRelativeUser(tempData._id))
+  setModalRelativesData(false)
+  
+}
+
+
+const handlePress = (item) => {
+  // console.log(item)
+  setIdCheckData(item)
+  
+
+  // setIdCheckData(null)
+}
+
+useEffect(() => {
+  // console.log('Id check Data : ',IdCheckData)
+  if(IdCheckData!==null){
+    dispatch(getRelativeUserData(IdCheckData))
+    // console.log('người thân data : ',relativesData)
+  }
+}, [IdCheckData]);
+
+
+
+
+
+
+  //data tạo người thân
+  const [dataCreateRelative, setDataCreateRelative] = 
+useState({  token: '',
+            fullname : '',
+            phoneNumber :'', 
+            gender : 'Female',
+            dateOfBirth: new Date(),
+            email :'',
+            address :'',
+            bloodGroup : '',
+            medicalHistory :''
+             });
+
+
+    //redux
+    const dispatch = useDispatch()
+
+
+const handleRelativeName = (text) => {
+  setRelativesData(prevRelativesData => ({ ...prevRelativesData, fullname : text }));
+}
+const handleRelativePhoneNumber = (text) => {
+
+  setRelativesData(prevRelativesData => ({ ...prevRelativesData, phoneNumber : text }));
+}
+
+  const handleRelativeGender = (text) => {
+  setRelativesData(prevRelativesData => ({ ...prevRelativesData, gender : text }));
+}
+
+  const handleRelativeEmail = (text) => {
+  setRelativesData(prevRelativesData => ({ ...prevRelativesData, email : text }));
+}
+
+  const handleRelativeAddress = (text) => {
+  setRelativesData(prevRelativesData => ({ ...prevRelativesData, address : text }));
+}
+
+  const handleRelativeBloodGroup = (text) => {
+  setRelativesData(prevRelativesData => ({ ...prevRelativesData, bloodGroup : text }));
+}
+
+  const handleRelativepMedicalHistory = (text) => {
+  setRelativesData(prevRelativesData => ({ ...prevRelativesData, medicalHistory : text }));
+}
+
+
+// hàm xử lý thêm người thân
+const handleNameRelative  = (text) => {
+  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, fullname : text }));
+}
+const handlePhoneNumberRelative = (text) => {
+  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, phoneNumber : text }));
+}
+const handleGenderRelative = (text) => {
+  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, gender : text }));
+}
+const handleEmailRelative = (text) => {
+  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, email : text }));
+}
+const handleAddressRelative = (text) => {
+  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, address : text }));
+}
+const handleBloodGroupRelative = (text) => {
+  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, bloodGroup : text }));
+}
+const handleMedicalHistoryRelative = (text) => {
+  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, medicalHistory : text }));
+}
+
+
+  // Ngày sinh nhật
+  const [date, setDate] = useState(new Date())
+  const [datePicker, setDatePicker] = useState(new Date());
+  const [datePicker1, setDatePicker1] = useState(new Date());
+  const [openModalDatePicker, setOpenModalDatePicker] = useState(false)
+  const [openModalDatePicker1, setOpenModalDatePicker1] = useState(false)
+  const hanldeModalDatapicker = ()=>{
+    setOpenModalDatePicker(true)
+  }
+  const hanldeModalDatapicker1 = ()=>{
+    setOpenModalDatePicker1(true)
+  }
+  //biến giữ giá trị sn datePicker
+  // console.log(moment(datePicker).format('YYYY-MM-DD'))
+
+
+  const onChangeDatePicker = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setDatePicker(currentDate);
+    setOpenModalDatePicker(false)
+    setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, dateOfBirth:  moment(datePicker).format('YYYY-MM-DD')}));
+    console.log(dataCreateRelative)
+}
+  const onChangeDatePicker1 = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setDatePicker1(currentDate);
+    setOpenModalDatePicker1(false)
+    setTempData(prevTempData => ({ ...prevTempData, dateOfBirth:  moment(datePicker1).format('YYYY-MM-DD')}));
+
+}
+
+  const handleCreateRelative = () =>{
+    console.log('Data người thân : ',dataCreateRelative)
+    dispatch(createRelativeUser(dataCreateRelative))
+    setModalVisible(false)
+  }
+ 
   const openDrawer = ()=>{
     navigation.openDrawer()
   }
   const handleLeftButton =()=>{
     setModalVisible(false)
   }
+  const handleChangeRelative = ()=>{
+    dispatch(editRelativeUser(relativesData))
+    
+
+  }
+
+  
 
 
   return (
@@ -50,14 +286,16 @@ const RelativeInfomation = ({navigation}) => {
           </TouchableOpacity>
         </View>
         <View style={{height:20}}></View>
-        <TouchableOpacity style={{flexDirection:"row",height:'8%',width:"100%",alignItems:"center",borderBottomWidth:0.5,borderBottomColor:themes.green}}>
-          <Image style={{height:"80%",width:'20%'}} resizeMode="contain" source={require('../../assets/Icon/user.png')}/>
-          <Text style={{fontSize:16,fontWeight:'500'}}>Lê Công Vinh</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{flexDirection:"row",height:'8%',width:"100%",alignItems:"center",borderBottomWidth:0.5,borderBottomColor:themes.green}}>
-          <Image style={{height:"80%",width:'20%'}} resizeMode="contain" source={require('../../assets/Icon/user.png')}/>
-          <Text style={{fontSize:16,fontWeight:'500'}}>Thủy Tiên</Text>
-        </TouchableOpacity>
+ {/* //SECTION - Người thân */}
+        <FlatList style={{flex:1,width:"100%"}} data={relatives}
+                renderItem={({item}) => 
+                  <TouchableOpacity onPress={()=>[handlePress(item._id),setModalRelativesData(true)]} style={{flexDirection:"row",height:60,width:"100%",alignItems:"center",borderBottomWidth:0.5,borderBottomColor:themes.green}}>
+                    <Image style={{height:"80%",width:'20%'}} resizeMode="contain" source={item.avatar ? {uri: item.avatar}: require('../../assets/Icon/user.png')}/>
+                    <Text style={{fontSize:16,fontWeight:'500'}}>{item.fullname}</Text>
+                  </TouchableOpacity>
+                }
+              />
+        
       </View>
       
       {
@@ -76,7 +314,7 @@ const RelativeInfomation = ({navigation}) => {
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Họ & tên</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
+                <TextInput value={dataCreateRelative.fullname} onChangeText={handleNameRelative} style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10,flexDirection:"row",justifyContent:"space-between"}}>
@@ -88,56 +326,154 @@ const RelativeInfomation = ({navigation}) => {
               </View>
             </View>
             <View style={{width:"50%",gap:4}}>
-            <Text style={styles.text}>Ngày sinh</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'4%',paddingRight:"4%",justifyContent:"center",alignItems:"flex-start"}}>
-                <Text>21/11/2000</Text>
+              <Text style={styles.text}>Ngày sinh</Text>
+                <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'4%',paddingRight:"4%",justifyContent:"space-between",alignItems:"center",flexDirection:"row",paddingRight:'10%'}}>
+                  <Text>{dataCreateRelative? '' : dataCreateRelative.dateOfBirth}</Text>
+                  <TouchableOpacity onPress={hanldeModalDatapicker}>
+                    <AntDesign name={'calendar'} size={20} color={themes.green}/>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Số điện thoại</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput style={{height:'100%',width:"100%"}} placeholder="Số điện thoại"></TextInput>
+                <TextInput value={dataCreateRelative.phoneNumber} onChangeText={handlePhoneNumberRelative} style={{height:'100%',width:"100%"}} placeholder="Số điện thoại"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Email</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput style={{height:'100%',width:"100%"}} placeholder="Email"></TextInput>
+                <TextInput value={dataCreateRelative.email} onChangeText={handleEmailRelative} style={{height:'100%',width:"100%"}} placeholder="Email"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Địa chỉ</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput style={{height:'100%',width:"100%"}} placeholder="Địa chỉ"></TextInput>
-              </View>
-            </View>
-            <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
-              <Text style={styles.text}>Quan hệ</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput style={{height:'100%',width:"100%"}} placeholder="Quan hệ"></TextInput>
+                <TextInput value={dataCreateRelative.address} onChangeText={handleAddressRelative} style={{height:'100%',width:"100%"}} placeholder="Địa chỉ"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Nhóm máu</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput style={{height:'100%',width:"100%"}} placeholder="Nhóm máu"></TextInput>
+                <TextInput value={dataCreateRelative.bloodGroup} onChangeText={handleBloodGroupRelative} style={{height:'100%',width:"100%"}} placeholder="Nhóm máu"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Tiểu sử bệnh</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput style={{height:'100%',width:"100%"}} placeholder="Tiểu sử bệnh"></TextInput>
+                <TextInput value={dataCreateRelative.medicalHistory} onChangeText={handleMedicalHistoryRelative} style={{height:'100%',width:"100%"}} placeholder="Tiểu sử bệnh"></TextInput>
               </View>
             </View>
             
             <View style={{height:200,width:"100%",alignItems:"center",justifyContent:"flex-start",paddingTop:"10%"}}>
-              <TouchableOpacity style={{height:"30%",width:'90%',backgroundColor:themes.green,justifyContent:"center",alignItems:"center",borderRadius:10}}>
+              <TouchableOpacity onPress={handleCreateRelative} style={{height:"30%",width:'90%',backgroundColor:themes.green,justifyContent:"center",alignItems:"center",borderRadius:10}}>
                 <Text style={{fontSize:16,fontWeight:"500",color:'white'}}>Lưu thay đổi</Text>
               </TouchableOpacity>
             </View>
             
+            {openModalDatePicker && (
+            <DateTimePicker
+              value={datePicker}
+              mode={'date'}
+              display="calendar"
+              onChange={onChangeDatePicker}
+            />
+      )}
           
+            </KeyboardAwareScrollView>
+
+          
+
+        </View>)
+      }
+      {/* //SECTION - show thông tin người thân và sửa */}
+      {
+        modalRelativesData && 
+        (<View style={styles.modal}>
+          <Header namePage={'Thông tin người thân'} nameLeftIcon={'chevron-left'} handleLeftButton={()=>[setModalRelativesData(false),setIdCheckData(null)]}/>
+            <KeyboardAwareScrollView enableOnAndroid={true} enableAutomaticScroll={true} extraScrollHeight={200} style={{flex:1,width:"100%",backgroundColor:'white'}}>
+            <View style={{height:100,width:'100%',justifyContent:"center",alignItems:"center"}}>
+              <View style={{height:"80%",width:'20%'}}>
+                <Image style={{height:"100%",width:"100%"}} resizeMode="contain" source={require('../../assets/Icon/user.png')}/>
+              </View>
+            </View>
+            <View style={{width:'100%', alignItems:"center",height:20}}>
+              <Text style={{fontSize:18,fontWeight:"500",lineHeight:20}}>{relativesData.fullname}</Text>
+            </View>
+            <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
+              <Text style={styles.text}>Họ & tên</Text>
+              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
+                <TextInput value={relativesData.fullname} onChangeText={handleRelativeName} style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
+              </View>
+            </View>
+            <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10,flexDirection:"row",justifyContent:"space-between"}}>
+            <View style={{width:"40%",gap:4}}>
+            <Text style={styles.text}>Giới tính</Text>
+              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'4%',paddingRight:"4%",flexDirection:"row",alignItems:"center",justifyContent:"space-between"}}>
+                <Text>Nữ</Text>
+                <Ionicons name='person' size={16}/>
+              </View>
+            </View>
+            <View style={{width:"50%",gap:4}}>
+              <Text style={styles.text}>Ngày sinh</Text>
+                <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'4%',paddingRight:"4%",justifyContent:"space-between",alignItems:"center",flexDirection:"row",paddingRight:'10%'}}>
+                  {/* <Text>{tempData && moment(tempData.dateOfBirth).format('YYYY-MM-DD')}</Text> */}
+                  <TouchableOpacity onPress={hanldeModalDatapicker1}>
+                    <AntDesign name={'calendar'} size={20} color={themes.green}/>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+            <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
+              <Text style={styles.text}>Số điện thoại</Text>
+              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
+                <TextInput value={relativesData.phoneNumber} onChangeText={handleRelativePhoneNumber} style={{height:'100%',width:"100%"}} placeholder="Số điện thoại"></TextInput>
+              </View>
+            </View>
+            <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
+              <Text style={styles.text}>Email</Text>
+              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
+                <TextInput value={relativesData.email} onChangeText={handleRelativeEmail} style={{height:'100%',width:"100%"}} placeholder="Email"></TextInput>
+              </View>
+            </View>
+            <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
+              <Text style={styles.text}>Địa chỉ</Text>
+              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
+                <TextInput value={relativesData.address} onChangeText={handleRelativeAddress} style={{height:'100%',width:"100%"}} placeholder="Địa chỉ"></TextInput>
+              </View>
+            </View>
+            <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
+              <Text style={styles.text}>Nhóm máu</Text>
+              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
+                <TextInput value={relativesData.bloodGroup} onChangeText={handleRelativeBloodGroup} style={{height:'100%',width:"100%"}} placeholder="Nhóm máu"></TextInput>
+              </View>
+            </View>
+            <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
+              <Text style={styles.text}>Tiểu sử bệnh</Text>
+              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
+                <TextInput value={relativesData.medicalHistory} onChangeText={handleRelativepMedicalHistory} style={{height:'100%',width:"100%"}} placeholder="Tiểu sử bệnh"></TextInput>
+              </View>
+            </View>
+            
+            <View style={{height:200,width:"100%",alignItems:"center",justifyContent:"flex-start",paddingTop:"10%"}}>
+              <TouchableOpacity onPress={handleChangeRelative} style={{height:"30%",width:'90%',backgroundColor:themes.green,justifyContent:"center",alignItems:"center",borderRadius:10}}>
+                <Text style={{fontSize:16,fontWeight:"500",color:'white'}}>Lưu thay đổi</Text>
+              </TouchableOpacity>
+              <View style={{height:20}}></View>
+              <TouchableOpacity onPress={hanldeDeleteRelative} style={{height:"30%",width:'90%',backgroundColor:'#f4495d',justifyContent:"center",alignItems:"center",borderRadius:10}}>
+                <Text style={{fontSize:16,fontWeight:"500",color:'white'}}>Xóa người thân</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {openModalDatePicker1 && (
+            <DateTimePicker
+              value={datePicker1}
+              mode={'date'}
+              display="calendar"
+              onChange={onChangeDatePicker1}
+            />
+      )}
           
             </KeyboardAwareScrollView>
 

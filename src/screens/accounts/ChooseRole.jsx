@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -19,17 +19,21 @@ import Foundation from "react-native-vector-icons/Foundation";
 import Fontisto from "react-native-vector-icons/Fontisto";
 import Entypo from "react-native-vector-icons/Entypo";
 import Feather from "react-native-vector-icons/Feather";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../components/header/Header'
 import themes from "../../../themes";
 import SelectionBar from "../../components/selectionbar/SelectionBar";
 import dataRole from "../../seeders/dataRole";
-
+import { UseSelector } from "react-redux/es/hooks/useSelector";
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const ChooseRole = ({navigation}) => {
+
+
+  
+
   return (
     <View style={styles.container}>
     <StatusBar/>

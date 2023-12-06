@@ -40,14 +40,12 @@ import CustomerSettings from '../screens/customers/CustomerSettings';
 import CustomerStatistic from '../screens/customers/CustomerStatistic';
 import RelativeInfomation from '../screens/customers/RelativeInfomation';
 import CustomerChooseSerVice from '../screens/customers/CustomerChooseSerVice';
-
+import RegisterAsANurse from '../screens/customers/RegisterAsANurse';
 //import redux
 import { store } from '../redux/Store';
 import themes from '../../themes';
 import { Provider } from 'react-redux';
 
-
-import RNSecureStorage, { ACCESSIBLE } from 'rn-secure-storage'
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -222,6 +220,16 @@ const Navigation = () => {
     }}
   />
   <Drawer.Screen
+    name='RegisterAsANurse'
+    component={RegisterAsANurse}
+    options={{
+      drawerLabel: 'Đăng ký điều dưỡng',
+      drawerIcon: ({ color, size }) => (
+        <Ionicons name='briefcase-sharp' size={size} color={color} />
+      ),
+    }}
+  />
+  <Drawer.Screen
     name='CustomerSettings'
     component={CustomerSettings}
     options={{
@@ -241,7 +249,7 @@ const Navigation = () => {
     <Provider store={store}>
     <NavigationContainer>
        
-        <Stack.Navigator initialRouteName='Login'>
+        <Stack.Navigator initialRouteName='Waitview'>
             <Stack.Screen options={{title: 'Waitview Title', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="Waitview" component={Waitview} />
             <Stack.Screen options={{title: 'Login', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="Login" component={Login} />
             <Stack.Screen options={{title: 'Register', headerStyle: {backgroundColor: 'green', },headerShown: false, }} name="Register" component={Register} />

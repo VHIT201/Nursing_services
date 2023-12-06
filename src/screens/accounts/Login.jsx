@@ -27,9 +27,11 @@ import { StatusBar } from "expo-status-bar";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNSecureStorage, { ACCESSIBLE } from 'rn-secure-storage'
+
+
 
 const Login = ({navigation}) => {
+  
   // biến tạm
   const error1 = 'Password must be at least 6 characters long and contain at least one lowercase letter, one uppercase letter, one digit.'
   const error2 = 'Password does not match!'
@@ -126,7 +128,7 @@ const Login = ({navigation}) => {
     
     console.log(time)
     //đẩy thông tin login vào redux
-    if(user.phoneNumber.startsWith(1)){
+    if(user.phoneNumber){
       const dataLogin = {phoneNumber:user.phoneNumber, password:user.password}
       // console.log(dataLogin)
       dispatch(loginUser(dataLogin))
@@ -144,6 +146,7 @@ const Login = ({navigation}) => {
     const handleLoginSuccess = () => {
       navigation.navigate('ChooseRole');
     }
+    
 
 
     if(error[0]?.message === error1){
@@ -157,19 +160,24 @@ const Login = ({navigation}) => {
     
   }
   
+  const storePassword = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem('userPassword', jsonValue);
+    } catch (e) {
+      // saving error
+    }
+  };
   
     useEffect(() => {
       if(userDataRedux.success === true){
       handleLoginSuccess() 
-      RNSecureStorage.set("user", JSON.stringify(userDataRedux), {accessible: ACCESSIBLE.WHEN_UNLOCKED})
-        .then((res) => {
-        console.log(res);
-        }, (err) => {
-        console.log(err);
-        });
+      storePassword(user.password)
+      storeData(userDataRedux)
     }
     }, [userDataRedux.success])
   
+    
   
   const handleLoginSuccess = () => {
     navigation.navigate('ChooseRole');
@@ -232,6 +240,14 @@ const Login = ({navigation}) => {
     navigation.navigate('ReceiveCode', {verifyEmail});
   }
 
+  const storeData = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(userDataRedux);
+      await AsyncStorage.setItem('userStoreData', jsonValue);
+    } catch (e) {
+      // saving error
+    }
+  };
 
 
 

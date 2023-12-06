@@ -7,36 +7,53 @@ import Animated, {
     withRepeat,
   } from 'react-native-reanimated';
 import 'react-native-gesture-handler';
-
+import { useDispatch,useSelector } from 'react-redux';
 import ChooseRole from '../accounts/ChooseRole';
 import themes from '../../../themes'
 import { useEffect, useState } from 'react';
-
+import { loginUser,getRelativeUser } from '../../redux/slices/userSlice';
 
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Waitview = ({navigation}) => {
 
     const [count, setCount] = useState(6);
     
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (count === 0) {
-        clearInterval(intervalId); 
-        navigation.navigate('Login')
-      } else {
-        console.clear();
-        console.log(`${count}`);
-        setCount((prevCount) => prevCount - 1);
-      }
-    }, 1000);
 
-    
-    return () => clearInterval(intervalId);
-  }, [count]);
+  //redux
+  const dispatch = useDispatch()
+
+  
+
+// kiểm tra data
+  const [values, setValues] = useState({email:'',password:''})
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const value = await AsyncStorage.getItem('userStoreData');
+        if (value !== null) {
+          const data = JSON.parse(value);
+          navigation.navigate('ChooseRole')
+        }
+        else{
+          navigation.navigate('Login')
+        }
+      } catch (error) {
+        console.log('Lỗi khi đọc dữ liệu:', error);
+        navigation.navigate('Login')
+      }
+    };
+
+    getData();
+  }, []);
+
+
+
+
 
 
   return (

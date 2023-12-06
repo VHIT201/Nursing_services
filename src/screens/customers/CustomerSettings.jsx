@@ -27,15 +27,17 @@ import JobsReceived from "../nurses/JobsReceived";
 import Header from "../../components/header/Header";
 import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
 import themes from "../../../themes";
-import { update } from "../../redux/slices/userSlice";
+import { update,updatePassword } from "../../redux/slices/userSlice";
 import InfoService from "../../components/selectionbar/InfoService";
 import * as ImagePicker from 'expo-image-picker';
 import placeholder from '../../assets/Icon/user.png'
-import { useDispatch,useSelector } from 'react-redux';
+import { useDispatch,useSelector, } from 'react-redux';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import * as DocumentPicker from 'expo-document-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 // import DatePicker from 'react-native-date-picker'
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -45,31 +47,78 @@ const CustomerSettings = ({navigation}) => {
   const now = new Date();
   const time = now.toLocaleTimeString();
 
+  const [user,setUser] = useState({})
+  const [tokenUser, setTokenUser] = useState({})
+  const [userPassword, setUserPassword] = useState('')
+  const [dataUpdatePassword, setDataUpdatePassword] = useState({token: tokenUser,oldPassword : userPassword, newPassword :'', confirmNewPassword :''})
 
 
+    //password
 
-
-
-
-
-
-
-
-  //data user redux
-  const userDataRedux = useSelector((state) => state.user)
-  // console.log(userDataRedux)
+    const handleNewPassword = (text) =>{
+      setDataUpdatePassword(prevDataUpdatePassword => ({ ...prevDataUpdatePassword, newPassword: text }));
+    }
+    const confirmNewPassword = (text) =>{
+      setDataUpdatePassword(prevDataUpdatePassword => ({ ...prevDataUpdatePassword, confirmNewPassword: text }));
+    }
   
+    const handleUpdatePassword = async () =>{
+      console.log('data update password : ',dataUpdatePassword)
+      dispatch(updatePassword(dataUpdatePassword))
+      // setBeingSelected(1000)
+    } 
+  
+
+
+
+  useEffect(() => {
+    const getToken = async ()=>{
+      const value = await AsyncStorage.getItem('userToken')
+      if(value!== null){
+        const data = JSON.parse(value)
+        // console.log('Thông tin token : ',data)
+        setTokenUser(data)
+        setDataUpdatePassword(prevDataUpdatePassword => ({ ...prevDataUpdatePassword, token: data }));
+  
+      }
+    }
+    const getPassword = async ()=>{
+      const value = await AsyncStorage.getItem('userPassword')
+      if(value!== null){
+        const data = JSON.parse(value)
+        // console.log('Thông tin password : ',data)
+        setUserPassword(data)
+        setDataUpdatePassword(prevDataUpdatePassword => ({ ...prevDataUpdatePassword, oldPassword: data }));
+      }
+    }
+    const getData = async () => {
+      try {
+        const value = await AsyncStorage.getItem('userStoreData');
+        if (value !== null) {
+          const data = JSON.parse(value);
+          // console.log('Thông tin data : ',data)
+          setUser(data.user)
+        }
+        else{
+          navigation.navigate('Login')
+        }
+      } catch (error) {
+        console.log('Lỗi khi đọc dữ liệu:', error);
+        navigation.navigate('Login')
+      }
+    };
+    getToken();
+    getData();
+    getPassword()
+   
+  }, []);
+
+
+  // console.log('data user : ' ,user)
   //data
 
-  const [user,setUser] = useState({
-                                  token:userDataRedux.user.accessToken,
-                                  fullname:userDataRedux.user.fullname,
-                                  gender:userDataRedux.user.gender,
-                                  dateOfBirth:'',
-                                  phoneNumber:userDataRedux.user.phoneNumber,
-                                  email:userDataRedux.user.email,
-                                  address:userDataRedux.user.address,
-                                  avatar:userDataRedux.user.avatar})
+  
+
   const [avatar, setAvatar] = useState(null);
   //redux
   const dispatch = useDispatch()
@@ -93,108 +142,111 @@ const CustomerSettings = ({navigation}) => {
     const handleUpdateUser = async () => {
       if(user.fullname != '' && user.email != '' && user.address != '') {
         console.log(time)
-        console.log('Thông tin update : ',user)
-        dispatch(update(user))
+        
+        const dataUpdateUser = {
+          token: tokenUser,
+          fullname: user.fullname,
+          email: user.email,
+          gender:'Male',
+          birthOfDate : user.birthOfDate,
+          address : user.address,
+        }
+        console.log('Thông tin update : ',dataUpdateUser)
+        dispatch(update(dataUpdateUser))
+        setBeingSelected(1000)
         
       }
     }
-  
- 
-              // State lưu đường dẫn ảnh
-      const [imageUri, setImageUri] = useState(''); 
 
-      // State lưu file ảnh 
-      const [image, setImage] = useState(null);
-      
 
-      const uploadImage = async () => {
-
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [3,4],
-            quality: 1
-        });
-      
-        if(!result.canceled) {
-      
-          // Lấy đường dẫn ảnh
-          const imageUri = result.assets[0].uri;
-      
-          // Lấy file ảnh từ đường dẫn
-          const imageFile = await fetch(imageUri);  
-          const imageBlob = await imageFile.blob();
-          
-          // Gán vào state
-          setImageUri(imageUri);
-          // console.log('imageuri : ',imageUri)
-          console.log(imageBlob);
-          saveImage(imageBlob);
-          
-        }
-      
-      }
-        
-        const saveImage = async (image,imageBlob) => {
-        
-          try {
-        
-            // Set file hình vào state
-            setImage(image);
-            updateAvatar(image,imageBlob)
-        
-          } catch (error) {
-            console.log("Lỗi upload hình ảnh: " + error);
-          }
-        
-        }
     
-        const updateAvatar = (image,imageBlob) => {
-        
-          // Cập nhật avatar trong state user
-          setUser(prevUser => ({
-            ...prevUser,
-            avatar: image
-          }));
-          console.log(image)
-          console.log(imageBlob)
-          
-        }
+ 
+ // State lưu đường dẫn ảnh
+const [imageUri, setImageUri] = useState('');
+
+// State lưu file ảnh
+const [image, setImage] = useState(null);
+
+const uploadImage = async () => {
+  try {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      // Lấy đường dẫn ảnh
+      const { uri: imageUri } = result.assets[0];
+
+      // Lấy file ảnh từ đường dẫn
+      const imageFile = await fetch(imageUri);
+      const imageBlob = await imageFile.blob();
+
+      // Lấy phần mở rộng đuôi file
+      const fileExtension = imageUri.split('.').pop().toLowerCase();
+
+      // Tạo tên file ngẫu nhiên
+      const randomFileName = `${Date.now()}.${fileExtension}`;
+
+      // Tạo đối tượng File từ imageBlob
+      const image = new File([imageBlob], randomFileName, { type: `image/${fileExtension}` });
+
+      // Gán vào state
+      setImage(image);
+      setImageUri(imageUri);
+      saveImage(image);
+    }
+  } catch (error) {
+    console.log('Lỗi khi tải ảnh lên: ' + error);
+  }
+};
+
+const saveImage = async (image) => {
+  try {
+    // Set file hình vào state
+    updateAvatar(image);
+  } catch (error) {
+    console.log('Lỗi upload hình ảnh: ' + error);
+  }
+};
+
+const updateAvatar = (image) => {
+  // Cập nhật avatar trong state user
+  setUser((prevUser) => ({
+    ...prevUser,
+    avatar: image,
+  }));
+};
+
+
 
         // State để lưu file PDF
         const [pdfFile, setPdfFile] = useState(null);
 
-        const pickPDFFile = async () => {
+const pickPDFFile = async () => {
+  try {
+    const docRes = await DocumentPicker.getDocumentAsync({
+      type: "application/pdf",
+    });
 
-          try {
-        
-            // Request quyền truy cập bộ nhớ của người dùng
-            await DocumentPicker.getDocumentAsyncPermissions();
-        
-            // Bắt đầu quá trình chọn file
-            const { uri, type } = await DocumentPicker.getDocumentAsync({
-              type: 'application/pdf' 
-            });
-        
-            // Kiểm tra file đã chọn
-            if(type === 'application/pdf') {
-        
-              // Lấy nội dung file dưới dạng Blob
-              const file = await fetch(uri);  
-              const fileBlob = await file.blob();
-        
-              // Lưu blob vào state
-              setPdfFile(fileBlob);
-        
-            } else {
-              console.log('Không phải file PDF');
-            }
-        
-          } catch (err) {
-            console.log('Lỗi chọn file', err);
-          }
-        
-        }
+    const { name, uri, type, size } = docRes;
+
+    const file = {
+      name: name.split(".")[0],
+      uri: uri,
+      type: type,
+      size: size,
+    };
+
+    setPdfFile(file);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
 
 
   // Ngày sinh nhật
@@ -247,7 +299,7 @@ const CustomerSettings = ({navigation}) => {
           </TouchableOpacity>
         </View>
         <View style={{width:'100%', alignItems:"center",height:20,marginTop:20}}>
-          <Text style={[styles.text,{fontSize:18,color:themes.green}]}>{userDataRedux.user.fullname ? user.fullname : 'Unkown user'}</Text>
+          <Text style={[styles.text,{fontSize:18,color:themes.green,lineHeight:20}]}>{user.fullname ? user.fullname : 'Unkown user'}</Text>
         </View>
         <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
           <Text style={styles.text}>Họ & tên</Text>
@@ -328,9 +380,10 @@ const CustomerSettings = ({navigation}) => {
     return(
       <View style={styles.container}>
         <Header handleLeftButton={()=>handleLeftButton()} nameLeftIcon={'chevron-left'} namePage={listSettings[beingSelected].label}/>
-      <View style={{height:400,width:"100%",paddingTop:"10%",paddingLeft:'5%',paddingRight:'5%'}}>
+      <View style={{height:300,width:"100%",paddingTop:"10%",paddingLeft:'5%',paddingRight:'5%'}}>
         <View style={{flexDirection:'row',width:"100%",justifyContent:"flex-start",alignItems:"center",gap:10}}>
           <FontAwesome5 name='lock' size={16} color={themes.green}/>
+          <View style={{width:10}}></View>
           <Text style={{fontSize:16,fontWeight:"500",color:themes.green}}>Mật khẩu hiện tại</Text>
         </View>
         <View style={{height:40,width:'100%',borderWidth:1,marginTop:6,justifyContent:"center",alignItems:'flex-start',paddingLeft:"2%"}}>
@@ -338,23 +391,25 @@ const CustomerSettings = ({navigation}) => {
         </View>
         <View style={{flexDirection:'row',width:"100%",justifyContent:"flex-start",alignItems:"center",gap:10,marginTop:20}}>
           <FontAwesome5 name='lock' size={16} color={themes.green}/>
+          <View style={{width:10}}></View>
           <Text style={{fontSize:16,fontWeight:"500",color:themes.green}}>Mật khẩu mới</Text>
         </View>
         <View style={{height:40,width:'100%',borderWidth:1,marginTop:6,justifyContent:"center",alignItems:'flex-start',paddingLeft:"2%"}}>
-          <TextInput style={{fontSize:14}} placeholder="Mật khẩu mới" />
+          <TextInput style={{fontSize:14}} placeholder="Mật khẩu mới" onChangeText={handleNewPassword}/>
         </View>
         <View style={{flexDirection:'row',width:"100%",justifyContent:"flex-start",alignItems:"center",gap:10,marginTop:20}}>
           <FontAwesome5 name='lock' size={16} color={themes.green}/>
+          <View style={{width:10}}></View>
           <Text style={{fontSize:16,fontWeight:"500",color:themes.green}}>Xác nhận mật khẩu mới</Text>
         </View>
         <View style={{height:40,width:'100%',borderWidth:1,marginTop:6,justifyContent:"center",alignItems:'flex-start',paddingLeft:"2%"}}>
-          <TextInput style={{fontSize:14}} placeholder="Xác nhận mật khẩu mới" />
+          <TextInput onChangeText={confirmNewPassword} style={{fontSize:14}} placeholder="Xác nhận mật khẩu mới" />
         </View>
       </View>
       
-       <View style={{flex:1,width:'100%',justifyContent:'flex-start',alignItems:"center"}}>
-        <TouchableOpacity style={{height:'12%',width:"90%",backgroundColor:themes.green,borderRadius:10,justifyContent:'center',alignItems:"center"}}>
-            <Text>Lưu thay đổi</Text>
+       <View style={{flex:1,width:'100%',justifyContent:'flex-start',alignItems:"center",paddingTop:20}}>
+        <TouchableOpacity onPress={handleUpdatePassword} style={{height:'10%',width:"90%",backgroundColor:themes.green,borderRadius:10,justifyContent:'center',alignItems:"center"}}>
+            <Text style={{fontSize:15,fontWeight:'600',color:"white"}}>Lưu thay đổi</Text>
           </TouchableOpacity>
        </View>
       </View>
@@ -392,11 +447,18 @@ const CustomerSettings = ({navigation}) => {
     )
   }
   if(beingSelected===5){
-    return(
-      <View style={styles.container}>
-        <Text>Coming Soon</Text>
-      </View>
-    )
+    async function removeUserData() {
+      try {
+        setBeingSelected(100)
+        await AsyncStorage.removeItem('userStoreData');
+        alert('Removed user data from storage');
+        navigation.navigate('Login')
+      } catch(e) {
+      }
+      
+    }
+    removeUserData()
+
   }
   else{
     return(
