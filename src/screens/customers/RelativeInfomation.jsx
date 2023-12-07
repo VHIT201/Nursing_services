@@ -33,15 +33,20 @@ import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createRelativeUser, } from "../../redux/slices/userSlice";
 import { getRelativeUser,editRelativeUser,getRelativeUserData,deleteRelativeUser } from "../../redux/slices/relativeSlice";
+import RelativeItem from "../../components/ListRelative/ItemRelative";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const RelativeInfomation = ({navigation}) => {
   const [modalVisible,setModalVisible] = useState(false)
+
+
     //data user redux
     const userDataRedux = useSelector((state) => state.user)
-    const userDataRelativeRedux = useSelector((state) => state.dataRelativeUser)
-    const userDataRelativeReduxDetails = useSelector((state) => state.RelativeUserDetails)
-    // console.log("dataRedux : ",userDataRelativeReduxDetails)
+    
+    const {dataRelativeUser,RelativeUserDetails} = useSelector((state) => state.relative)
+    // console.log(RelativeUserDetails)
+    // const userDataRelativeReduxDetails = useSelector((state) => state.RelativeUserDetails)
+   
 
 
 const [user,setUser] = useState({})
@@ -58,6 +63,15 @@ const [IdCheckData,setIdCheckData] = useState(null)
 //modal
 const [modalRelativesData,setModalRelativesData] = useState(false)
 
+
+useEffect(() => {
+  if(dataRelativeUser){
+    setRelatives(dataRelativeUser)
+  }
+}, [dataRelativeUser]);
+
+
+// console.log(relatives)
 useEffect(() => {
   const getToken = async ()=>{
     const value = await AsyncStorage.getItem('userToken')
@@ -67,11 +81,9 @@ useEffect(() => {
       setTokenUser(data)
       setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, token : data }));
       dispatch(getRelativeUser({token : data}))
+
     }
-
-
   }
-
 
 
   const getData = async () => {
@@ -91,18 +103,7 @@ useEffect(() => {
     }
   };
 
-  const userRelatives = async ()=>{
-    const value = await AsyncStorage.getItem('relativeUser')
-    if(value!== null){
-      const data = JSON.parse(value)
-      // console.log('Thông tin người thân : ',data)
-      setRelatives(data)
-  
-    }
-    else {
-      console.log('Không có data')
-    }
-  }
+
 
 
   const userRelativesData = async ()=>{
@@ -121,12 +122,14 @@ useEffect(() => {
 
   getToken();
   getData();
-  userRelatives();
+ 
   userRelativesData();
 }, []);
 
 const hanldeDeleteRelative = () =>{
-  dispatch(deleteRelativeUser(tempData._id))
+  // console.log(tempData._id)
+  let id = tempData._id;
+  dispatch(deleteRelativeUser({id,tokenUser}))
   setModalRelativesData(false)
   
 }
@@ -140,6 +143,7 @@ const handlePress = (item) => {
   // setIdCheckData(null)
 }
 
+//lấy data người thân
 useEffect(() => {
   // console.log('Id check Data : ',IdCheckData)
   if(IdCheckData!==null){
@@ -245,7 +249,7 @@ const handleMedicalHistoryRelative = (text) => {
     setDatePicker(currentDate);
     setOpenModalDatePicker(false)
     setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, dateOfBirth:  moment(datePicker).format('YYYY-MM-DD')}));
-    console.log(dataCreateRelative)
+    // console.log(dataCreateRelative)
 }
   const onChangeDatePicker1 = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -256,7 +260,7 @@ const handleMedicalHistoryRelative = (text) => {
 }
 
   const handleCreateRelative = () =>{
-    console.log('Data người thân : ',dataCreateRelative)
+    // console.log('Data người thân : ',dataCreateRelative)
     dispatch(createRelativeUser(dataCreateRelative))
     setModalVisible(false)
   }
@@ -287,14 +291,24 @@ const handleMedicalHistoryRelative = (text) => {
         </View>
         <View style={{height:20}}></View>
  {/* //SECTION - Người thân */}
-        <FlatList style={{flex:1,width:"100%"}} data={relatives}
+        {/* <FlatList style={{flex:1,width:"100%"}} data={relatives}
                 renderItem={({item}) => 
                   <TouchableOpacity onPress={()=>[handlePress(item._id),setModalRelativesData(true)]} style={{flexDirection:"row",height:60,width:"100%",alignItems:"center",borderBottomWidth:0.5,borderBottomColor:themes.green}}>
                     <Image style={{height:"80%",width:'20%'}} resizeMode="contain" source={item.avatar ? {uri: item.avatar}: require('../../assets/Icon/user.png')}/>
                     <Text style={{fontSize:16,fontWeight:'500'}}>{item.fullname}</Text>
                   </TouchableOpacity>
                 }
-              />
+              /> */}
+              {
+                relatives.map(item => (
+                  <RelativeItem
+                    key={item._id}
+                    item={item}
+                    // handlePress={handlePressItem} 
+                    setModalRelativesData={setModalRelativesData}
+                  />
+))
+              }
         
       </View>
       

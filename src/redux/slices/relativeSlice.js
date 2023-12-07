@@ -28,7 +28,6 @@ const initialState = {
     loading: false,
     success: false,
     error:[],
-    messsageVerifyOtp:"",
     dataRelativeUser : [],
     RelativeUserDetails:{}
 
@@ -90,11 +89,11 @@ export const deleteRelativeUser = createAsyncThunk(
     "auth/delete-relative-user",
     async (values, thunkAPI) => {
       try {
-        console.log(values)
-        const {data:result} = await http.delete(`/relatives/${values}`, {
+        console.log('values id : ',values)
+        const {data:result} = await http.delete(`/relatives/${values.id}`, {
           signal: thunkAPI.signal,
           headers: {
-            Authorization : "Bearer " + values.token,
+            Authorization : "Bearer " + values.tokenUser,
           }
        });
         console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
@@ -141,14 +140,11 @@ export const editRelativeUser = createAsyncThunk(
   );
 
   export const relativeSlice = createSlice({
-    name: "user", //tên
+    name: "relative", //tên
     initialState,
     reducers: {
       updateUser: (state, action) => {
-        const { RelativeUserDetails, dataRelativeUser } = action.payload;
-
-        state.RelativeUserDetails = RelativeUserDetails;
-        state.dataRelativeUser = dataRelativeUser;
+        
       },
     },
 
@@ -172,9 +168,9 @@ export const editRelativeUser = createAsyncThunk(
             state.loading = true;
           })
           .addCase(getRelativeUser.fulfilled, (state, action) => {
-            console.log('payload : ' ,action.payload)
+            console.log('payload : ' ,action.payload.result.data)
             state.loading = false
-            state.dataRelativeUser = action.payload
+            state.dataRelativeUser = action.payload.result.data
             state.message = action.payload.message
           })
           .addCase(getRelativeUser.rejected, (state, action) => {
@@ -190,7 +186,7 @@ export const editRelativeUser = createAsyncThunk(
           .addCase(getRelativeUserData.fulfilled, (state, action) => {
             console.log('payload : ' , action.payload)
             state.loading = false
-            state.RelativeUserDetails = action.payload.data
+            state.RelativeUserDetails = action.payload.result.data
             state.message = action.payload.message
             
 
