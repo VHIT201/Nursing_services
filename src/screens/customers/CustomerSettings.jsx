@@ -48,10 +48,12 @@ const CustomerSettings = ({navigation}) => {
   const time = now.toLocaleTimeString();
 
   const [user,setUser] = useState({})
+  // console.log(user)
   const [tokenUser, setTokenUser] = useState({})
   const [userPassword, setUserPassword] = useState('')
   const [dataUpdatePassword, setDataUpdatePassword] = useState({token: tokenUser,oldPassword : userPassword, newPassword :'', confirmNewPassword :''})
-
+  const userDataRedux = useSelector((state) => state.user)
+  // console.log(userDataRedux)
 
     //password
 
@@ -82,6 +84,9 @@ const CustomerSettings = ({navigation}) => {
   
       }
     }
+
+    
+
     const getPassword = async ()=>{
       const value = await AsyncStorage.getItem('userPassword')
       if(value!== null){
@@ -97,7 +102,8 @@ const CustomerSettings = ({navigation}) => {
         if (value !== null) {
           const data = JSON.parse(value);
           // console.log('Thông tin data : ',data)
-          setUser(data.user)
+          
+          setUser(data)
         }
         else{
           navigation.navigate('Login')
@@ -123,7 +129,7 @@ const CustomerSettings = ({navigation}) => {
   //redux
   const dispatch = useDispatch()
 
-
+//NOTE - sửa thông tin
 
     //Chỉnh sửa thông tin
     const handleFullName = (text) =>{
@@ -146,6 +152,7 @@ const CustomerSettings = ({navigation}) => {
         const dataUpdateUser = {
           token: tokenUser,
           fullname: user.fullname,
+          avatar : user.avatar,
           email: user.email,
           gender:'Male',
           birthOfDate : user.birthOfDate,
@@ -159,13 +166,13 @@ const CustomerSettings = ({navigation}) => {
     }
 
 
-    
+    //NOTE - Sửa ảnh
  
  // State lưu đường dẫn ảnh
 const [imageUri, setImageUri] = useState('');
 
 // State lưu file ảnh
-const [image, setImage] = useState(null);
+const [image, setImage] = useState(user.avatar);
 
 const uploadImage = async () => {
   try {
@@ -178,47 +185,108 @@ const uploadImage = async () => {
 
     if (!result.canceled) {
       // Lấy đường dẫn ảnh
-      const { uri: imageUri } = result.assets[0];
+      // const { uri: imageUri } = result.assets[0];
+      
+      // console.log('ảnh : ',result.assets[0])
+      // setImage(result.assets[0]);
 
-      // Lấy file ảnh từ đường dẫn
-      const imageFile = await fetch(imageUri);
-      const imageBlob = await imageFile.blob();
+      const uri = result.assets[0].uri
+      // const name = result.assets[0].name
+      const name = 'avatar'
+      // const type = result.assets[0].type
+      const type = 'image/png'
+      const source = {uri, name, type}
+      
+      // const formdata = new FormData()
+      // formdata.append({
+      //   uri : result.assets[0].uri,
+      //   name : result.assets[0].fileName,
+      //   type : result.assets[0].type,
+      //   size : result.assets[0].fileSize
+      // })
+        
+      // console.log('FormData : ', formdata._parts[0][0])
 
-      // Lấy phần mở rộng đuôi file
-      const fileExtension = imageUri.split('.').pop().toLowerCase();
 
-      // Tạo tên file ngẫu nhiên
-      const randomFileName = `${Date.now()}.${fileExtension}`;
+      const createFileFromUri = async (uri) => {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+      
+        const name = uri.split('/').pop();
+        const fileType = name.split('.').pop();
+      
+        return new File([blob], name, {type: `image/${fileType}`});
+      }
+      
+      const file = await createFileFromUri(source.uri);
 
-      // Tạo đối tượng File từ imageBlob
-      const image = new File([imageBlob], randomFileName, { type: `image/${fileExtension}` });
+      console.log('Đây là source : ',source)
+      // setUser((prevUser) => ({
+      //   ...prevUser,
+      //   avatar: source,
+      // }));
 
-      // Gán vào state
-      setImage(image);
-      setImageUri(imageUri);
-      saveImage(image);
+      const dataUpdateUser1 = {
+        token: tokenUser,
+        avatar : source,
+
+      }
+      console.log('Thông tin update : ',dataUpdateUser1)
+      dispatch(update(dataUpdateUser1))
+
+      
+
+      handleUpdata(source)
+      
+
+      // // Lấy file ảnh từ đường dẫn
+      // const imageFile = await fetch(imageUri);
+      // const imageBlob = await imageFile.blob();
+
+      // // Lấy phần mở rộng đuôi file
+      // const fileExtension = imageUri.split('.').pop().toLowerCase();
+
+      // // Tạo tên file ngẫu nhiên
+      // const randomFileName = `${Date.now()}.${fileExtension}`;
+
+      // // Tạo đối tượng File từ imageBlob
+      // const image = new File([imageBlob], randomFileName, { type: `image/${fileExtension}` });
+
+      // // Gán vào state
+   
+      // setImageUri(imageUri);
+      // saveImage(image);
     }
   } catch (error) {
     console.log('Lỗi khi tải ảnh lên: ' + error);
   }
 };
 
-const saveImage = async (image) => {
-  try {
-    // Set file hình vào state
-    updateAvatar(image);
-  } catch (error) {
-    console.log('Lỗi upload hình ảnh: ' + error);
-  }
-};
 
-const updateAvatar = (image) => {
-  // Cập nhật avatar trong state user
-  setUser((prevUser) => ({
-    ...prevUser,
-    avatar: image,
-  }));
-};
+//NOTE - hàm upload cloud viết tạm test
+const handleUpdata = (photo) =>{
+  const data = new FormData()
+  data.append('file',photo)
+  data.append('upload_preset','test_upload_avatar')
+  data.append("clould_name","dcq1kx1wa")
+  fetch('https://api.cloudinary.com/v1_1/dcq1kx1wa/image/upload',{
+    method:'POST',
+    body:data,
+    headers:{
+        'Accept':'application/json',
+        'Content-Type':'multipart/form-data'
+    }
+}).then(res => res.json())
+.then(data => {
+    // setPicture(data.url)
+    console.log('có ảnh : ' ,data)
+
+}).catch(err => {
+    console.log(err)
+}
+)
+}
+
 
 
 
@@ -295,7 +363,8 @@ const pickPDFFile = async () => {
         
         <View style={{height:100,width:'100%',justifyContent:"center",alignItems:"center"}}>
           <TouchableOpacity onPress={uploadImage} style={{height:100,width:100,borderRadius:50,borderWidth:2,borderColor:themes.gray,justifyContent:"center",alignItems:'center'}}>
-          <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={user.avatar ? {uri: user.avatar} : placeholder} />
+          <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={ placeholder} />
+          {/* <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={user.avatar ? {uri: user.avatar} :  placeholder} /> */}
           </TouchableOpacity>
         </View>
         <View style={{width:'100%', alignItems:"center",height:20,marginTop:20}}>

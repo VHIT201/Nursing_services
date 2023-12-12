@@ -47,7 +47,7 @@ export const getRelativeUser = createAsyncThunk(
           }
        });
         // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
-        storeRelativeUser(result.data)
+        // storeRelativeUser(result.data)
   
           return {
                result
@@ -89,7 +89,7 @@ export const deleteRelativeUser = createAsyncThunk(
     "auth/delete-relative-user",
     async (values, thunkAPI) => {
       try {
-        console.log('values id : ',values)
+        // console.log('values id : ',values)
         const {data:result} = await http.delete(`/relatives/${values.id}`, {
           signal: thunkAPI.signal,
           headers: {
@@ -119,6 +119,7 @@ export const editRelativeUser = createAsyncThunk(
         console.log('data sửa :', values)
 
         const {data:result} = await http.patch(`/relatives/${values._id}/${values}`, {
+        // const {data:result} = await http.patch(`/relatives/${values._id}/${values}`, {
           signal: thunkAPI.signal,
           headers: {
             Authorization : "Bearer " + values._id,
@@ -168,7 +169,7 @@ export const editRelativeUser = createAsyncThunk(
             state.loading = true;
           })
           .addCase(getRelativeUser.fulfilled, (state, action) => {
-            console.log('payload : ' ,action.payload.result.data)
+            // console.log('payload : ' ,action.payload.result.data)
             state.loading = false
             state.dataRelativeUser = action.payload.result.data
             state.message = action.payload.message
@@ -176,7 +177,7 @@ export const editRelativeUser = createAsyncThunk(
           .addCase(getRelativeUser.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
-            console.log(action.payload);
+            // console.log(action.payload);
           })
 
           //1 người
@@ -184,7 +185,7 @@ export const editRelativeUser = createAsyncThunk(
             state.loading = true;
           })
           .addCase(getRelativeUserData.fulfilled, (state, action) => {
-            console.log('payload : ' , action.payload)
+            // console.log('payload : ' , action.payload)
             state.loading = false
             state.RelativeUserDetails = action.payload.result.data
             state.message = action.payload.message
@@ -195,13 +196,13 @@ export const editRelativeUser = createAsyncThunk(
           .addCase(getRelativeUserData.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
-            console.log(action.payload);
+            // console.log(action.payload);
           })
           .addCase(editRelativeUser.pending, (state) => {
             state.loading = true;
           })
           .addCase(editRelativeUser.fulfilled, (state, action) => {
-            console.log('payload : ' ,action.payload)
+            // console.log('payload : ' ,action.payload)
             state.loading = false
             state.dataRelativeUser = action.payload.data
             state.message = action.payload.message

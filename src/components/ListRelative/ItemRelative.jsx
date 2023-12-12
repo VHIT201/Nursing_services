@@ -6,14 +6,11 @@ import {
 } from 'react-native';
 import themes from '../../../themes';
 
-const RelativeItem = ({item, handlePress, setModalRelativesData}) => {
-    console.log(item)
+const RelativeItem = ({item, handlePress}) => {
+    // console.log(item)
   return (
     <TouchableOpacity 
-      onPress={() => {
-        handlePress(item._id);
-        setModalRelativesData(true);
-      }}
+      onPress={handlePress}
       style={{
         flexDirection: "row",
         height: 60,

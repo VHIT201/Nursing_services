@@ -38,6 +38,15 @@ const storeToken = async (value) => {
     // saving error
   }
 };
+const updateUserAsyncStorage = async (value) => {
+  try {
+    await AsyncStorage.removeItem('userStoreData')
+    const jsonValue = JSON.stringify(value);
+    await AsyncStorage.setItem('userStoreData', jsonValue);
+  } catch (e) {
+    // saving error
+  }
+};
 
 //hàm persistent session
 
@@ -78,7 +87,7 @@ export const loginUser = createAsyncThunk(
      const tokenData = result.data.accessToken
      storeData(userData)
      storeToken(tokenData)
-      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
         return {
             user: result.data.user ,
             token: result.data.accessToken,
@@ -153,13 +162,13 @@ export const verifyCode = createAsyncThunk(
   }
 );
 
-//hàm update
+//NOTE - Hàm update
 export const update = createAsyncThunk(
   "auth/update",
   async (values, thunkAPI) => {
-    const formData = new FormData();
-    console.log('values avatar : ',values.avatar)
-    formData.append("avatar", values.avatar)
+    // const formData = new FormData();
+    // console.log('values avatar : ',values.avatar)
+    // formData.append("avatar", values.avatar)
     try {
       const {data:result} = await http.patch("/users/update", values, {
         signal: thunkAPI.signal,
@@ -167,10 +176,12 @@ export const update = createAsyncThunk(
         headers: {
           Authorization : "Bearer " + values.token,
           "Content-Type" : "multipart/form-data"
-        }
+        },
+
      });
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
-      // storeData(result.data)
+      updateUserAsyncStorage(result.data)
+      console.log("đã update user")
         return {
             user: result.data,
         };
@@ -194,7 +205,7 @@ export const updatePassword = createAsyncThunk(
         //truyền token
         headers: {
           Authorization : "Bearer " + values.token,
-          // "Content-Type" : "multipart/form-data"
+
         }
      });
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);

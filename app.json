@@ -33,16 +33,29 @@
           "documentPermissionMessage": "Allow $(Product_NAME) to access documents" 
         }
       ],
-  
       [
         "expo-image-picker",
         {
-          "cameraPermissionMessage": "Allow $(Product_NAME) to access your camera",
-          
-          "photosPermissionMessage": "Allow $(Product_NAME) to access your photos"
+          "cameraPermission": {
+            "ios": "Allow $(PRODUCT_NAME) to use your camera",
+            "android": {
+              "title": "Camera Permission",
+              "message": "Allow $(PRODUCT_NAME) to access your camera",
+              "buttonPositive": "Allow",
+              "buttonNegative": "Deny"
+            }
+          },
+          "photosPermission": {
+            "ios": "Allow $(PRODUCT_NAME) to access your photos",
+            "android": {
+              "title": "Photos Permission",
+              "message": "Allow $(PRODUCT_NAME) to access your photos",
+              "buttonPositive": "Allow",
+              "buttonNegative": "Deny"
+            }
+          }
         }
       ]
     ]
-  
   }
 }

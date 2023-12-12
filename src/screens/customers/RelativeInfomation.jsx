@@ -42,12 +42,14 @@ const RelativeInfomation = ({navigation}) => {
 
     //data user redux
     const userDataRedux = useSelector((state) => state.user)
-    
+    // console.log('data user : ',userDataRedux)
     const {dataRelativeUser,RelativeUserDetails} = useSelector((state) => state.relative)
-    // console.log(RelativeUserDetails)
+ 
     // const userDataRelativeReduxDetails = useSelector((state) => state.RelativeUserDetails)
    
-
+useEffect(() => {
+  dispatch(getRelativeUser({token : tokenUser}))
+}, [modalRelativesData]);
 
 const [user,setUser] = useState({})
 const [tokenUser, setTokenUser] = useState({})
@@ -64,61 +66,72 @@ const [IdCheckData,setIdCheckData] = useState(null)
 const [modalRelativesData,setModalRelativesData] = useState(false)
 
 
+//Lấy data 1 người thân
+useEffect(() => {
+  if(RelativeUserDetails){
+    setRelativesData(RelativeUserDetails)
+  }
+}, [RelativeUserDetails]);
+
+
+//Lấy data list người thân
 useEffect(() => {
   if(dataRelativeUser){
+    // console.log(dataRelativeUser)
     setRelatives(dataRelativeUser)
   }
 }, [dataRelativeUser]);
 
 
+const getToken = async ()=>{
+  const value = await AsyncStorage.getItem('userToken')
+  if(value!== null){
+    const data = JSON.parse(value)
+    // console.log('Thông tin token : ',data)
+    setTokenUser(data)
+    setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, token : data }));
+    dispatch(getRelativeUser({token : data}))
+
+  }
+}
+
+
+
 // console.log(relatives)
 useEffect(() => {
-  const getToken = async ()=>{
-    const value = await AsyncStorage.getItem('userToken')
-    if(value!== null){
-      const data = JSON.parse(value)
-      // console.log('Thông tin token : ',data)
-      setTokenUser(data)
-      setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, token : data }));
-      dispatch(getRelativeUser({token : data}))
-
+const getData = async () => {
+  try {
+    const value = await AsyncStorage.getItem('userStoreData');
+    if (value !== null) {
+      const data = JSON.parse(value);
+      // console.log('Thông tin data : ',data)
+      setUser(data.user)
     }
+    // else{
+    //   navigation.navigate('Login')
+    // }
+  } catch (error) {
+    console.log('Lỗi khi đọc dữ liệu:', error);
+    navigation.navigate('Login')
   }
-
-
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('userStoreData');
-      if (value !== null) {
-        const data = JSON.parse(value);
-        // console.log('Thông tin data : ',data)
-        setUser(data.user)
-      }
-      else{
-        navigation.navigate('Login')
-      }
-    } catch (error) {
-      console.log('Lỗi khi đọc dữ liệu:', error);
-      navigation.navigate('Login')
-    }
-  };
+};
 
 
 
 
-  const userRelativesData = async ()=>{
-    const value = await AsyncStorage.getItem('relativeUserData')
-    if(value!== null){
-      const data = JSON.parse(value)
-      // console.log('Thông tin người thân : ',data)
-      setRelativesData(data)
-      setTempData(data)
-  
-    }
-    else {
-      // console.log('Không có data')
-    }
+const userRelativesData = async ()=>{
+  const value = await AsyncStorage.getItem('relativeUserData')
+  if(value!== null){
+    const data = JSON.parse(value)
+    // console.log('Thông tin người thân : ',data)
+    setRelativesData(data)
+    setTempData(data)
+
   }
+  else {
+    // console.log('Không có data')
+  }
+}
 
   getToken();
   getData();
@@ -126,9 +139,18 @@ useEffect(() => {
   userRelativesData();
 }, []);
 
+
+
+
+
+
+
+
+
+
 const hanldeDeleteRelative = () =>{
   // console.log(tempData._id)
-  let id = tempData._id;
+  let id = relativesData._id;
   dispatch(deleteRelativeUser({id,tokenUser}))
   setModalRelativesData(false)
   
@@ -153,6 +175,12 @@ useEffect(() => {
 }, [IdCheckData]);
 
 
+//SECTION -  hàm chọn xem thông tin 1 người thân
+const handlePressItemRelative = (id) =>{
+  // console.log(id)
+  dispatch(getRelativeUserData(id))
+  setModalRelativesData(true)
+}
 
 
 
@@ -272,6 +300,7 @@ const handleMedicalHistoryRelative = (text) => {
     setModalVisible(false)
   }
   const handleChangeRelative = ()=>{
+    console.log('relativesData : ',relativesData)
     dispatch(editRelativeUser(relativesData))
     
 
@@ -304,8 +333,8 @@ const handleMedicalHistoryRelative = (text) => {
                   <RelativeItem
                     key={item._id}
                     item={item}
-                    // handlePress={handlePressItem} 
-                    setModalRelativesData={setModalRelativesData}
+                    handlePress={()=>handlePressItemRelative(item._id)}
+                    
                   />
 ))
               }

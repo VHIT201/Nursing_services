@@ -11,7 +11,7 @@ const themes = {
     blue:'#4287f5',
     red:'#ff4b4b' 
    
-        // notReceived yellow
+        // waiting yellow
         // happening blue
         // complete green
         // cancelled red
