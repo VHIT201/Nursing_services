@@ -157,7 +157,7 @@ export const editRelativeUser = createAsyncThunk(
           })
           .addCase(deleteRelativeUser.fulfilled, (state, action) => {
             console.log(action.payload)
-
+            state.loading = false
           })
           .addCase(deleteRelativeUser.rejected, (state, action) => {
             state.loading = false;

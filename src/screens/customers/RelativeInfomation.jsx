@@ -34,6 +34,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createRelativeUser, } from "../../redux/slices/userSlice";
 import { getRelativeUser,editRelativeUser,getRelativeUserData,deleteRelativeUser } from "../../redux/slices/relativeSlice";
 import RelativeItem from "../../components/ListRelative/ItemRelative";
+import Loading from "../../components/Progress/Loading";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const RelativeInfomation = ({navigation}) => {
@@ -42,8 +43,11 @@ const RelativeInfomation = ({navigation}) => {
 
     //data user redux
     const userDataRedux = useSelector((state) => state.user)
+   
     // console.log('data user : ',userDataRedux)
     const {dataRelativeUser,RelativeUserDetails} = useSelector((state) => state.relative)
+    const userRelativeRedux = useSelector((state) => state.relative)
+    // console.log('loading : ', userRelativeRedux)
  
     // const userDataRelativeReduxDetails = useSelector((state) => state.RelativeUserDetails)
    
@@ -83,6 +87,8 @@ useEffect(() => {
 }, [dataRelativeUser]);
 
 
+
+
 const getToken = async ()=>{
   const value = await AsyncStorage.getItem('userToken')
   if(value!== null){
@@ -94,7 +100,19 @@ const getToken = async ()=>{
 
   }
 }
+const userRelativesData = async ()=>{
+  const value = await AsyncStorage.getItem('relativeUserData')
+  if(value!== null){
+    const data = JSON.parse(value)
+    // console.log('Thông tin người thân : ',data)
+    setRelativesData(data)
+    setTempData(data)
 
+  }
+  else {
+    // console.log('Không có data')
+  }
+}
 
 
 // console.log(relatives)
@@ -119,19 +137,7 @@ const getData = async () => {
 
 
 
-const userRelativesData = async ()=>{
-  const value = await AsyncStorage.getItem('relativeUserData')
-  if(value!== null){
-    const data = JSON.parse(value)
-    // console.log('Thông tin người thân : ',data)
-    setRelativesData(data)
-    setTempData(data)
 
-  }
-  else {
-    // console.log('Không có data')
-  }
-}
 
   getToken();
   getData();
@@ -147,13 +153,14 @@ const userRelativesData = async ()=>{
 
 
 
-
+//NOTE - Xóa người thân
 const hanldeDeleteRelative = () =>{
   // console.log(tempData._id)
   let id = relativesData._id;
   dispatch(deleteRelativeUser({id,tokenUser}))
   setModalRelativesData(false)
-  
+  userRelativesData();
+  dispatch(getRelativeUser({token : tokenUser}))
 }
 
 
@@ -291,6 +298,8 @@ const handleMedicalHistoryRelative = (text) => {
     // console.log('Data người thân : ',dataCreateRelative)
     dispatch(createRelativeUser(dataCreateRelative))
     setModalVisible(false)
+    userRelativesData();
+    dispatch(getRelativeUser({token : tokenUser}))
   }
  
   const openDrawer = ()=>{
@@ -298,13 +307,17 @@ const handleMedicalHistoryRelative = (text) => {
   }
   const handleLeftButton =()=>{
     setModalVisible(false)
+    userRelativesData();
   }
   const handleChangeRelative = ()=>{
     console.log('relativesData : ',relativesData)
     dispatch(editRelativeUser(relativesData))
-    
-
+    userRelativesData();
   }
+
+  useEffect(() => {
+    getRelativeUser({token : tokenUser})
+  }, []);
 
   
 
@@ -320,14 +333,6 @@ const handleMedicalHistoryRelative = (text) => {
         </View>
         <View style={{height:20}}></View>
  {/* //SECTION - Người thân */}
-        {/* <FlatList style={{flex:1,width:"100%"}} data={relatives}
-                renderItem={({item}) => 
-                  <TouchableOpacity onPress={()=>[handlePress(item._id),setModalRelativesData(true)]} style={{flexDirection:"row",height:60,width:"100%",alignItems:"center",borderBottomWidth:0.5,borderBottomColor:themes.green}}>
-                    <Image style={{height:"80%",width:'20%'}} resizeMode="contain" source={item.avatar ? {uri: item.avatar}: require('../../assets/Icon/user.png')}/>
-                    <Text style={{fontSize:16,fontWeight:'500'}}>{item.fullname}</Text>
-                  </TouchableOpacity>
-                }
-              /> */}
               {
                 relatives.map(item => (
                   <RelativeItem
@@ -523,6 +528,12 @@ const handleMedicalHistoryRelative = (text) => {
           
 
         </View>)
+      }
+      {
+        userRelativeRedux.loading && 
+        (<View style={styles.modal}>
+          <Loading/>
+         </View>)
       }
     </View>
   )

@@ -111,7 +111,7 @@ const ReceiveCode = ({navigation,route}) => {
   useEffect(() => {
     if(message === messageSuccess)
     {
-      navigation.navigate('ChangePasswordForgot')
+      navigation.navigate('ChangePasswordForgot',{verifyOtp})
       
     }
     }

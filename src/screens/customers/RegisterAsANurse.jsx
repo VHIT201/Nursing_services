@@ -43,7 +43,7 @@ const RegisterAsANurse = ({navigation}) => {
         <View style={{height:100,width:'100%',justifyContent:"center",alignItems:"center"}}>
           {/* <TouchableOpacity onPress={uploadImage} style={{height:100,width:100,borderRadius:50,borderWidth:2,borderColor:themes.gray,justifyContent:"center",alignItems:'center'}}> */}
           <TouchableOpacity  style={{height:100,width:100,borderRadius:50,borderWidth:2,borderColor:themes.gray,justifyContent:"center",alignItems:'center'}}>
-          {/* <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={user.avatar ? {uri: user.avatar} : placeholder} /> */}
+          <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={user.avatar ? {uri: user.avatar} : placeholder} />
           </TouchableOpacity>
         </View>
         <View style={{width:'100%', alignItems:"center",height:20,marginTop:20}}>
@@ -58,10 +58,10 @@ const RegisterAsANurse = ({navigation}) => {
         <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10,flexDirection:"row",justifyContent:"space-between"}}>
         <View style={{width:"40%",gap:4}}>
         <Text style={styles.text}>Giới tính</Text>
-          <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'4%',paddingRight:"4%",flexDirection:"row",alignItems:"center",justifyContent:"space-between"}}>
+          <TouchableOpacity style={{borderWidth:1,height:34,position:'relative',width:"100%",paddingLeft:'4%',paddingRight:"4%",flexDirection:"row",alignItems:"center",justifyContent:"space-between"}}>
             <Text>Nữ</Text>
             <Ionicons name='person' size={16}/>
-          </View>
+          </TouchableOpacity>
         </View>
         <View style={{width:"50%",gap:4}}>
         <Text style={styles.text}>Ngày sinh</Text>

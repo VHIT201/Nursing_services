@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import http from "../../utils/http";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch,useSelector, } from 'react-redux';
+
 
 // khởi tạo các biến
 
@@ -17,6 +19,7 @@ const initialState = {
   loading: false,
   success: false,
   error:[],
+  message:'',
   messsageVerifyOtp:"",
   dataRelativeUser : [],
   RelativeUserDetails:{}
@@ -51,28 +54,28 @@ const updateUserAsyncStorage = async (value) => {
 //hàm persistent session
 
 
-export const persistentSession = createAsyncThunk(
-  "auth/login",
-  async (values, thunkAPI) => {
-    try {
-      const {data:result} = await http.post("/users/login", values, {
-        signal: thunkAPI.signal
-     });
-    //   console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
-        return {
-            user: result.data.user ,
-            token: result.data.accessToken,
-            persistentSessionSuccess : result.success
-        };
-    } catch (error) {
-      // console.log(
-      //   "🚀 ~ file: user.slice.ts:47 ~ error:",
-      //   error.response.data.error
-      // );
-      return thunkAPI.rejectWithValue(error.response.data.error);
-    }
-  }
-);
+// export const persistentSession = createAsyncThunk(
+//   "auth/login",
+//   async (values, thunkAPI) => {
+//     try {
+//       const {data:result} = await http.post("/users/login", values, {
+//         signal: thunkAPI.signal
+//      });
+//     //   console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+//         return {
+//             user: result.data.user ,
+//             token: result.data.accessToken,
+//             persistentSessionSuccess : result.success
+//         };
+//     } catch (error) {
+//       // console.log(
+//       //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+//       //   error.response.data.error
+//       // );
+//       return thunkAPI.rejectWithValue(error.response.data.error);
+//     }
+//   }
+// );
 
 
 //hàm login
@@ -85,13 +88,46 @@ export const loginUser = createAsyncThunk(
      });
      const userData = result.data.user
      const tokenData = result.data.accessToken
-     storeData(userData)
+    //  storeData(userData)
      storeToken(tokenData)
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
         return {
             user: result.data.user ,
             token: result.data.accessToken,
             success : result.success
+        };
+    } catch (error) {
+      // console.log(
+      //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+      //   error.response.data.error
+      // );
+      return thunkAPI.rejectWithValue(error.response.data.error);
+    }
+  }
+);
+//NOTE - get info user
+export const getInfoUser = createAsyncThunk(
+  "auth/getInfoUser",
+
+  async (values, thunkAPI) => {
+    try {
+      console.log('test : ',values)
+      const {data:result} = await http.get("/users/info", {
+        signal: thunkAPI.signal,
+        headers: {
+          Authorization : "Bearer " + values,
+          
+        },
+     });
+     
+     const userData = result.data
+    //  console.log('Data user từ sv : ', userData)
+     storeData(userData)
+    //  storeToken(tokenData)
+      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+        return {
+            user: result.data.user ,
+            token: result.data.accessToken,
         };
     } catch (error) {
       // console.log(
@@ -122,7 +158,7 @@ export const registerUser = createAsyncThunk(
     }
   }
 );
-
+// quên mật khẩu
 export const forgotPassword = createAsyncThunk(
   "auth/forgot-password",
   async (values, thunkAPI) => {
@@ -142,6 +178,7 @@ export const forgotPassword = createAsyncThunk(
     }
   }
 );
+//gửi verify code
 export const verifyCode = createAsyncThunk(
   "auth/verify-otp",
   async (values, thunkAPI) => {
@@ -162,26 +199,27 @@ export const verifyCode = createAsyncThunk(
   }
 );
 
+
+
 //NOTE - Hàm update
 export const update = createAsyncThunk(
   "auth/update",
+  
   async (values, thunkAPI) => {
-    // const formData = new FormData();
-    // console.log('values avatar : ',values.avatar)
-    // formData.append("avatar", values.avatar)
+    // console.log('values in update : ',values)
     try {
       const {data:result} = await http.patch("/users/update", values, {
         signal: thunkAPI.signal,
         //truyền token
         headers: {
           Authorization : "Bearer " + values.token,
-          "Content-Type" : "multipart/form-data"
+          
         },
 
      });
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
-      updateUserAsyncStorage(result.data)
-      console.log("đã update user")
+      storeData(result.data)
+      console.log("đã update user : ",result.data)
         return {
             user: result.data,
         };
@@ -199,8 +237,8 @@ export const updatePassword = createAsyncThunk(
   "auth/update-password",
   async (values, thunkAPI) => {
     try {
-      console.log(values.token)
-      const {data:result} = await http.patch("/users/reset-password", values, {
+      // console.log(values.token)
+      const {data:result} = await http.patch("/users/update-password", values, {
         signal: thunkAPI.signal,
         //truyền token
         headers: {
@@ -209,7 +247,7 @@ export const updatePassword = createAsyncThunk(
         }
      });
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
-      // storeData(result.data)
+      console.log("đã update user")
         return {
             user: result.data,
         };
@@ -222,6 +260,31 @@ export const updatePassword = createAsyncThunk(
     }
   }
 );
+//hàm reset password
+export const resetPassword = createAsyncThunk(
+  "auth/resetPassword",
+  async (values, thunkAPI) => {
+    try {
+      // console.log(values.token)
+      const {data:result} = await http.put("/users/reset-password", values, {
+        signal: thunkAPI.signal,
+     });
+      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+      console.log("đã update user")
+        return {
+          result
+        };
+    } catch (error) {
+      // console.log(
+      //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+      //   error.response.data.error
+      // );
+      return thunkAPI.rejectWithValue(error.response.data.error);
+    }
+  }
+);
+
+
 
 
 
@@ -274,6 +337,7 @@ export const userSlice = createSlice({
 
   extraReducers(builder) {
     builder
+       //NOTE - addCase Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.success = false;
@@ -284,6 +348,8 @@ export const userSlice = createSlice({
         state.user.accessToken = action.payload.token
         state.loading = false
         state.success = true
+
+        
         // if(action.payload.success === true) 
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -292,6 +358,22 @@ export const userSlice = createSlice({
         state.error = action.payload;
         console.log(action.payload);
       })
+     //NOTE - addCase getInfoUser
+      .addCase(getInfoUser.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+      })
+      .addCase(getInfoUser.fulfilled, (state, action) => {
+        state.user = action.payload.user
+        state.loading = false
+      })
+      .addCase(getInfoUser.rejected, (state, action) => {
+        state.loading = false;
+        // console.log('Lỗi')
+        state.error = action.payload;
+        console.log(action.payload);
+      })
+         //NOTE - addCase Registeruser
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
       })
@@ -360,6 +442,34 @@ export const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         console.log(action.payload);
+      })
+      .addCase(updatePassword.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updatePassword.fulfilled, (state, action) => {
+        console.log('payload : ' ,action.payload)
+        state.loading = false
+        state.message = action.payload.message
+        // state.success = true
+      })
+      .addCase(updatePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        // console.log(action.payload);
+      })
+      //NOTE - addCase ResetPassword
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(resetPassword.fulfilled, (state, action) => {
+        console.log('payload : ' ,action.payload.result)
+        state.loading = false
+        state.message = action.payload.result.message
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        // console.log(action.payload);
       })
       
   },

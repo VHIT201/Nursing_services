@@ -22,7 +22,7 @@ import Register from './Register';
 import { useDispatch,useSelector } from 'react-redux';
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import Loading from "../../components/Progress/Loading";
-import { loginUser, updateUser, forgotPassword } from "../../redux/slices/userSlice";
+import { loginUser, updateUser, forgotPassword,getInfoUser } from "../../redux/slices/userSlice";
 import { StatusBar } from "expo-status-bar";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -171,9 +171,11 @@ const Login = ({navigation}) => {
   
     useEffect(() => {
       if(userDataRedux.success === true){
-      handleLoginSuccess() 
-      storePassword(user.password)
-      storeData(userDataRedux)
+        // console.log('token nè : ',userDataRedux.user.accessToken)
+        dispatch(getInfoUser({token : userDataRedux.user.accessToken}))
+        handleLoginSuccess() 
+        storePassword(user.password)
+        storeData(userDataRedux)
     }
     }, [userDataRedux.success])
   
@@ -378,8 +380,6 @@ const Login = ({navigation}) => {
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
-        
-        
       </View>
         )
       }
