@@ -43,9 +43,8 @@ const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 const CustomerSettings = ({ navigation }) => {
-
-
-  
+  //dispatch
+  const dispatch = useDispatch();
   //time
   const now = new Date();
   const time = now.toLocaleTimeString();
@@ -64,8 +63,7 @@ const CustomerSettings = ({ navigation }) => {
     newPassword: "",
     confirmNewPassword: "",
   });
-  const userDataRedux = useSelector((state) => state.user);
-  // console.log(userDataRedux)
+  
 
   //NOTE - update password
   const handleOldPassword = (text) => {
@@ -93,12 +91,14 @@ const CustomerSettings = ({ navigation }) => {
     setBeingSelected(1000);
   };
 
+  //SECTION - Bắt đầu vào trang
   useEffect(() => {
+    console.log("bắt đầu tìm kiếm data")
     const getToken = async () => {
-      const value = await AsyncStorage.getItem("userToken");
+      const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
       if (value !== null) {
-        const data = JSON.parse(value);
-        // console.log('Thông tin token : ',data)
+        const data = JSON.parse(value); 
+        dispatch(getInfoUser(data))  // get info user
         setTokenUser(data);
         setDataUpdatePassword((prevDataUpdatePassword) => ({
           ...prevDataUpdatePassword,
@@ -107,72 +107,60 @@ const CustomerSettings = ({ navigation }) => {
       }
     };
 
-    const getPassword = async () => {
-      const value = await AsyncStorage.getItem("userPassword");
-      if (value !== null) {
-        const data = JSON.parse(value);
-        // console.log('Thông tin password : ',data)
-        setUserPassword(data);
-        setDataUpdatePassword((prevDataUpdatePassword) => ({
-          ...prevDataUpdatePassword,
-          oldPassword: data,
-        }));
-      }
-    };
-    const getData = async () => {
-      try {
-        const value = await AsyncStorage.getItem("userStoreData");
-        if (value !== null) {
-          const data = JSON.parse(value);
-          // console.log("Thông tin data : ", data);
+    // const getData = async () => {
+    //   try {
+    //     const value = await AsyncStorage.getItem("userStoreData");
+    //     if (value !== null) {
+    //       const data = JSON.parse(value);
+    //       // console.log("Thông tin data : ", data);
 
-          setUser(data);
-        } else {
-          navigation.navigate("Login");
-        }
-      } catch (error) {
-        console.log("Lỗi khi đọc dữ liệu:", error);
-        navigation.navigate("Login");
-      }
-    };
+    //       setUser(data);
+    //     } else {
+    //       navigation.navigate("Login");
+    //     }
+    //   } catch (error) {
+    //     console.log("Lỗi khi đọc dữ liệu:", error);
+    //     navigation.navigate("Login");
+    //   }
+    // };
+
     getToken();
-    getData();
-    getPassword();
+    // getData();
+
   }, []);
 
-  // console.log('data user : ' ,user)
-  //data
-
+  const data = useSelector((state) => state.user.user);
+  const [userDataRedux, setUserDataRedux] = useState(data)
   const [avatar, setAvatar] = useState(null);
   //redux
-  const dispatch = useDispatch();
+
 
   //NOTE - sửa thông tin
 
   //Chỉnh sửa thông tin
   const handleFullName = (text) => {
-    setUser((prevUser) => ({ ...prevUser, fullname: text }));
+    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, fullname: text }));
   };
   const handleChangePhoneNumber = (text) => {
-    setUser((prevUser) => ({ ...prevUser, phoneNumber: text }));
+    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, phoneNumber: text }));
   };
   const handleChangeEmail = (text) => {
-    setUser((prevUser) => ({ ...prevUser, email: text }));
+    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, email: text }));
   };
   const handleChangeAddress = (text) => {
-    setUser((prevUser) => ({ ...prevUser, address: text }));
+    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, address: text }));
   };
 
   const [tempAvatar, setTempAvatar] = useState("");
   const handleUpdateUser = async () => {
     let dataUpdateUser = {
       token: tokenUser,
-      fullname: user.fullname,
-      email: user.email,
+      fullname: userDataRedux.fullname,
+      email: userDataRedux.email,
       gender: "Male",
-      avatar: tempAvatar || user.avatar,
-      birthOfDate: user.birthOfDate,
-      address: user.address,
+      avatar: tempAvatar || userDataRedux.avatar,
+      birthOfDate: userDataRedux.birthOfDate,
+      address: userDataRedux.address,
     };
 
     console.log("Thông tin update : ", dataUpdateUser);
@@ -239,8 +227,7 @@ const CustomerSettings = ({ navigation }) => {
         console.log(err);
       });
   };
-console.log("temp avatar : ",tempAvatar)
-console.log("user : ", user)
+
   // State để lưu file PDF
   const [pdfFile, setPdfFile] = useState(null);
 
@@ -344,16 +331,9 @@ console.log("user : ", user)
                 alignItems: "center",
               }}
             >
-              {/* <Image
-                style={{ height: 100, width: 100, borderRadius: 50 }}
-                resizeMode="contain"
-                source={{
-                  uri: "https://res.cloudinary.com/ddg0aosts/image/upload/v1702390216/nursing/users/l5a4qd55o9gwz1xhc0mp.jpg",
-                }}
-              /> */}
 
               {/* //NOTE - ảnh đại diện */}
-              <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={tempAvatar === '' ? {uri: user.avatar} :  {uri : tempAvatar}} />
+              <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={tempAvatar === '' ? {uri: userDataRedux.avatar} :  {uri : tempAvatar}} />
 
               <TouchableOpacity
                 onPress={uploadImage}
@@ -389,7 +369,7 @@ console.log("user : ", user)
                 { fontSize: 18, color: themes.green, lineHeight: 20 },
               ]}
             >
-              {user.fullname ? user.fullname : "Unkown user"}
+              {userDataRedux.fullname ? userDataRedux.fullname : "Unkown user"}
             </Text>
           </View>
           <View
@@ -412,11 +392,16 @@ console.log("user : ", user)
               }}
             >
               <TextInput
-                onChangeText={handleFullName}
-                value={user.fullname}
+                onChangeText={(text) =>
+                  setUserDataRedux((prevUserDataRedux) => ({
+                    ...prevUserDataRedux,
+                    fullname: text,
+                  }))
+                }
+                value={userDataRedux.fullname}
                 style={{ height: "100%", width: "100%" }}
                 placeholder="Họ và tên"
-              ></TextInput>
+            ></TextInput>
             </View>
           </View>
           <View
@@ -464,7 +449,7 @@ console.log("user : ", user)
                   paddingRight: "10%",
                 }}
               >
-                <Text>{moment(user.dateOfBirth).format("DD/MM/YYYY")}</Text>
+                <Text>{moment(userDataRedux.dateOfBirth).format("DD/MM/YYYY")}</Text>
                 <TouchableOpacity onPress={hanldeModalDatapicker}>
                   <AntDesign name={"calendar"} size={20} color={themes.green} />
                 </TouchableOpacity>
@@ -492,8 +477,8 @@ console.log("user : ", user)
               }}
             >
               <TextInput
-                onChangeText={handleChangePhoneNumber}
-                value={user.phoneNumber}
+                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, phoneNumber: text }))}
+                value={userDataRedux.phoneNumber}
                 style={{ height: "100%", width: "100%" }}
                 placeholder="Số điện thoại"
               ></TextInput>
@@ -519,8 +504,8 @@ console.log("user : ", user)
               }}
             >
               <TextInput
-                onChangeText={handleChangeEmail}
-                value={user.email}
+                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, email: text }))}
+                value={userDataRedux.email}
                 style={{ height: "100%", width: "100%" }}
                 placeholder="Email"
               ></TextInput>
@@ -548,8 +533,8 @@ console.log("user : ", user)
             >
               <TextInput
                 multiline
-                onChangeText={handleChangeAddress}
-                value={user.address}
+                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, address: text }))}
+                value={userDataRedux.address}
                 style={{ width: "100%" }}
                 placeholder="Địa chỉ"
               ></TextInput>
@@ -621,6 +606,13 @@ console.log("user : ", user)
               onChange={onChangeDatePicker}
             />
           )}
+
+          {
+        userDataRedux.loading && 
+        (<View style={styles.modal}>
+          <Loading/>
+         </View>)
+      }
         </KeyboardAwareScrollView>
       </View>
     );

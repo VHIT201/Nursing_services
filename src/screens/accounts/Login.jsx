@@ -140,13 +140,6 @@ const Login = ({navigation}) => {
       console.log(dataLogin)
       dispatch(loginUser(dataLogin))
     }
-    
-    
- 
-    const handleLoginSuccess = () => {
-      navigation.navigate('ChooseRole');
-    }
-    
 
 
     if(error[0]?.message === error1){
@@ -172,7 +165,7 @@ const Login = ({navigation}) => {
     useEffect(() => {
       if(userDataRedux.success === true){
         // console.log('token nè : ',userDataRedux.user.accessToken)
-        dispatch(getInfoUser({token : userDataRedux.user.accessToken}))
+
         handleLoginSuccess() 
         storePassword(user.password)
         storeData(userDataRedux)
@@ -180,8 +173,9 @@ const Login = ({navigation}) => {
     }, [userDataRedux.success])
   
     
-  
+//NOTE -  xử lý khi login thành công
   const handleLoginSuccess = () => {
+    dispatch(getInfoUser(userDataRedux.user.accessToken))
     navigation.navigate('ChooseRole');
   }
 

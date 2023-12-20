@@ -87,16 +87,15 @@ useEffect(() => {
 }, [dataRelativeUser]);
 
 
-
-
 const getToken = async ()=>{
   const value = await AsyncStorage.getItem('userToken')
   if(value!== null){
     const data = JSON.parse(value)
     // console.log('Thông tin token : ',data)
+    dispatch(getRelativeUser({token : data}))
     setTokenUser(data)
     setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, token : data }));
-    dispatch(getRelativeUser({token : data}))
+    
 
   }
 }
@@ -117,30 +116,25 @@ const userRelativesData = async ()=>{
 
 // console.log(relatives)
 useEffect(() => {
-const getData = async () => {
-  try {
-    const value = await AsyncStorage.getItem('userStoreData');
-    if (value !== null) {
-      const data = JSON.parse(value);
-      // console.log('Thông tin data : ',data)
-      setUser(data.user)
-    }
-    // else{
-    //   navigation.navigate('Login')
-    // }
-  } catch (error) {
-    console.log('Lỗi khi đọc dữ liệu:', error);
-    navigation.navigate('Login')
-  }
-};
-
-
-
-
-
+// const getData = async () => {
+//   try {
+//     const value = await AsyncStorage.getItem('userStoreData');
+//     if (value !== null) {
+//       const data = JSON.parse(value);
+//       // console.log('Thông tin data : ',data)
+//       setUser(data.user)
+//     }
+//     // else{
+//     //   navigation.navigate('Login')
+//     // }
+//   } catch (error) {
+//     console.log('Lỗi khi đọc dữ liệu:', error);
+//     navigation.navigate('Login')
+//   }
+// };
 
   getToken();
-  getData();
+  // getData();
  
   userRelativesData();
 }, []);
@@ -174,8 +168,7 @@ const handlePress = (item) => {
 
 //lấy data người thân
 useEffect(() => {
-  // console.log('Id check Data : ',IdCheckData)
-  if(IdCheckData!==null){
+  if(IdCheckData!=null){
     dispatch(getRelativeUserData(IdCheckData))
     // console.log('người thân data : ',relativesData)
   }
@@ -211,7 +204,7 @@ useState({  token: '',
 
 
 const handleRelativeName = (text) => {
-  setRelativesData(prevRelativesData => ({ ...prevRelativesData, fullname : text }));
+  
 }
 const handleRelativePhoneNumber = (text) => {
 
@@ -452,7 +445,8 @@ const handleMedicalHistoryRelative = (text) => {
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Họ & tên</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.fullname} onChangeText={handleRelativeName} style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
+                <TextInput value={relativesData.fullname} 
+                  onChangeText={handleRelativeName} style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10,flexDirection:"row",justifyContent:"space-between"}}>

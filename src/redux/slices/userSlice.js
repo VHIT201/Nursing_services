@@ -8,7 +8,6 @@ import { useDispatch,useSelector, } from 'react-redux';
 
 const initialState = {
   user: {
-    token: "",
     id: "",
     fullname: "",
     email: "",
@@ -36,9 +35,10 @@ const storeData = async (value) => {
 const storeToken = async (value) => {
   try {
     const jsonValue = JSON.stringify(value);
+    await AsyncStorage.removeItem('userToken');
     await AsyncStorage.setItem('userToken', jsonValue);
   } catch (e) {
-    // saving error
+    console.log('Lỗi store giá trị token : ', e)
   }
 };
 const updateUserAsyncStorage = async (value) => {
@@ -86,11 +86,11 @@ export const loginUser = createAsyncThunk(
       const {data:result} = await http.post("/users/login", values, {
         signal: thunkAPI.signal
      });
-     const userData = result.data.user
+    //  const userData = result.data.user
      const tokenData = result.data.accessToken
     //  storeData(userData)
      storeToken(tokenData)
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
         return {
             user: result.data.user ,
             token: result.data.accessToken,
@@ -111,7 +111,6 @@ export const getInfoUser = createAsyncThunk(
 
   async (values, thunkAPI) => {
     try {
-      console.log('test : ',values)
       const {data:result} = await http.get("/users/info", {
         signal: thunkAPI.signal,
         headers: {
@@ -121,12 +120,12 @@ export const getInfoUser = createAsyncThunk(
      });
      
      const userData = result.data
-    //  console.log('Data user từ sv : ', userData)
-     storeData(userData)
+     console.log('Data user từ sv : ', userData)
+    //  storeData(userData)
     //  storeToken(tokenData)
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
         return {
-            user: result.data.user ,
+            user: result.data,
             token: result.data.accessToken,
         };
     } catch (error) {
