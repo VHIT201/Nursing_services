@@ -33,6 +33,33 @@ const initialState = {
 
   };
 
+  
+//tạo người thân
+export const createRelativeUser = createAsyncThunk(
+  "auth/createRelativeUser",
+  async (values, thunkAPI) => {
+    try {
+      // console.log('data values : ',values.fullname)
+      const {data:result} = await http.post("/users/create-relative-user", values, {
+        signal: thunkAPI.signal,
+        headers: {
+          Authorization : "Bearer " + values.token,
+        }
+     });
+      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+
+        return {
+             result
+        };
+    } catch (error) {
+      // console.log(
+      //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+      //   error.response.data.error
+      // );
+      return thunkAPI.rejectWithValue(error.response.data.error);
+    }
+  }
+);
   //Lấy danh sách người thân
 export const getRelativeUser = createAsyncThunk(
     "auth/get-relative-user",
@@ -43,7 +70,7 @@ export const getRelativeUser = createAsyncThunk(
           signal: thunkAPI.signal,
           headers: {
             Authorization : "Bearer " + values.token,
-            "Content-Type" : "multipart/form-data"
+
           }
        });
         // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
@@ -115,8 +142,8 @@ export const editRelativeUser = createAsyncThunk(
     "auth/edit-relative-user",
     async (values, thunkAPI) => {
       try {
-        console.log(values._id)
-        console.log('data sửa :', values)
+        // console.log(values._id)
+        // console.log('data sửa :', values)
 
         const {data:result} = await http.patch(`/relatives/${values._id}/${values}`, {
         // const {data:result} = await http.patch(`/relatives/${values._id}/${values}`, {
@@ -165,11 +192,12 @@ export const editRelativeUser = createAsyncThunk(
             state.error = action.payload;
             console.log(action.payload);
           })
+          // lấy danh sách người thân
           .addCase(getRelativeUser.pending, (state) => {
             state.loading = true;
           })
           .addCase(getRelativeUser.fulfilled, (state, action) => {
-            // console.log('payload : ' ,action.payload.result.data)
+            console.log('payload : ' , action.payload.result.data)
             state.loading = false
             state.dataRelativeUser = action.payload.result.data
             state.message = action.payload.message
@@ -185,7 +213,7 @@ export const editRelativeUser = createAsyncThunk(
             state.loading = true;
           })
           .addCase(getRelativeUserData.fulfilled, (state, action) => {
-            // console.log('payload : ' , action.payload)
+            console.log('payload get data đơn : ' , action.payload.result.data)
             state.loading = false
             state.RelativeUserDetails = action.payload.result.data
             state.message = action.payload.message
@@ -202,18 +230,33 @@ export const editRelativeUser = createAsyncThunk(
             state.loading = true;
           })
           .addCase(editRelativeUser.fulfilled, (state, action) => {
-            // console.log('payload : ' ,action.payload)
+            console.log('payload : ' ,action.payload)
             state.loading = false
             state.dataRelativeUser = action.payload.data
-            state.message = action.payload.message
-          
+            state.message = action.payload.message          
           })
           .addCase(editRelativeUser.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
             console.log(action.payload);
           })
+          .addCase(createRelativeUser.pending, (state) => {
+            state.loading = true;
+          })
+          .addCase(createRelativeUser.fulfilled, (state, action) => {
+            console.log('payload : ' ,action.payload)
+            state.loading = false
+            state.message = action.payload.message
+            // state.success = true
+          })
+          .addCase(createRelativeUser.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+            console.log(action.payload);
+          })
         }
+
+        
         
 
 

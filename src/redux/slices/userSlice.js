@@ -120,7 +120,7 @@ export const getInfoUser = createAsyncThunk(
      });
      
      const userData = result.data
-     console.log('Data user từ sv : ', userData)
+    //  console.log('Data user từ sv : ', userData)
     //  storeData(userData)
     //  storeToken(tokenData)
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
@@ -287,32 +287,6 @@ export const resetPassword = createAsyncThunk(
 
 
 
-//tạo người thân
-export const createRelativeUser = createAsyncThunk(
-  "auth/createRelativeUser",
-  async (values, thunkAPI) => {
-    try {
-      console.log('data values : ',values.fullname)
-      const {data:result} = await http.post("/users/create-relative-user", values, {
-        signal: thunkAPI.signal,
-        headers: {
-          Authorization : "Bearer " + values.token,
-        }
-     });
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
-
-        return {
-             result
-        };
-    } catch (error) {
-      // console.log(
-      //   "🚀 ~ file: user.slice.ts:47 ~ error:",
-      //   error.response.data.error
-      // );
-      return thunkAPI.rejectWithValue(error.response.data.error);
-    }
-  }
-);
 
 
 
@@ -424,20 +398,6 @@ export const userSlice = createSlice({
         // state.success = true
       })
       .addCase(update.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-        console.log(action.payload);
-      })
-      .addCase(createRelativeUser.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(createRelativeUser.fulfilled, (state, action) => {
-        console.log('payload : ' ,action.payload)
-        state.loading = false
-        state.message = action.payload.message
-        // state.success = true
-      })
-      .addCase(createRelativeUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         console.log(action.payload);

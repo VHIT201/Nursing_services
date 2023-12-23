@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -13,6 +13,9 @@ import {
   StatusBar,
   Button
 } from "react-native";
+import { useSelector,useDispatch } from 'react-redux';
+import { getListServices } from "../../redux/slices/servicesSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
@@ -29,6 +32,8 @@ import themes from "../../../themes";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const CustomerHome = ({navigation}) => {
+  //redux
+  const dispatch = useDispatch()
   const [visibleModal,setVisibleModal] = useState(false)
   const [visibleModal1,setVisibleModal1] = useState(false)
   const [visibleModal2,setVisibleModal2] = useState(false)
@@ -72,18 +77,36 @@ const services = dataService
     } 
   }
 
+  //SECTION - Bắt đầu
+  useEffect(() => {
+    console.log("bắt đầu tìm kiếm token")
+    const getToken = async () => {
+      const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
+      if (value !== null) {
+        const data = JSON.parse(value); 
+        console.log(data)
+        dispatch(getListServices())
+      }
+    };
+    getToken()
+  }, []);
+
+  const dataServices = useSelector((state) => state.services)
+  const listServices = dataServices.services
+  console.log(dataServices.services)
+
   return (
     <View style={styles.container}>
       <StatusBar/>
       <Header nameLeftIcon={'navicon'} handleLeftButton={openDrawer} namePage={'Trang chủ'} />
       <View style={styles.body}>
       <FlatList
-          data={services}
+          data={listServices}
           renderItem={({ item }) => (
-            <HomeSelectButton handlePress={()=>handleHomeButton(item.id)} nameLeftIcon={'chevron-left'} title={item.name} />
+            <HomeSelectButton handlePress={()=>handleHomeButton(item._id)} nameLeftIcon={'chevron-left'} title={item.name} />
             
             )}
-          keyExtractor={(item) => item.id} 
+          keyExtractor={(item) => item._id} 
         />
         
       </View>
@@ -231,7 +254,8 @@ const styles = StyleSheet.create({
     flex:1,
     width:'100%',
     paddingLeft:"5%",
-    paddingRight:"5%"
+    paddingRight:"5%",
+    paddingTop:4
   },
   modal:{
     position:"absolute",

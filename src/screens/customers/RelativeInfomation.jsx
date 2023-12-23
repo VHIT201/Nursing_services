@@ -31,13 +31,15 @@ import { useSelector,useDispatch } from 'react-redux';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createRelativeUser, } from "../../redux/slices/userSlice";
+import { createRelativeUser, } from "../../redux/slices/relativeSlice";
 import { getRelativeUser,editRelativeUser,getRelativeUserData,deleteRelativeUser } from "../../redux/slices/relativeSlice";
 import RelativeItem from "../../components/ListRelative/ItemRelative";
 import Loading from "../../components/Progress/Loading";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const RelativeInfomation = ({navigation}) => {
+      //redux
+  const dispatch = useDispatch()
   const [modalVisible,setModalVisible] = useState(false)
 
 
@@ -45,22 +47,16 @@ const RelativeInfomation = ({navigation}) => {
     const userDataRedux = useSelector((state) => state.user)
    
     // console.log('data user : ',userDataRedux)
-    const {dataRelativeUser,RelativeUserDetails} = useSelector((state) => state.relative)
+    const {dataRelativeUser,RelativeUserDetails} = useSelector((state) => state.relative) //Danh sách / Chi tiết 1 người
+    // console.log(RelativeUserDetails)
     const userRelativeRedux = useSelector((state) => state.relative)
-    // console.log('loading : ', userRelativeRedux)
- 
-    // const userDataRelativeReduxDetails = useSelector((state) => state.RelativeUserDetails)
-   
-useEffect(() => {
-  dispatch(getRelativeUser({token : tokenUser}))
-}, [modalRelativesData]);
+    
 
-const [user,setUser] = useState({})
 const [tokenUser, setTokenUser] = useState({})
 //List người thân
 const [relatives, setRelatives] = useState([])
 //1 người thân
-const [relativesData, setRelativesData] = useState([])
+const [relativesData, setRelativesData] = useState({})
 const [tempData, setTempData] = useState(null)
 const [tempData1, setTempData1] = useState(null)
 const [IdCheckData,setIdCheckData] = useState(null)
@@ -77,16 +73,9 @@ useEffect(() => {
   }
 }, [RelativeUserDetails]);
 
-
-//Lấy data list người thân
 useEffect(() => {
-  if(dataRelativeUser){
-    // console.log(dataRelativeUser)
-    setRelatives(dataRelativeUser)
-  }
-}, [dataRelativeUser]);
-
-
+  getToken()
+}, []);
 const getToken = async ()=>{
   const value = await AsyncStorage.getItem('userToken')
   if(value!== null){
@@ -114,47 +103,14 @@ const userRelativesData = async ()=>{
 }
 
 
-// console.log(relatives)
-useEffect(() => {
-// const getData = async () => {
-//   try {
-//     const value = await AsyncStorage.getItem('userStoreData');
-//     if (value !== null) {
-//       const data = JSON.parse(value);
-//       // console.log('Thông tin data : ',data)
-//       setUser(data.user)
-//     }
-//     // else{
-//     //   navigation.navigate('Login')
-//     // }
-//   } catch (error) {
-//     console.log('Lỗi khi đọc dữ liệu:', error);
-//     navigation.navigate('Login')
-//   }
-// };
-
-  getToken();
-  // getData();
- 
-  userRelativesData();
-}, []);
-
-
-
-
-
-
-
-
-
 //NOTE - Xóa người thân
 const hanldeDeleteRelative = () =>{
   // console.log(tempData._id)
   let id = relativesData._id;
   dispatch(deleteRelativeUser({id,tokenUser}))
-  setModalRelativesData(false)
-  userRelativesData();
+  // userRelativesData();
   dispatch(getRelativeUser({token : tokenUser}))
+  setModalRelativesData(false)
 }
 
 
@@ -173,6 +129,11 @@ useEffect(() => {
     // console.log('người thân data : ',relativesData)
   }
 }, [IdCheckData]);
+
+
+useEffect(() => {
+  dispatch(getRelativeUser({token : tokenUser}))
+}, [modalRelativesData]);
 
 
 //SECTION -  hàm chọn xem thông tin 1 người thân
@@ -199,37 +160,15 @@ useState({  token: '',
              });
 
 
-    //redux
-    const dispatch = useDispatch()
 
 
-const handleRelativeName = (text) => {
-  
-}
-const handleRelativePhoneNumber = (text) => {
 
-  setRelativesData(prevRelativesData => ({ ...prevRelativesData, phoneNumber : text }));
-}
+
 
   const handleRelativeGender = (text) => {
   setRelativesData(prevRelativesData => ({ ...prevRelativesData, gender : text }));
 }
 
-  const handleRelativeEmail = (text) => {
-  setRelativesData(prevRelativesData => ({ ...prevRelativesData, email : text }));
-}
-
-  const handleRelativeAddress = (text) => {
-  setRelativesData(prevRelativesData => ({ ...prevRelativesData, address : text }));
-}
-
-  const handleRelativeBloodGroup = (text) => {
-  setRelativesData(prevRelativesData => ({ ...prevRelativesData, bloodGroup : text }));
-}
-
-  const handleRelativepMedicalHistory = (text) => {
-  setRelativesData(prevRelativesData => ({ ...prevRelativesData, medicalHistory : text }));
-}
 
 
 // hàm xử lý thêm người thân
@@ -291,8 +230,9 @@ const handleMedicalHistoryRelative = (text) => {
     // console.log('Data người thân : ',dataCreateRelative)
     dispatch(createRelativeUser(dataCreateRelative))
     setModalVisible(false)
-    userRelativesData();
+    // userRelativesData();
     dispatch(getRelativeUser({token : tokenUser}))
+    setModalRelativesData(false)
   }
  
   const openDrawer = ()=>{
@@ -300,12 +240,15 @@ const handleMedicalHistoryRelative = (text) => {
   }
   const handleLeftButton =()=>{
     setModalVisible(false)
-    userRelativesData();
+    dispatch(getRelativeUser({token : tokenUser}))
   }
+  //SECTION -  Hàm sửa data
   const handleChangeRelative = ()=>{
     console.log('relativesData : ',relativesData)
     dispatch(editRelativeUser(relativesData))
-    userRelativesData();
+    // userRelativesData();
+    dispatch(getRelativeUser({token : tokenUser}))
+    setModalRelativesData(false)
   }
 
   useEffect(() => {
@@ -327,7 +270,7 @@ const handleMedicalHistoryRelative = (text) => {
         <View style={{height:20}}></View>
  {/* //SECTION - Người thân */}
               {
-                relatives.map(item => (
+                dataRelativeUser.map(item => (
                   <RelativeItem
                     key={item._id}
                     item={item}
@@ -409,7 +352,7 @@ const handleMedicalHistoryRelative = (text) => {
             
             <View style={{height:200,width:"100%",alignItems:"center",justifyContent:"flex-start",paddingTop:"10%"}}>
               <TouchableOpacity onPress={handleCreateRelative} style={{height:"30%",width:'90%',backgroundColor:themes.green,justifyContent:"center",alignItems:"center",borderRadius:10}}>
-                <Text style={{fontSize:16,fontWeight:"500",color:'white'}}>Lưu thay đổi</Text>
+                <Text style={{fontSize:16,fontWeight:"500",color:'white'}}>Tạo người thân</Text>
               </TouchableOpacity>
             </View>
             
@@ -446,7 +389,7 @@ const handleMedicalHistoryRelative = (text) => {
               <Text style={styles.text}>Họ & tên</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
                 <TextInput value={relativesData.fullname} 
-                  onChangeText={handleRelativeName} style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
+                  onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, fullname : text }))} style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10,flexDirection:"row",justifyContent:"space-between"}}>
@@ -470,31 +413,31 @@ const handleMedicalHistoryRelative = (text) => {
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Số điện thoại</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.phoneNumber} onChangeText={handleRelativePhoneNumber} style={{height:'100%',width:"100%"}} placeholder="Số điện thoại"></TextInput>
+                <TextInput value={relativesData.phoneNumber} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, phoneNumber : text }))} style={{height:'100%',width:"100%"}} placeholder="Số điện thoại"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Email</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.email} onChangeText={handleRelativeEmail} style={{height:'100%',width:"100%"}} placeholder="Email"></TextInput>
+                <TextInput value={relativesData.email} onChangeText={(text) =>  setRelativesData(prevRelativesData => ({ ...prevRelativesData, email: text }))} style={{height:'100%',width:"100%"}} placeholder="Email"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Địa chỉ</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.address} onChangeText={handleRelativeAddress} style={{height:'100%',width:"100%"}} placeholder="Địa chỉ"></TextInput>
+                <TextInput value={relativesData.address} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, address : text }))} style={{height:'100%',width:"100%"}} placeholder="Địa chỉ"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Nhóm máu</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.bloodGroup} onChangeText={handleRelativeBloodGroup} style={{height:'100%',width:"100%"}} placeholder="Nhóm máu"></TextInput>
+                <TextInput value={relativesData.bloodGroup} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, bloodGroup : text }))} style={{height:'100%',width:"100%"}} placeholder="Nhóm máu"></TextInput>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Tiểu sử bệnh</Text>
               <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.medicalHistory} onChangeText={handleRelativepMedicalHistory} style={{height:'100%',width:"100%"}} placeholder="Tiểu sử bệnh"></TextInput>
+                <TextInput value={relativesData.medicalHistory} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, medicalHistory : text }))} style={{height:'100%',width:"100%"}} placeholder="Tiểu sử bệnh"></TextInput>
               </View>
             </View>
             

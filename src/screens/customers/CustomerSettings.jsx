@@ -93,7 +93,7 @@ const CustomerSettings = ({ navigation }) => {
 
   //SECTION - Bắt đầu vào trang
   useEffect(() => {
-    console.log("bắt đầu tìm kiếm data")
+    // console.log("bắt đầu tìm kiếm data")
     const getToken = async () => {
       const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
       if (value !== null) {
