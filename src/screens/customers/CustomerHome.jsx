@@ -14,7 +14,8 @@ import {
   Button
 } from "react-native";
 import { useSelector,useDispatch } from 'react-redux';
-import { getListServices } from "../../redux/slices/servicesSlice";
+
+import { getListServices, getListSubServices, getListSubServicesByIDService } from "../../redux/slices/servicesSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import FontAwesome from "react-native-vector-icons/FontAwesome";
@@ -27,7 +28,7 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Header from "../../components/header/Header";
 import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
-import dataService from "../../seeders/dataService";
+
 import themes from "../../../themes";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -42,16 +43,20 @@ const CustomerHome = ({navigation}) => {
   const [subService, setSubService] = useState([])
   const [schedule,setSchedule] = useState(1)
   const [cashPayment,setCashPayment] = useState(true)
-const services = dataService
+ 
 
 
   const openDrawer = ()=>{
     navigation.openDrawer()
   }
   const handleHomeButton = (id) =>{
-    setVisibleModal(true)
-    findSubServicesById(id)
+    // findSubServicesById(id)
 
+    const idService = id
+    console.log(idService)
+    // dispatch(getListSubServices(idService))
+    dispatch(getListSubServicesByIDService(idService))
+    setVisibleModal(true)
   }
   const handleLeftModalButton = () =>{
     setVisibleModal(false)
@@ -62,20 +67,16 @@ const services = dataService
   const handleLeftModal2Button = () =>{
     setVisibleModal2(false)
   }
-  const handlePressItemModal = (name) =>{
-    setVisibleModal1(true)
-    setModal1Name(name)
+  const handlePressItemModal = (name,id) =>{
+    navigation.navigate('ServiceForm',{name,id})
+    // setVisibleModal1(true)
+    // setModal1Name(name)
   }
 
   const handleButtonModal1 = ()=>{
     setVisibleModal2(true)
   }
-  const findSubServicesById = (id) => {
-    const service = dataService.find(service => service.id === id);
-    if (service) {
-      setSubService(service.subServices)
-    } 
-  }
+
 
   //SECTION - Bắt đầu
   useEffect(() => {
@@ -91,10 +92,14 @@ const services = dataService
     getToken()
   }, []);
 
+  
   const dataServices = useSelector((state) => state.services)
   const listServices = dataServices.services
-  console.log(dataServices.services)
-
+  // console.log(dataServices.services)
+  const dataSubService = useSelector((state) => state.services)
+  const listSubService = dataSubService.subServices.subService
+  // console.log(dataSubService.subServices.name)
+// console.log('List SubService : ', listSubService)
   return (
     <View style={styles.container}>
       <StatusBar/>
@@ -114,15 +119,15 @@ const services = dataService
       {
         visibleModal &&(
           <View style={styles.modal}>
-            <Header nameLeftIcon={'chevron-left'} handleLeftButton={handleLeftModalButton} namePage={'Chăm sóc - Điều dưỡng'} /> 
+            <Header nameLeftIcon={'chevron-left'} handleLeftButton={handleLeftModalButton} namePage={dataSubService.subServices.name} /> 
             <View style={{flex:1,width:"100%"}}>
               <FlatList
-                  data={subService}
+                  data={listSubService}
                   renderItem={({ item }) => (
-                      <HomeSelectButton handlePress={()=>handlePressItemModal(item.name)}  nameLeftIcon={'chevron-left'}  title={item.name} />
+                      <HomeSelectButton handlePress={()=>handlePressItemModal(item.name,item._id)}  nameLeftIcon={'chevron-left'}  title={item.name} />
                       
                       )}
-                  keyExtractor={(item) => item.id} 
+                  keyExtractor={(item) => item._id} 
                   />
             </View>
           </View>

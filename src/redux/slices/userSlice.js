@@ -24,14 +24,7 @@ const initialState = {
   RelativeUserDetails:{}
 };
 
-const storeData = async (value) => {
-  try {
-    const jsonValue = JSON.stringify(value);
-    await AsyncStorage.setItem('userStoreData', jsonValue);
-  } catch (e) {
-    // saving error
-  }
-};
+
 const storeToken = async (value) => {
   try {
     const jsonValue = JSON.stringify(value);
@@ -41,41 +34,19 @@ const storeToken = async (value) => {
     console.log('Lỗi store giá trị token : ', e)
   }
 };
-const updateUserAsyncStorage = async (value) => {
+const storeLoginState = async (value) => {
   try {
-    await AsyncStorage.removeItem('userStoreData')
-    const jsonValue = JSON.stringify(value);
-    await AsyncStorage.setItem('userStoreData', jsonValue);
-  } catch (e) {
-    // saving error
+    const jsonValue = JSON.stringify(value)
+    await AsyncStorage.removeItem('stateLogin')
+    await AsyncStorage.setItem('stateLogin', jsonValue)
+    // console.log('jsonValue : ', jsonValue)
   }
-};
+  catch (e) {
+    console.log('Lỗi gán trạng thái đăng nhập ', e)
+  }
+}
 
-//hàm persistent session
 
-
-// export const persistentSession = createAsyncThunk(
-//   "auth/login",
-//   async (values, thunkAPI) => {
-//     try {
-//       const {data:result} = await http.post("/users/login", values, {
-//         signal: thunkAPI.signal
-//      });
-//     //   console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
-//         return {
-//             user: result.data.user ,
-//             token: result.data.accessToken,
-//             persistentSessionSuccess : result.success
-//         };
-//     } catch (error) {
-//       // console.log(
-//       //   "🚀 ~ file: user.slice.ts:47 ~ error:",
-//       //   error.response.data.error
-//       // );
-//       return thunkAPI.rejectWithValue(error.response.data.error);
-//     }
-//   }
-// );
 
 
 //hàm login
@@ -217,7 +188,6 @@ export const update = createAsyncThunk(
 
      });
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
-      storeData(result.data)
       console.log("đã update user : ",result.data)
         return {
             user: result.data,
@@ -246,7 +216,6 @@ export const updatePassword = createAsyncThunk(
         }
      });
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
-      console.log("đã update user")
         return {
             user: result.data,
         };
@@ -269,7 +238,29 @@ export const resetPassword = createAsyncThunk(
         signal: thunkAPI.signal,
      });
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
-      console.log("đã update user")
+
+        return {
+          result
+        };
+    } catch (error) {
+      // console.log(
+      //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+      //   error.response.data.error
+      // );
+      return thunkAPI.rejectWithValue(error.response.data.error);
+    }
+  }
+);
+//hàm upload file
+export const uploadPDF = createAsyncThunk(
+  "auth/resetPassword",
+  async (values, thunkAPI) => {
+    try {
+      const {data:result} = await http.post("/upload/pdf", values, {
+        signal: thunkAPI.signal,
+     });
+      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+
         return {
           result
         };
@@ -283,9 +274,7 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
-
-
-
+//NOTE - Đăng xuất
 
 
 
@@ -321,9 +310,7 @@ export const userSlice = createSlice({
         state.user.accessToken = action.payload.token
         state.loading = false
         state.success = true
-
-        
-        // if(action.payload.success === true) 
+        storeLoginState(JSON.stringify(true))
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -337,6 +324,7 @@ export const userSlice = createSlice({
         state.success = false;
       })
       .addCase(getInfoUser.fulfilled, (state, action) => {
+        console.log('get user : ' ,action.payload.user)
         state.user = action.payload.user
         state.loading = false
       })
@@ -414,7 +402,7 @@ export const userSlice = createSlice({
       .addCase(updatePassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        // console.log(action.payload);
+        console.log(action.payload);
       })
       //NOTE - addCase ResetPassword
       .addCase(resetPassword.pending, (state) => {
@@ -428,9 +416,9 @@ export const userSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        // console.log(action.payload);
       })
       
+
   },
 });
 

@@ -150,27 +150,42 @@ const Login = ({navigation}) => {
       console.log(error[0].message)
       setWrongPassword(true)
     }
+    if(userDataRedux.success == true){
+      handleLoginSuccess()
+    }
     
   }
-  
-  const storePassword = async (value) => {
-    try {
-      const jsonValue = JSON.stringify(value);
-      await AsyncStorage.setItem('userPassword', jsonValue);
-    } catch (e) {
-      // saving error
-    }
-  };
-  
-    useEffect(() => {
-      if(userDataRedux.success === true){
-        // console.log('token nè : ',userDataRedux.user.accessToken)
+  const [checkData,setCheckData] = useState('')
+  const [stateLogin, setStateLogin] = useState('')
+  // console.log('user token : ', checkData)
+  useEffect(() => {
+    const checkData = async () => {
+      const token = await AsyncStorage.getItem("userToken")
+      const stateLoginTemp = await AsyncStorage.getItem("stateLogin")
+      let stateLogin = JSON.parse(stateLoginTemp); 
+      console.log('state login : ', stateLogin)
+      setStateLogin(stateLogin)
 
-        handleLoginSuccess() 
-        storePassword(user.password)
-        storeData(userDataRedux)
+
+      if(stateLogin == ''){
+        console.log('Bạn cần đăng nhập')
+        navigation.navigate('Login')
+      }
+      if(stateLogin == false){
+        console.log('Bạn cần đăng nhập')
+        navigation.navigate('Login')
+      }
     }
-    }, [userDataRedux.success])
+    checkData()
+  }, []);
+  
+  useEffect(() => {
+    if(userDataRedux.success == true){
+      dispatch(getInfoUser(userDataRedux.user.accessToken))
+      navigation.navigate('ChooseRole');
+    }
+  }, [userDataRedux.success]);
+
   
     
 //NOTE -  xử lý khi login thành công

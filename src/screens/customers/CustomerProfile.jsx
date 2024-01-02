@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState,useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -11,9 +11,12 @@ import {
   Dimensions,
   Image,
   StatusBar,
-  Button,
+  Button
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useSelector,useDispatch } from 'react-redux';
+import { getListServices, getListSubServices, getListSubServicesByIDService } from "../../redux/slices/servicesSlice";
+import { getInfoUser, update, updatePassword, uploadPDF } from "../../redux/slices/userSlice";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import Foundation from "react-native-vector-icons/Foundation";
@@ -22,81 +25,79 @@ import Entypo from "react-native-vector-icons/Entypo";
 import Feather from "react-native-vector-icons/Feather";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Input from "../../components/textInput/TextInput";
-import JobsReceived from "../nurses/JobsReceived";
-import Header from "../../components/header/Header";
 import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
+import dataService from "../../seeders/dataService";
 import themes from "../../../themes";
-import { getInfoUser, update, updatePassword, uploadPDF } from "../../redux/slices/userSlice";
-import InfoService from "../../components/selectionbar/InfoService";
-import * as ImagePicker from "expo-image-picker";
-import placeholder from "../../assets/Icon/user.png";
-import { useDispatch, useSelector } from "react-redux";
+import Header from "../../components/header/Header";
+import Input from "../../components/textInput/TextInput";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 import * as DocumentPicker from "expo-document-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+const CustomerProfile = ({navigation}) => {
+      //dispatch
+    const dispatch = useDispatch();
 
-// import DatePicker from 'react-native-date-picker'
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
+    //userData
+     //redux
+    const data = useSelector((state) => state.user.user);
+    const [userDataRedux, setUserDataRedux] = useState(data)
+    const error = useSelector((state) => state.user.error)
+    const [tempAvatar, setTempAvatar] = useState("");
+    const [tempGender, setTempGender] = useState(userDataRedux.gender);
 
-const CustomerSettings = ({ navigation }) => {
-  //dispatch
-  const dispatch = useDispatch();
+    const [modalPickGender, setModalPickGender] = useState(false)
+    const [tokenUser, setTokenUser] = useState({});
 
-  //useState Textnput
-  const [oldPasswordIsTrue, setOldPasswordIsTrue] = useState(true)
-  const [newPasswordIsTrue, setNewPasswordIsTrue] = useState(true)
-  const [confirmPasswordIsTrue, setConfirmPasswordIsTrue] = useState(true)
-  //time
-  const now = new Date();
-  const time = now.toLocaleTimeString();
+    const [dataUpdatePassword, setDataUpdatePassword] = useState({
+        token: tokenUser,
+        oldPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
 
-  //NOTE - Data user từ async
-  const [user, setUser] = useState({});
-  // useEffect(() => {
-  //   console.log(user);
-  // }, []);
+      const handleGender = () =>{
+        if(tempGender === 'Male'){
+          setTempGender('Female')
+          setModalPickGender(false)
+        }
+        else{
+          setTempGender('Male')
+          setModalPickGender(false)
+        }
+      }
+    //NOTE - Hàm xử lý update
+    const handleUpdateUser = async () => {
+        if(tempGender === 'Nam'){
+          setUserDataRedux((prevUserDataRedux) => ({
+            ...prevUserDataRedux,
+            gender: 'Male',
+          }))
+        }
+        else{
+          setUserDataRedux((prevUserDataRedux) => ({
+            ...prevUserDataRedux,
+            gender: 'Female',
+          }))
+        }
+        let dataUpdateUser = {
+          token: tokenUser,
+          fullname: userDataRedux.fullname,
+          email: userDataRedux.email,
+          gender: userDataRedux.gender,
+          avatar: userDataRedux.avatar,
+          birthOfDate: userDataRedux.birthOfDate,
+          address: userDataRedux.address,
+        };
+    
+        console.log("Thông tin update : ", dataUpdateUser);
+        dispatch(update(dataUpdateUser))
+        setTempAvatar('')
+        dispatch(getInfoUser(tokenUser))
+      };
 
-  const [tokenUser, setTokenUser] = useState({});
-  const [userPassword, setUserPassword] = useState("");
-  const [dataUpdatePassword, setDataUpdatePassword] = useState({
-    token: tokenUser,
-    oldPassword: "",
-    newPassword: "",
-    confirmNewPassword: "",
-  });
-  
-
-  //NOTE - update password
-  const handleOldPassword = (text) => {
-    setDataUpdatePassword((prevDataUpdatePassword) => ({
-      ...prevDataUpdatePassword,
-      oldPassword: text,
-    }));
-  };
-  const handleNewPassword = (text) => {
-    setDataUpdatePassword((prevDataUpdatePassword) => ({
-      ...prevDataUpdatePassword,
-      newPassword: text,
-    }));
-  };
-  const confirmNewPassword = (text) => {
-    setDataUpdatePassword((prevDataUpdatePassword) => ({
-      ...prevDataUpdatePassword,
-      confirmNewPassword: text,
-    }));
-  };
-
-  const handleUpdatePassword = async () => {
-    console.log("data update password : ", dataUpdatePassword);
-    dispatch(updatePassword(dataUpdatePassword));
-    // setBeingSelected(1000);
-  };
-
-  //SECTION - Bắt đầu vào trang
+       //SECTION - Bắt đầu vào trang
   useEffect(() => {
     console.log("bắt đầu tìm kiếm data")
     const getToken = async () => {
@@ -113,72 +114,14 @@ const CustomerSettings = ({ navigation }) => {
     };
 
     getToken();
- 
-
+    dispatch(getInfoUser(tokenUser))
   }, []);
-
   useEffect(() => {
-    dispatch(getInfoUser(tokenUser))
+    
   }, []);
 
-  //redux
-  const data = useSelector((state) => state.user.user);
-  const [userDataRedux, setUserDataRedux] = useState(data)
-  const [avatar, setAvatar] = useState(null);
 
- const error = useSelector((state) => state.user.error)
-// console.log('Đây là error : ' ,error[0].message)
-
-//NOTE - Thay đổi message
-useEffect(() => {
-  if(error[0]?.message === 'Password does not match!'){
-    setOldPasswordIsTrue(false)
-  }
-  if(error[0]?.message === 'Confirm password does not match!'){
-    setConfirmPasswordIsTrue(false)
-  }
-}, [error[0]?.message]);
-
-  //NOTE - sửa thông tin
-
-  //Chỉnh sửa thông tin
-  const handleFullName = (text) => {
-    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, fullname: text }));
-  };
-  const handleChangePhoneNumber = (text) => {
-    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, phoneNumber: text }));
-  };
-  const handleChangeEmail = (text) => {
-    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, email: text }));
-  };
-  const handleChangeAddress = (text) => {
-    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, address: text }));
-  };
-
-  const [tempAvatar, setTempAvatar] = useState("");
-  const handleUpdateUser = async () => {
-    let dataUpdateUser = {
-      token: tokenUser,
-      fullname: userDataRedux.fullname,
-      email: userDataRedux.email,
-      gender: "Male",
-      avatar: userDataRedux.avatar,
-      birthOfDate: userDataRedux.birthOfDate,
-      address: userDataRedux.address,
-    };
-
-    console.log("Thông tin update : ", dataUpdateUser);
-    dispatch(update(dataUpdateUser))
-  
-   setTempAvatar('')
-    setBeingSelected(1000);
-    dispatch(getInfoUser(tokenUser))
-  };
-  useEffect(() => {
-    dispatch(getInfoUser(tokenUser))
-  }, []);
-
-  //NOTE - Sửa ảnh
+        //NOTE - Sửa ảnh
 
   const uploadImage = async () => {
     try {
@@ -286,45 +229,21 @@ useEffect(() => {
     setUser((prevUser) => ({ ...prevUser, dateOfBirth: currentDate }));
   };
   
-
-  const openDrawer = () => {
-    navigation.openDrawer();
-  };
-  const handleLeftButton = () => {
-    setBeingSelected(6);
-  };
-
-
-  const [beingSelected, setBeingSelected] = useState(6);
-  const [language, setLanguage] = useState("vi");
-  const listSettings = [
-    { key: 1, name: "changePassword", label: "Đổi mật khẩu" },
-    { key: 2, name: "language", label: "Ngôn ngữ" },
-    { key: 3, name: "rules", label: "Điều khoản sử dụng" },
-    { key: 4, name: "privacyPolicy", label: "Chính sách bảo mật" },
-    { key: 5, name: "exit", label: "Thoát" },
-  ];
-  // console.log(beingSelected)
-
-  if (beingSelected === 0) {
-    return (
-      <View style={[styles.container, { paddingTop: 30 }]}>
+  //NOTE - Hàm quay trở lại
+  const handleLeftButton = () =>{
+    navigation.goBack()
+  }
+  return (
+    //SECTION - Container
+    <View style={styles.container}>
+        <StatusBar/>
+        <Header handleLeftButton={handleLeftButton} namePage={'Chi tiết tài khoản'} nameLeftIcon={'chevron-left'}/>
         <KeyboardAwareScrollView
           enableOnAndroid={true}
           enableAutomaticScroll={true}
           style={{ flex: 1, width: "100%" }}
         >
-          <View style={{ width: "100%", alignItems: "center" }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "600",
-                color: themes.green,
-                marginBottom: 20,
-              }}
-            >
-              Thông tin người dùng
-            </Text>
+          <View style={{ width: "100%", alignItems: "center",height:30 }}>
           </View>
 
           <View
@@ -350,8 +269,7 @@ useEffect(() => {
             >
 
               {/* //NOTE - ảnh đại diện */}
-              <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" 
-              source={tempAvatar !== '' ? {uri : tempAvatar} : {uri: userDataRedux?.avatar}   } />
+              <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={tempAvatar === '' ? {uri: userDataRedux.avatar} :  {uri : tempAvatar}} />
 
               <TouchableOpacity
                 onPress={uploadImage}
@@ -407,6 +325,17 @@ useEffect(() => {
                 marginTop:10
               }}
             >
+              {/* <TextInput
+                onChangeText={(text) =>
+                  setUserDataRedux((prevUserDataRedux) => ({
+                    ...prevUserDataRedux,
+                    fullname: text,
+                  }))
+                }
+                value={userDataRedux.fullname}
+                style={{ height: "100%", width: "100%" }}
+                placeholder="Họ và tên"
+            ></TextInput> */}
 
             <Input placeholder={'Họ và tên'} value={userDataRedux.fullname} leftIconName={'user'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
@@ -425,25 +354,39 @@ useEffect(() => {
               justifyContent: "space-between",
             }}
           >
-            <View style={{ width: "40%", gap: 4 }}>
+            <View style={{ width: "40%", gap: 4, position:'relative' }}>
               <Text style={[styles.text,{marginBottom:6}]}>Giới tính</Text>
               <TouchableOpacity
+                onPress={()=>setModalPickGender(true)}
                 style={{
                   position: "relative",
                   height: 40,
                   width: "100%",
-                  paddingLeft: "10%",
-                  paddingRight: "4%",
+                  // paddingLeft: "10%",
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "flex-start",
                   borderRadius:10,
                   backgroundColor:"white",
+                  position:'relative'
                 }}
               >
-                <FontAwesome name="intersex" size={16} color={themes.gray}/>
-                <Text style={{marginLeft:10,fontSize:14,fontWeight:'500'}}>Nữ</Text>
+                <FontAwesome style={{marginLeft:'10%'}} name="intersex" size={16} color={themes.green}/>
+                <Text style={{marginLeft:10,fontSize:14,fontWeight:'500'}}>{tempGender === 'Male' ? 'Nam' : 'Nữ'}</Text>
+
+                
               </TouchableOpacity>
+              {
+                modalPickGender === true && 
+                  (
+                    <TouchableOpacity onPress={handleGender} style={{height:40,width:'100%',flexDirection: "row",
+                      alignItems: "center",position:'absolute',backgroundColor:"white",borderRadius:10,top:'104%',zIndex:2,backgroundColor:"white",}}>
+                      <FontAwesome style={{marginLeft:'10%'}} name="intersex" size={16} color={themes.gray}/>
+                      <Text style={{marginLeft:10,fontSize:14,fontWeight:'500'}}>{tempGender === 'Male' ? 'Nữ' : 'Nam'}</Text>
+                  </TouchableOpacity>
+                  )
+              }
+              
             </View>
             <View style={{ width: "50%", gap: 4 }}>
               <Text style={[styles.text,{marginBottom:6}]}>Ngày sinh</Text>
@@ -478,7 +421,7 @@ useEffect(() => {
               marginTop: 10,
             }}
           >
-            <Text style={styles.text}>Số điện thoại</Text>
+            <Text style={[styles.text]}>Số điện thoại</Text>
             <View
               style={{
                 height: 50,
@@ -487,7 +430,12 @@ useEffect(() => {
 
               }}
             >
-
+              {/* <TextInput
+                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, phoneNumber: text }))}
+                value={userDataRedux.phoneNumber}
+                style={{ height: "100%", width: "100%" }}
+                placeholder="Số điện thoại"
+              ></TextInput> */}
               <Input placeholder={'Số điện thoại'} value={userDataRedux.phoneNumber} leftIconName={'phone'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     phoneNumber: text,
@@ -513,7 +461,12 @@ useEffect(() => {
 
               }}
             >
-
+              {/* <TextInput
+                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, email: text }))}
+                value={userDataRedux.email}
+                style={{ height: "100%", width: "100%" }}
+                placeholder="Email"
+              ></TextInput> */}
               <Input placeholder={'Email'} value={userDataRedux.email} leftIconName={'at-sign'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     email: text,
@@ -539,6 +492,13 @@ useEffect(() => {
                 marginTop:10
               }}
             >
+              {/* <TextInput
+                multiline
+                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, address: text }))}
+                value={userDataRedux.address}
+                style={{ width: "100%" }}
+                placeholder="Địa chỉ"
+              ></TextInput> */}
               <Input placeholder={'Địa chỉ'} value={userDataRedux.address} leftIconName={'navigation'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     address: text,
@@ -554,13 +514,14 @@ useEffect(() => {
               marginTop: 30,
             }}
           >
-            <Text style={styles.text}>Tải lên hồ sơ cá nhân</Text>
+            <Text style={[styles.text,{marginBottom:10}]}>Tải lên hồ sơ cá nhân</Text>
             <View
               style={{
                 height: 60,
                 width: "100%",
                 paddingLeft: "1%",
                 paddingRight: "5%",
+                borderRadius:10
               }}
             >
               <TouchableOpacity onPress={pickPDFFile}>
@@ -569,6 +530,7 @@ useEffect(() => {
                     height: 60,
                     width: 60,
                     backgroundColor: themes.gray,
+                    borderRadius:10
                   }}
                   resizeMode="contain"
                   source={require("../../assets/Icon/upload.png")}
@@ -619,191 +581,21 @@ useEffect(() => {
          </View>)
       }
         </KeyboardAwareScrollView>
-      </View>
-    );
-  }
-  if (beingSelected === 2) {
-    return (
-      <View style={styles.container}>
-        <Header
-          handleLeftButton={() => handleLeftButton()}
-          nameLeftIcon={"chevron-left"}
-          namePage={listSettings[beingSelected].label}
-        />
-        <View
-          style={{
-            flex: 1,
-            width: "100%",
-            paddingLeft: "5%",
-            paddingRight: "5%",
-            marginTop: 40,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => setLanguage("vi")}
-            style={{
-              width: "100%",
-              height: 50,
-              borderBottomWidth: 1,
-              borderBottomColor: themes.green,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 15, fontWeight: "500" }}>Tiếng Việt</Text>
-            <Ionicons
-              name={language === "vi" ? "radio-button-on" : "radio-button-off"}
-              size={20}
-              color={themes.green}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setLanguage("en")}
-            style={{
-              width: "100%",
-              height: 50,
-              borderBottomWidth: 1,
-              borderBottomColor: themes.green,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 15, fontWeight: "500" }}>English</Text>
-            <Ionicons
-              name={language === "en" ? "radio-button-on" : "radio-button-off"}
-              size={20}
-              color={themes.green}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-  if (beingSelected === 3) {
-    return (
-      <View style={styles.container}>
-        <Header
-          handleLeftButton={() => handleLeftButton()}
-          nameLeftIcon={"chevron-left"}
-          namePage={listSettings[beingSelected].label}
-        />
-      </View>
-    );
-  }
-  if (beingSelected === 4) {
-    return (
-      <View style={styles.container}>
-        <Header
-          handleLeftButton={() => handleLeftButton()}
-          nameLeftIcon={"chevron-left"}
-          namePage={listSettings[beingSelected].label}
-        />
-      </View>
-    );
-  }
-  if (beingSelected === 5) {
-    async function removeUserData() {
-      try {
-        setBeingSelected(100);
-        await AsyncStorage.removeItem("userToken");
-        await AsyncStorage.removeItem('stateLogin')
-        const temp = false
-        await AsyncStorage.setItem('stateLogin', JSON.stringify(false));
-        alert("Đã đăng xuất");
-        navigation.navigate("Login");
-      } catch (e) {}
-    }
-    removeUserData();
-  } else {
-    return (
-      <View style={styles.container}>
-        <Header
-          namePage={"Cài đặt"}
-          nameLeftIcon={"navicon"}
-          handleLeftButton={openDrawer}
-        />
-        <View
-          style={{
-            flex: 1,
-            width: "100%",
-            paddingLeft: "5%",
-            paddingRight: "5%",
-            paddingTop: "5%",
-          }}
-        >
-        <TouchableOpacity
-                onPress={() => navigation.navigate('CustomerProfile')}
-                style={{
-                  height: 60,
-                  width: "100%",
-                  justifyContent: "space-between",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  borderBottomWidth: 1,
-                  borderBottomColor: themes.green,
-                }}
-              >
-                <Text style={{ fontWeight: "500", fontSize: 15 }}>
-                  Chi tiết tài khoản
-                </Text>
-                <AntDesign name={"right"} />
-              </TouchableOpacity>
-          <FlatList
-            data={listSettings}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => setBeingSelected(item.key)}
-                style={{
-                  height: 60,
-                  width: "100%",
-                  justifyContent: "space-between",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  borderBottomWidth: 1,
-                  borderBottomColor: themes.green,
-                }}
-              >
-                <Text style={{ fontWeight: "500", fontSize: 15 }}>
-                  {item.label}
-                </Text>
-                <AntDesign name={"right"} />
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item.key}
-          ></FlatList>
-        </View>
-        {
-        userDataRedux.loading && 
-        (<View style={styles.modal}>
-          <Loading/>
-         </View>)
-      }
-      </View>
-    );
-  }
-};
+    </View>
+  )
+}
 
-export default CustomerSettings;
+export default CustomerProfile
 
 const styles = StyleSheet.create({
-  container: {
-    height: windowHeight,
-    width: windowWidth,
-    position: 'relative',
-    // backgroundColor:themes.gray
-  },
-  text: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: themes.green,
-  },
-  modal:{
-    position:"absolute",
-    height:windowHeight*1.2,
-    width:"100%",
-    alignItems: "center",
-    
-  },
-});
+    container:{
+        flex:1,
+        width:"100%",
+        
+    },
+    text: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: themes.green,
+    },
+})

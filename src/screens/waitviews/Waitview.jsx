@@ -19,34 +19,39 @@ const windowHeight = Dimensions.get('window').height;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Waitview = ({navigation}) => {
+    
 
     const [count, setCount] = useState(6);
     
 
+
+
   //redux
   const dispatch = useDispatch()
 
-  
 
-// kiểm tra data
-  const [values, setValues] = useState({email:'',password:''})
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const value = await AsyncStorage.getItem('userStoreData');
-        if (value !== null) {
-          const data = JSON.parse(value);
-          navigation.navigate('ChooseRole')
-        }
-        else{
+        const stateLogin = await AsyncStorage.getItem('stateLogin')
+        console.log('state Login nè : ', stateLogin)
+
+        
+        if (stateLogin == null) {
           navigation.navigate('Login')
+        }
+        if(stateLogin !== null ){
+          navigation.navigate('ChooseRole')
+          const value = await AsyncStorage.getItem('userToken');
+          console.log('Value token : ', value)
         }
       } catch (error) {
         console.log('Lỗi khi đọc dữ liệu:', error);
-        navigation.navigate('Login')
+        // navigation.navigate('Login')
       }
     };
+
 
     getData();
   }, []);

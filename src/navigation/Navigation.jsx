@@ -41,11 +41,16 @@ import CustomerStatistic from '../screens/customers/CustomerStatistic';
 import RelativeInfomation from '../screens/customers/RelativeInfomation';
 import CustomerChooseSerVice from '../screens/customers/CustomerChooseSerVice';
 import RegisterAsANurse from '../screens/customers/RegisterAsANurse';
+import CustomerProfile from '../screens/customers/CustomerProfile';
+import ServiceForm from '../screens/customers/serviceBookingProcess/ServiceForm';
+import ServiceConfirm from '../screens/customers/serviceBookingProcess/ServiceConfirm';
 //import redux
 import { store } from '../redux/Store';
 import themes from '../../themes';
 import { Provider } from 'react-redux';
 
+// import test 
+import Test from '../screens/Test';
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -262,6 +267,10 @@ const Navigation = () => {
             <Stack.Screen options={{headerShown:false}} name="NursingDrawerNavigation" component={NursingDrawerNavigation} />
             <Stack.Screen options={{headerShown:false}} name="CustomerDrawerNavigation" component={CustomerDrawerNavigation} />
             <Stack.Screen options={{headerShown:false}} name='CustomerChooseSerVice' component={CustomerChooseSerVice}/>
+            <Stack.Screen options={{headerShown:false}} name='CustomerProfile' component={CustomerProfile}/>
+            <Stack.Screen options={{headerShown:false}} name='ServiceForm' component={ServiceForm}/>
+            <Stack.Screen options={{headerShown:false}} name='ServiceConfirm' component={ServiceConfirm}/>
+            {/* <Stack.Screen options={{headerShown:false}} name='Test' component={Test}/> */}
        
         </Stack.Navigator>
     </NavigationContainer> 

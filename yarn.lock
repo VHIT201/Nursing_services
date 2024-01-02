@@ -5935,6 +5935,11 @@ image-size@^1.0.0:
   dependencies:
     queue "6.0.2"
 
+immer@^6.0.3:
+  version "6.0.9"
+  resolved "https://registry.npmjs.org/immer/-/immer-6.0.9.tgz"
+  integrity sha512-SyCYnAuiRf67Lvk0VkwFvwtDoEiCMjeamnHvRfnVDyc7re1/rQrNxuL+jJ7lA3WvdC4uznrvbmm+clJ9+XXatg==
+
 immer@^9.0.21:
   version "9.0.21"
   resolved "https://registry.npmjs.org/immer/-/immer-9.0.21.tgz"
@@ -6793,6 +6798,16 @@ lodash.debounce@^4.0.8:
   version "4.0.8"
   resolved "https://registry.npmjs.org/lodash.debounce/-/lodash.debounce-4.0.8.tgz"
   integrity sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==
+
+lodash.find@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.npmjs.org/lodash.find/-/lodash.find-4.6.0.tgz"
+  integrity sha512-yaRZoAV3Xq28F1iafWN1+a0rflOej93l1DQUejs3SZ41h2O9UJBoS9aueGjPDgAl4B6tPC0NuuchLKaDQQ3Isg==
+
+lodash.findindex@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.npmjs.org/lodash.findindex/-/lodash.findindex-4.6.0.tgz"
+  integrity sha512-9er6Ccz6sEST3bHFtUrCFWk14nE8cdL/RoW1RRDV1BxqN3qsmsT56L14jhfctAqhVPVcdJw4MRxEaVoAK+JVvw==
 
 lodash.isequal@^4.5.0:
   version "4.5.0"
@@ -9119,6 +9134,15 @@ react-native-maps@>=1.0.0:
   integrity sha512-KfVZ03L42+a22Fkcl2uDe5d+73BweTlcRUzm2G+aQUJ7fHrBxj7CuXWtKMSNpVDiO3YDCWcshiiyjSXxkd/qOw==
   dependencies:
     "@types/geojson" "^7946.0.10"
+
+react-native-number-please@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.npmjs.org/react-native-number-please/-/react-native-number-please-1.0.5.tgz"
+  integrity sha512-XkbSv1o3zFyadnpU9KmcW18nvM/kPgr2cirRHFEZsvcEw9rjWTe57HFD/7NeNSXvTYOd7srtuh0Cs4f9hkmWUw==
+  dependencies:
+    immer "^6.0.3"
+    lodash.find "^4.6.0"
+    lodash.findindex "^4.6.0"
 
 react-native-radio-buttons-group@^3.0.5:
   version "3.0.5"

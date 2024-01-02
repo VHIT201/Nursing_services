@@ -143,14 +143,14 @@ export const editRelativeUser = createAsyncThunk(
     async (values, thunkAPI) => {
       try {
         // console.log(values._id)
-        // console.log('data sửa :', values)
+        console.log('data sửa :', values)
 
-        const {data:result} = await http.patch(`/relatives/${values._id}/${values}`, {
-        // const {data:result} = await http.patch(`/relatives/${values._id}/${values}`, {
+        const {data:result} = await http.patch(`/relatives/${values._id}`,values ,{
           signal: thunkAPI.signal,
           headers: {
             Authorization : "Bearer " + values._id,
-          }
+          },
+
        });
         console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
   

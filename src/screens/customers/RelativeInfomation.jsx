@@ -35,14 +35,16 @@ import { createRelativeUser, } from "../../redux/slices/relativeSlice";
 import { getRelativeUser,editRelativeUser,getRelativeUserData,deleteRelativeUser } from "../../redux/slices/relativeSlice";
 import RelativeItem from "../../components/ListRelative/ItemRelative";
 import Loading from "../../components/Progress/Loading";
+import Input from "../../components/textInput/TextInput";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const RelativeInfomation = ({navigation}) => {
       //redux
   const dispatch = useDispatch()
   const [modalVisible,setModalVisible] = useState(false)
+  const [modalPickGender, setModalPickGender] = useState(false)
 
-
+  
     //data user redux
     const userDataRedux = useSelector((state) => state.user)
    
@@ -50,11 +52,13 @@ const RelativeInfomation = ({navigation}) => {
     const {dataRelativeUser,RelativeUserDetails} = useSelector((state) => state.relative) //Danh sách / Chi tiết 1 người
     // console.log(RelativeUserDetails)
     const userRelativeRedux = useSelector((state) => state.relative)
-    
+    // console.log(userRelativeRedux)
 
 const [tokenUser, setTokenUser] = useState({})
 //List người thân
 const [relatives, setRelatives] = useState([])
+const [tempGender, setTempGender] = useState('');
+console.log(tempGender)
 //1 người thân
 const [relativesData, setRelativesData] = useState({})
 const [tempData, setTempData] = useState(null)
@@ -170,31 +174,6 @@ useState({  token: '',
 }
 
 
-
-// hàm xử lý thêm người thân
-const handleNameRelative  = (text) => {
-  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, fullname : text }));
-}
-const handlePhoneNumberRelative = (text) => {
-  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, phoneNumber : text }));
-}
-const handleGenderRelative = (text) => {
-  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, gender : text }));
-}
-const handleEmailRelative = (text) => {
-  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, email : text }));
-}
-const handleAddressRelative = (text) => {
-  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, address : text }));
-}
-const handleBloodGroupRelative = (text) => {
-  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, bloodGroup : text }));
-}
-const handleMedicalHistoryRelative = (text) => {
-  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, medicalHistory : text }));
-}
-
-
   // Ngày sinh nhật
   const [date, setDate] = useState(new Date())
   const [datePicker, setDatePicker] = useState(new Date());
@@ -255,7 +234,16 @@ const handleMedicalHistoryRelative = (text) => {
     getRelativeUser({token : tokenUser})
   }, []);
 
-  
+  const handleGender = () =>{
+    if(tempGender === 'Male'){
+      setRelativesData(prevRelativesData => ({ ...prevRelativesData, gender : 'Female' }))
+      setModalPickGender(false)
+    }
+    else{
+      setRelativesData(prevRelativesData => ({ ...prevRelativesData, gender : 'Male' }))
+      setModalPickGender(false)
+    }
+  }
 
 
   return (
@@ -279,7 +267,6 @@ const handleMedicalHistoryRelative = (text) => {
                   />
 ))
               }
-        
       </View>
       
       {
@@ -297,8 +284,11 @@ const handleMedicalHistoryRelative = (text) => {
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Họ & tên</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={dataCreateRelative.fullname} onChangeText={handleNameRelative} style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                <Input 
+                  value={dataCreateRelative.fullname} 
+                  onChangeText={(text)=> setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, fullname : text }))} 
+                  placeholder="Họ và tên"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'user'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10,flexDirection:"row",justifyContent:"space-between"}}>
@@ -317,36 +307,52 @@ const handleMedicalHistoryRelative = (text) => {
                     <AntDesign name={'calendar'} size={20} color={themes.green}/>
                   </TouchableOpacity>
                 </View>
+                
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Số điện thoại</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={dataCreateRelative.phoneNumber} onChangeText={handlePhoneNumberRelative} style={{height:'100%',width:"100%"}} placeholder="Số điện thoại"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                <Input  
+                  value={dataCreateRelative.phoneNumber} 
+                  onChangeText={(text) =>  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, phoneNumber : text }))} 
+                  placeholder="Số điện thoại"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'phone'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Email</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={dataCreateRelative.email} onChangeText={handleEmailRelative} style={{height:'100%',width:"100%"}} placeholder="Email"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                <Input  
+                  value={dataCreateRelative.email} 
+                  onChangeText={(text) =>  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, email : text }))} 
+                  placeholder="Email"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'mail'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Địa chỉ</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={dataCreateRelative.address} onChangeText={handleAddressRelative} style={{height:'100%',width:"100%"}} placeholder="Địa chỉ"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                <Input  
+                  value={dataCreateRelative.address} 
+                  onChangeText={(text) =>  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, address : text }))} 
+                  placeholder="Địa chỉ"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'map-pin'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Nhóm máu</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={dataCreateRelative.bloodGroup} onChangeText={handleBloodGroupRelative} style={{height:'100%',width:"100%"}} placeholder="Nhóm máu"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                <Input  
+                  value={dataCreateRelative.bloodGroup} 
+                  onChangeText={(text) =>  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, bloodGroup : text }))} 
+                  placeholder="Nhóm máu"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'user'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Tiểu sử bệnh</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={dataCreateRelative.medicalHistory} onChangeText={handleMedicalHistoryRelative} style={{height:'100%',width:"100%"}} placeholder="Tiểu sử bệnh"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                <Input  
+                  value={dataCreateRelative.medicalHistory} 
+                  onChangeText={(text) =>  setDataCreateRelative(prevDataCreateRelative => ({ ...prevDataCreateRelative, medicalHistory : text }))} 
+                  placeholder="Tiểu sử bệnh"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'list'}/>
               </View>
             </View>
             
@@ -371,7 +377,7 @@ const handleMedicalHistoryRelative = (text) => {
 
         </View>)
       }
-      {/* //SECTION - show thông tin người thân và sửa */}
+      {/* //NOTE - show thông tin người thân và sửa */}
       {
         modalRelativesData && 
         (<View style={styles.modal}>
@@ -387,57 +393,99 @@ const handleMedicalHistoryRelative = (text) => {
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Họ & tên</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.fullname} 
-                  onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, fullname : text }))} style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                {/* <TextInput value={relativesData.fullname} 
+                  onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, fullname : text }))} style={{height:'100%',width:"100%"}} 
+                  placeholder="Họ và tên"></TextInput> */}
+                <Input  value={relativesData.fullname} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, fullname : text }))} 
+                placeholder="Họ và tên"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'user'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10,flexDirection:"row",justifyContent:"space-between"}}>
-            <View style={{width:"40%",gap:4}}>
-            <Text style={styles.text}>Giới tính</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'4%',paddingRight:"4%",flexDirection:"row",alignItems:"center",justifyContent:"space-between"}}>
-                <Text>Nữ</Text>
-                <Ionicons name='person' size={16}/>
-              </View>
+            <View style={{ width: "40%", gap: 4, position:'relative' }}>
+              <Text style={[styles.text,{marginBottom:6}]}>Giới tính</Text>
+              <TouchableOpacity
+                onPress={()=>setModalPickGender(!modalPickGender)}
+                style={{
+                  position: "relative",
+                  height: 40,
+                  width: "100%",
+                  // paddingLeft: "10%",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  borderRadius:10,
+                  backgroundColor:"white",
+                  position:'relative'
+                }}
+              >
+                <FontAwesome style={{marginLeft:'10%'}} name="intersex" size={16} color={themes.green}/>
+                <Text style={{marginLeft:10,fontSize:14,fontWeight:'500'}}>{relativesData.gender === 'Male' ? 'Nam' : 'Nữ'}</Text>
+
+                
+              </TouchableOpacity>
+              {
+                modalPickGender === true && 
+                  (
+                    <TouchableOpacity onPress={handleGender} style={{height:40,width:'100%',flexDirection: "row",
+                      alignItems: "center",position:'absolute',backgroundColor:"white",borderRadius:10,top:'104%',zIndex:2,backgroundColor:"white",}}>
+                      <FontAwesome style={{marginLeft:'10%'}} name="intersex" size={16} color={themes.gray}/>
+                      <Text style={{marginLeft:10,fontSize:14,fontWeight:'500'}}>{relativesData.gender === 'Male' ? 'Nữ' : 'Nam'}</Text>
+                  </TouchableOpacity>
+                  )
+              }
+              
             </View>
             <View style={{width:"50%",gap:4}}>
               <Text style={styles.text}>Ngày sinh</Text>
-                <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'4%',paddingRight:"4%",justifyContent:"space-between",alignItems:"center",flexDirection:"row",paddingRight:'10%'}}>
-                  {/* <Text>{tempData && moment(tempData.dateOfBirth).format('YYYY-MM-DD')}</Text> */}
-                  <TouchableOpacity onPress={hanldeModalDatapicker1}>
+                <View style={{height:40,width:"100%",justifyContent:"flex-start",alignItems:"center",flexDirection:"row",paddingRight:'10%'}}>
+                  <TouchableOpacity style={{marginRight:'5%'}} onPress={hanldeModalDatapicker1}>
                     <AntDesign name={'calendar'} size={20} color={themes.green}/>
                   </TouchableOpacity>
+                  <Text>{relativesData && moment(relativesData.dateOfBirth).format('DD-MM-YYYY')}</Text>
+                  
                 </View>
+                
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Số điện thoại</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.phoneNumber} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, phoneNumber : text }))} style={{height:'100%',width:"100%"}} placeholder="Số điện thoại"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                {/* <TextInput value={relativesData.phoneNumber} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, phoneNumber : text }))} style={{height:'100%',width:"100%"}} placeholder="Số điện thoại"></TextInput> */}
+                <Input  value={relativesData.phoneNumber} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, phoneNumber : text }))} 
+                placeholder="Số điện thoại"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'phone'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Email</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.email} onChangeText={(text) =>  setRelativesData(prevRelativesData => ({ ...prevRelativesData, email: text }))} style={{height:'100%',width:"100%"}} placeholder="Email"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                {/* <TextInput value={relativesData.email} onChangeText={(text) =>  setRelativesData(prevRelativesData => ({ ...prevRelativesData, email: text }))} style={{height:'100%',width:"100%"}} placeholder="Email"></TextInput> */}
+                <Input  value={relativesData.email} onChangeText={(text) =>  setRelativesData(prevRelativesData => ({ ...prevRelativesData, email: text }))} 
+                placeholder="Email"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'mail'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Địa chỉ</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.address} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, address : text }))} style={{height:'100%',width:"100%"}} placeholder="Địa chỉ"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                {/* <TextInput value={relativesData.address} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, address : text }))} style={{height:'100%',width:"100%"}} placeholder="Địa chỉ"></TextInput> */}
+                <Input  value={relativesData.address} onChangeText={(text) =>  setRelativesData(prevRelativesData => ({ ...prevRelativesData, address: text }))} 
+                placeholder="Email"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'mail'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Nhóm máu</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.bloodGroup} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, bloodGroup : text }))} style={{height:'100%',width:"100%"}} placeholder="Nhóm máu"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                {/* <TextInput value={relativesData.bloodGroup} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, bloodGroup : text }))} style={{height:'100%',width:"100%"}} placeholder="Nhóm máu"></TextInput> */}
+                <Input  value={relativesData.bloodGroup} onChangeText={(text) =>  setRelativesData(prevRelativesData => ({ ...prevRelativesData, bloodGroup: text }))} 
+                placeholder="Email"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'mail'}/>
               </View>
             </View>
             <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
               <Text style={styles.text}>Tiểu sử bệnh</Text>
-              <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-                <TextInput value={relativesData.medicalHistory} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, medicalHistory : text }))} style={{height:'100%',width:"100%"}} placeholder="Tiểu sử bệnh"></TextInput>
+              <View style={{height:40,width:"100%"}}>
+                {/* <TextInput value={relativesData.medicalHistory} onChangeText={(text)=> setRelativesData(prevRelativesData => ({ ...prevRelativesData, medicalHistory : text }))} style={{height:'100%',width:"100%"}} placeholder="Tiểu sử bệnh"></TextInput> */}
+                <Input  value={relativesData.medicalHistory} onChangeText={(text) =>  setRelativesData(prevRelativesData => ({ ...prevRelativesData, medicalHistory: text }))} 
+                placeholder="Email"  height={'100%'} width={'100%'} isTrue={true} leftIconName={'mail'}/>
               </View>
             </View>
             
