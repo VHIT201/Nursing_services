@@ -70,9 +70,10 @@ const CustomerCalendar = ({navigation}) => {
             (
               <>
               <ScrollView style={{flex:1,width:'100%',paddingLeft:'1%',paddingRight:"1%"}}>
-                <ServiceDescription handlePress={handleModal}/>
-                <ServiceDescription handlePress={handleModal}/>
-                <ServiceDescription handlePress={handleModal}/>
+                <ServiceDescription state={'happening'} handlePress={handleModal}/>
+                <ServiceDescription state={'complete'} handlePress={handleModal}/>
+                <ServiceDescription state={'waiting'} handlePress={handleModal}/>
+                <ServiceDescription state={'cancelled'} handlePress={handleModal}/>
                 
                 
                 <View style={{height:100,width:'100%'}}></View>

@@ -33,13 +33,34 @@ import moment from 'moment';
 import themes from "../../../../themes";
 import NumberPlease from 'react-native-number-please';
 import { getRelativeUser,editRelativeUser,getRelativeUserData,deleteRelativeUser } from '../../../redux/slices/relativeSlice'
+import { getInfoUser } from "../../../redux/slices/userSlice";
 import RelativeItem from "../../../components/ListRelative/ItemRelative";
+import ItemNurse from "../../../components/ListNurse/ItemNurse";
+
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const ServiceForm = ({navigation}) => {
     const dispatch = useDispatch()
     const route = useRoute();
     const { name, id } = route.params;
+
+//SECTION - Hàm lọc thời gian
+  const extractTime = (datetime) => {
+    const date = new Date(datetime);
+
+    const hours = date.getHours();
+    const h = hours % 12 || 12; // Đảm bảo giờ không bao giờ lớn hơn 12
+    const formattedHours = h < 10 ? `0${h}` : h; // Thêm số 0 nếu giờ là một chữ số
+
+    const minutes = date.getMinutes();
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes; // Thêm số 0 nếu phút là một chữ số
+
+    const amOrPm = hours >= 12 ? "PM" : "AM";
+
+    return `${formattedHours}:${formattedMinutes} ${amOrPm}`;
+  };
+
+//!SECTION
 
 //SECTION - Chọn ngày bắt đầu
     const [startDate, setStartDate] = useState(new Date())
@@ -48,6 +69,7 @@ const ServiceForm = ({navigation}) => {
         console.log('Hello world')
         console.log(selectedDate)
         setStartDate(selectedDate)
+        setEndTime(selectedDate)
         setShowStartDate(false)
     }
 //!SECTION
@@ -58,7 +80,9 @@ const ServiceForm = ({navigation}) => {
     const [showStartTime, setShowStartTime] = useState(false)
     const onChangeStartTime = (event, selectedTime ) => {
         console.log('Thời gian bắt đầu : ', selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-        setStartTime(selectedTime);
+        // setStartTime(selectedTime);
+        setStartDate(selectedTime);
+        console.log(startDate)
         setShowStartTime(false);
       }
 //!SECTION
@@ -67,7 +91,9 @@ const ServiceForm = ({navigation}) => {
     const [showEndTime, setShowEndTime] = useState(false)
     const onChangeEndTime = (event, selectedTime ) => {
         console.log('Thời gian kết thúc : ', selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        
         setEndTime(selectedTime);
+        console.log(endTime)
         setShowEndTime(false);
       }
 //!SECTION
@@ -94,6 +120,7 @@ const ServiceForm = ({navigation}) => {
       if (value !== null) {
         const data = JSON.parse(value); 
         // console.log(data)
+        dispatch(getInfoUser(data))
         dispatch(getRelativeUser({token : data}))
       }
     };
@@ -101,13 +128,19 @@ const ServiceForm = ({navigation}) => {
   }, []);
 
   const {dataRelativeUser,RelativeUserDetails} = useSelector((state) => state.relative) //Danh sách / Chi tiết 1 người
+  const data = useSelector((state) => state.user.user);
+  // console.log('userdataredux : ', data)
 //   console.log('list : ', dataRelativeUser)
 
 const [modalListRelatives, setModalListRelatives] = useState(false)
+const [modalListNurse, setModalListNurse] = useState(false)
 //!SECTION
 
 // const [serviceUsers, setServiceUsers] = useState({"__v": 0, "_id": "658a35b63fceb4ac08a55f02", "address": "789 Forest Road, Village", "bloodGroup": "A+", "createdAt": "2023-12-26T02:08:54.116Z", "dateOfBirth": "1988-09-22T00:00:00.000Z", "fullname": "Bob Johnson 4", "gender": "Female", "healthcareAgent": "6586952d8f4a92e3054a3d6e", "medicalHistory": "Asthma, takes regular medication.", "phoneNumber": "0397184209", "updatedAt": "2023-12-26T02:08:54.116Z"})
 const [serviceUsers, setServiceUsers] = useState('')
+const [serviceNurse, setServiceNurse] = useState('')
+
+
 const handlePressItemRelative = (id,data) =>{
   console.log('User : ' ,data)
   setServiceUsers(data)
@@ -134,15 +167,17 @@ const ageCalculator = (dateOfBirth) => {
 
   const handleSercive = () =>{
     let dataService = {
-      startDate : startDate,
-      days : days,
-      startTime : startTime,
-      endTime : endTime,
+      subServiceId: id,
+      nameService : name,
+      startDate : startDate.toISOString(),
+      startTime : startDate.toISOString(),
+      endTime : endTime.toISOString(),
       serviceUsers : serviceUsers,
       note : note,
       cashPayment : cashPayment,
       
     }
+    navigation.navigate('ServiceConfirm', dataService)
   }
 //!SECTION
 
@@ -151,50 +186,99 @@ const ageCalculator = (dateOfBirth) => {
     <View style={styles.container}>
             <Header nameLeftIcon={'chevron-left'} handleLeftButton={()=>navigation.goBack()} namePage={name} /> 
             <ScrollView style={[styles.body]}>
-            <View style={styles.cover}>
-              <View style={{width:'100%',height:40,flexDirection:'row',justifyContent:'space-between',marginBottom:10}}>
-                <TouchableOpacity onPress={()=>setShowStartDate(true)}  style={styles.btn}>
-                  <Text style={{color:themes.green,fontWeight:'600'}}>Ngày bắt đầu</Text>
-                  <AntDesign name={'calendar'} size={20} color={themes.green}/>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={()=>setShowStartTime(true)} style={styles.btn}>
-                  <Text style={{color:themes.green,fontWeight:'600'}}>Giờ bắt đầu</Text>
-                  <AntDesign name={'clockcircleo'} color={themes.green} size={20}/>
+            <View style={[styles.cover,{justifyContent:"center",alignItems:"flex-start"}]}>
+              <Text style={{fontSize:16, fontWeight:'500',color:themes.green,marginBottom:10}}>Chọn thời gian </Text>
+              <View style={{width:'90%',height:40,flexDirection:'row',justifyContent:'space-between',marginBottom:10,borderWidth:1,borderRadius:10,borderColor:themes.gray}}>
+                <View style={{width:"30%",height:"100%",justifyContent:"center",alignItems:"center",borderRightWidth:1,borderColor:themes.gray}}>
+                  <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>Ngày</Text>
+                </View>
+                <TouchableOpacity onPress={()=>setShowStartDate(true)} style={{width:"70%",height:"100%", justifyContent:"center",alignItems:"flex-start",paddingLeft:'10%'}}>
+                  <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>{moment(startDate).format('DD/MM/YYYY')}</Text>
                 </TouchableOpacity>
               </View>
-              <View style={{width:'100%',height:40,flexDirection:'row',justifyContent:'space-between'}}>
-                <TouchableOpacity onPress={()=>setShowDays(true)} style={styles.btn}>
-                  <Text style={{color:themes.green,fontWeight:'600'}}>Số ngày</Text>
-                  <AntDesign name={'calendar'} size={20} color={themes.green}/>
+              <View style={{width:'90%',height:40,flexDirection:'row',justifyContent:'space-between',marginBottom:10,borderWidth:1,borderRadius:10,borderColor:themes.gray}}>
+                <View style={{width:"30%",height:"100%",justifyContent:"center",alignItems:"center",borderRightWidth:1,borderColor:themes.gray}}>
+                  <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>Giờ bắt đầu</Text>
+                </View>
+                <TouchableOpacity onPress={()=>setShowStartTime(true)} style={{width:"70%",height:"100%", justifyContent:"center",alignItems:"flex-start",paddingLeft:'10%'}}>
+                  <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>{extractTime(startDate)}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>setShowEndTime(true)} style={styles.btn}>
-                  <Text style={{color:themes.green,fontWeight:'600'}}>Giờ kết thúc</Text>
-                  <AntDesign name={'clockcircleo'} color={themes.green} size={20}/>
+              </View>
+              <View style={{width:'90%',height:40,flexDirection:'row',justifyContent:'space-between',marginBottom:10,borderWidth:1,borderRadius:10,borderColor:themes.gray}}>
+                <View style={{width:"30%",height:"100%",justifyContent:"center",alignItems:"center",borderRightWidth:1,borderColor:themes.gray}}>
+                  <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>Giờ kết thúc</Text>
+                </View>
+                <TouchableOpacity onPress={()=>setShowEndTime(true)} style={{width:"70%",height:"100%", justifyContent:"center",alignItems:"flex-start",paddingLeft:'10%'}}>
+                  <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>{extractTime(endTime)}</Text>
                 </TouchableOpacity>
               </View>
               </View>
               <View style={styles.cover}>
-                <Text style={{fontSize:16, fontWeight:'500',color:themes.green}}>Người sử dụng dịch vụ </Text>
+                <View style={{width:"100%",flexDirection:"row", alignItems:"center",justifyContent:'space-between'}}>
+                  <Text style={{fontSize:16, fontWeight:'500',color:themes.green}}>Người sử dụng dịch vụ </Text>
+                  <TouchableOpacity onPress={()=>setModalListRelatives(true)}>
+                    <Text style={{fontSize:14,fontWeight:"500",color:themes.green}}>Thay đổi</Text>
+                  </TouchableOpacity>
+                </View>
               {
                 serviceUsers == '' && (
                   <View style={{borderRadius:10, paddingTop:20,paddingBottom:20,justifyContent:"center",alignItems:"center",width:'100%', borderColor:themes.gray}}>
-                    <TouchableOpacity onPress={()=>setModalListRelatives(true)} style={{flexDirection:'row',width:"100%",justifyContent:"center",alignItems:'center',height:40,borderColor:themes.green,borderWidth:1,borderRadius:10}}>
-                      <Text style={{fontWeight:'600',color:themes.green}}>Chọn người sử dụng dịch vụ</Text>
-                    </TouchableOpacity>
+                    {/* <RelativeItem item={data}/> */}
+                    <View style={{height:80,width:"90%",borderRadius:10,borderWidth:1,flexDirection:'row',justifyContent:'center',alignItems:"center",borderColor:themes.gray}}>
+                      <View style={{height:'100%',width:"30%",justifyContent:"center",alignItems:"center"}}>
+                        <View style={{height:60,width:60,borderRadius:30}}>
+                          <Image style={{height:'100%',width:'100%',borderRadius:25}} resizeMode="contain" source={{uri:data.avatar}}/>
+                        </View>
+                      </View>
+                      <View style={{height:'100%',width:"70%",justifyContent:"center",alignItems:"flex-start"}}>
+                        <Text style={{fontSize:15,fontWeight:"500",color:themes.green}}>{data.fullname}</Text>
+                        <Text style={{fontSize:14,fontWeight:'500',color:'gray'}}>Địa chỉ : {data.address}</Text>
+                      </View>
+                    </View>
                   </View>
                 )
               }
               {
                 serviceUsers !== '' && (
+                  <View style={{borderRadius:10, paddingTop:20,paddingBottom:20,justifyContent:"center",alignItems:"center",width:'100%', borderColor:themes.gray}}>
+                    {/* <RelativeItem item={data}/> */}
+                    <View style={{height:80,width:"90%",borderRadius:10,borderWidth:1,flexDirection:'row',justifyContent:'center',alignItems:"center",borderColor:themes.gray}}>
+                      <View style={{height:'100%',width:"30%",justifyContent:"center",alignItems:"center"}}>
+                        <View style={{height:60,width:60,borderRadius:30}}>
+                          <Image style={{height:'100%',width:'100%',borderRadius:25}} resizeMode="contain" source={{uri:serviceUsers.avatar}}/>
+                        </View>
+                      </View>
+                      <View style={{height:'100%',width:"70%",justifyContent:"center",alignItems:"flex-start"}}>
+                        <Text style={{fontSize:15,fontWeight:"500",color:themes.green}}>{serviceUsers.fullname}</Text>
+                        <Text style={{fontSize:14,fontWeight:'500',color:'gray'}}>Địa chỉ : {serviceUsers.address}</Text>
+                      </View>
+                    </View>
+                  </View>
+                )
+              }
+              </View>
+              <View style={styles.cover}>
+                <Text style={{fontSize:16, fontWeight:'500',color:themes.green}}>Chọn điều dưỡng thực hiện</Text>
+              {
+                serviceNurse == '' && (
+                  <View style={{borderRadius:10, paddingTop:20,paddingBottom:20,justifyContent:"center",alignItems:"center",width:'100%', borderColor:themes.gray}}>
+                    <TouchableOpacity onPress={()=>setModalListNurse(true)} style={{flexDirection:'row',width:"70%",justifyContent:"center",alignItems:'center',height:40,borderColor:themes.green,borderWidth:1,borderRadius:10}}>
+                      <Text style={{fontWeight:'600',color:themes.green}}>Xem danh sách điều dưỡng</Text>
+                    </TouchableOpacity>
+                  </View>
+                )
+              }
+              {
+                serviceNurse !== '' && (
                   <View style={{borderRadius:10, paddingTop:10,paddingBottom:10,justifyContent:"center",alignItems:"center",width:'100%', borderColor:themes.gray}}>
                     <View style={{width:"100%",paddingTop:10,paddingBottom:10,borderRadius:10,borderWidth:1,borderColor:themes.green,flexDirection:'column',justifyContent:'center',alignItems:"center"}}>
                         <Text style={{fontSize:14,fontWeight:"500",color:themes.green}}>{`${serviceUsers.fullname}, Tuổi : ${ageCalculator(serviceUsers.dateOfBirth)} `}</Text>
                         <Text style={{fontSize:14,fontWeight:"500",color:themes.green}}>{`${serviceUsers.address}`}</Text>
                       </View>
-                    <TouchableOpacity onPress={()=>setModalListRelatives(true)} style={{flexDirection:'row',marginTop:10,width:"100%",justifyContent:"center",alignItems:'center',height:40,borderColor:themes.gray,borderWidth:1,borderRadius:10}}>
-                      <Text style={{fontWeight:'600',color:themes.yellow}}>Đổi người sử dụng dịch vụ</Text>
+                    <TouchableOpacity onPress={()=>setModalListNurse(true)} style={{flexDirection:'row',marginTop:10,width:"100%",justifyContent:"center",alignItems:'center',height:40,borderColor:themes.gray,borderWidth:1,borderRadius:10}}>
+                      <Text style={{fontWeight:'600',color:themes.yellow}}>Đổi điều dưỡng thực hiện</Text>
                     </TouchableOpacity>
-                    
+
               </View>
                 )
               }
@@ -229,12 +313,12 @@ const ageCalculator = (dateOfBirth) => {
               <View style={styles.cover}>
               <Text style={{fontSize:16, fontWeight:'500',color:themes.green}}>Chi tiết thanh toán</Text>
               <View style={{width:'100%',flexDirection:'row',marginTop:10}}>
-                <View style={{width:'30%',justifyContent:"center",alignItems:'flex-start'}}>
+                <View style={{width:'40%',justifyContent:"center",alignItems:'flex-start'}}>
                   <Text style={styles.paymentText}>Giá tiền : </Text>
                   <Text style={styles.paymentText}>Giảm giá : </Text>
-                  <Text style={styles.paymentText}>Tổng thanh toán : </Text>
+                  <Text style={[styles.paymentText,{fontSize:16}]}>Tổng thanh toán : </Text>
                 </View>
-                <View style={{width:'70%',justifyContent:"center",alignItems:'flex-end'}}>
+                <View style={{width:'60%',justifyContent:"center",alignItems:'flex-end'}}>
                   <Text style={styles.paymentText}>200.000 đ </Text>
                   <Text style={styles.paymentText}>50.000 đ </Text>
                   <Text style={[styles.paymentText,{color:'red',fontSize:16}]}>150.000 đ </Text>
@@ -267,7 +351,7 @@ const ageCalculator = (dateOfBirth) => {
             {
                 showStartTime && (
                     <DateTimePicker 
-                        value={startTime}
+                        value={startDate}
                         mode="time"
                         onChange={onChangeStartTime}
                         onTouchCancel={()=>{
@@ -323,6 +407,17 @@ const ageCalculator = (dateOfBirth) => {
                           />
 ))
               }
+                        
+                    </View>
+                )
+            }
+            {
+                modalListNurse && (
+                    <View style={{height:"100%",width:'100%',justifyContent:"flex-start",alignItems:"center",position:'absolute',backgroundColor:"white"}}>
+                        <Header handleLeftButton={()=>setModalListRelatives(false)} nameLeftIcon={'chevron-left'} namePage={'Chọn điều dưỡng'} />
+                          <ItemNurse/>
+                          <ItemNurse/>
+                          <ItemNurse/>
                         
                     </View>
                 )

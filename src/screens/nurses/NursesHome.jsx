@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -27,11 +27,43 @@ import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
 import themes from "../../../themes";
 import InfoService from "../../components/selectionbar/InfoService";
 import dataService from "../../seeders/dataService";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { getListServices, getListSubServicesByIDService } from "../../redux/slices/servicesSlice";
+import { getInfoUser } from "../../redux/slices/userSlice";
+import { useDispatch,useSelector } from 'react-redux';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 
 const NursesHome = ({navigation}) => {
+  const [visibleModal,setVisibleModal] = useState(false)
+
+    //redux
+    const dispatch = useDispatch()
+
+    //SECTION - Bắt đầu
+    useEffect(() => {
+      const getToken = async () => {
+        const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
+        if (value !== null) {
+          const data = JSON.parse(value); 
+          console.log(data)
+          dispatch(getListServices())
+          dispatch(getInfoUser(data))
+        }
+        if(value == null){
+          // navigation.navigate('Login')
+        }
+      };
+      getToken()
+    }, []);
+
+
+    const dataServices = useSelector((state) => state.services)
+    const listServices = dataServices.services
+    const dataSubService = useSelector((state) => state.services)
+    const listSubService = dataSubService.subServices.subService
 
   const openDrawer = ()=>{
     navigation.openDrawer()
@@ -40,30 +72,56 @@ const NursesHome = ({navigation}) => {
     navigation.navigate('JobsReceived')
   }
 
-  const [services, setServices] = useState([
-    { id: 1, service: 'Chăm sóc - điều dưỡng', state: false },
-    { id: 2, service: 'Thủ thuật điều dưỡng', state: false },
-    { id: 3, service: 'Phục hồi chức năng', state: false },
-    { id: 4, service: 'Châm cứu - Bấm huyệt', state: false },
-    { id: 5, service: 'Mẹ và bé', state: false },
-    { id: 6, service: 'Đặt lịch xét nghiệm tại nhà', state: false },
-  ]);
+  const handleHomeButton = (id) =>{
+    // findSubServicesById(id)
+
+    const idService = id
+    console.log(idService)
+    // dispatch(getListSubServices(idService))
+    dispatch(getListSubServicesByIDService(idService))
+    setVisibleModal(true)
+  }
+  const handleLeftModalButton = () =>{
+    setVisibleModal(false)
+  }
+
+  const handlePressItemModal = (name,id) =>{
+    navigation.navigate('JobsReceived',{name,id})
+    // setVisibleModal1(true)
+    // setModal1Name(name)
+  }
+
 {/* <EvilIcons name="navicon" size={30} color={'white'}/> */}
   return (
     <View style={styles.container}>
       <StatusBar/>
       <Header namePage={'Trang chủ'} handleLeftButton={openDrawer} nameLeftIcon={'navicon'}/>
-      <View style={{flex:1,width:'100%'}}>
+      <View style={{flex:1,width:'100%',paddingLeft:"5%",paddingRight:"5%",marginTop:4}}>
       <FlatList
-          data={services}
+          data={listServices}
           renderItem={({ item }) => (
-            <HomeSelectButton handlePress={handleNavigation} title={item.service} />
-            
-            )}
-          keyExtractor={(item) => item.id} 
+            <HomeSelectButton handlePress={()=>handleHomeButton(item._id)} nameLeftIcon={'chevron-left'} title={item.name} />
+                                    )}
+          keyExtractor={(item) => item._id} 
         />
         
       </View>
+      {
+        visibleModal &&(
+          <View style={styles.modal}>
+            <Header nameLeftIcon={'chevron-left'} handleLeftButton={handleLeftModalButton} namePage={dataSubService.subServices.name} /> 
+            <View style={{flex:1,width:"100%"}}>
+              <FlatList
+                  data={listSubService}
+                  renderItem={({ item }) => (
+                      <HomeSelectButton handlePress={()=>handlePressItemModal(item.name,item._id)}  nameLeftIcon={'chevron-left'}  title={item.name} />
+                      )}
+                  keyExtractor={(item) => item._id} 
+                  />
+            </View>
+          </View>
+        )
+      }
       
     </View>
   )
@@ -75,7 +133,13 @@ const styles = StyleSheet.create({
   container:{
     height:'100%',
     width:windowWidth,
-
+    position:"relative"
   },
-  
+  modal:{
+    position:"absolute",
+    height:"100%",
+    width:"100%",
+    backgroundColor:"white",
+    zIndex:2
+  },
 })

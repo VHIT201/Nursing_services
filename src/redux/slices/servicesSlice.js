@@ -19,7 +19,7 @@ const initialState = {
     "auth/get-list-services",
     async (values, thunkAPI) => {
       try {
-
+        // console.log('Tìm kiếm service');
         const {data:result} = await http.get("/services/get-all", {
           signal: thunkAPI.signal,
 

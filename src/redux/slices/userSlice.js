@@ -251,16 +251,22 @@ export const resetPassword = createAsyncThunk(
     }
   }
 );
-//hàm upload file
-export const uploadPDF = createAsyncThunk(
-  "auth/resetPassword",
+//hàm đăng ký điều dưỡng
+export const changeRoleNurse = createAsyncThunk(
+  "auth/change-role-nurse",
   async (values, thunkAPI) => {
     try {
-      const {data:result} = await http.post("/upload/pdf", values, {
+      console.log('data update điều dưỡng : ', values)
+      const {data:result} = await http.patch("/users/change-role-nurse", values, {
         signal: thunkAPI.signal,
-     });
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+        headers: {
+          Authorization : "Bearer " + values.token,
 
+        }
+     });
+      console.log('Đăng ký điều dưỡng thành công')
+      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+      
         return {
           result
         };
@@ -305,11 +311,12 @@ export const userSlice = createSlice({
         state.success = false;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log(action.payload)
+        console.log('action payload login : ', action.payload)
         state.user = action.payload.user
         state.user.accessToken = action.payload.token
         state.loading = false
         state.success = true
+        // state.message = action.payload.message
         storeLoginState(JSON.stringify(true))
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -324,7 +331,7 @@ export const userSlice = createSlice({
         state.success = false;
       })
       .addCase(getInfoUser.fulfilled, (state, action) => {
-        console.log('get user : ' ,action.payload.user)
+        // console.log('get user : ' ,action.payload.user)
         state.user = action.payload.user
         state.loading = false
       })

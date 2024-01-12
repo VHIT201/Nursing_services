@@ -35,6 +35,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 import * as DocumentPicker from "expo-document-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 const CustomerProfile = ({navigation}) => {
       //dispatch
     const dispatch = useDispatch();
@@ -45,6 +46,8 @@ const CustomerProfile = ({navigation}) => {
     const [userDataRedux, setUserDataRedux] = useState(data)
     const error = useSelector((state) => state.user.error)
     const [tempAvatar, setTempAvatar] = useState("");
+    const [tempCV, setTempCV] = useState("");
+
     const [tempGender, setTempGender] = useState(userDataRedux.gender);
 
     const [modalPickGender, setModalPickGender] = useState(false)
@@ -86,7 +89,7 @@ const CustomerProfile = ({navigation}) => {
           fullname: userDataRedux.fullname,
           email: userDataRedux.email,
           gender: userDataRedux.gender,
-          avatar: userDataRedux.avatar,
+          avatar: tempAvatar !== '' ? tempAvatar : userDataRedux.avatar,
           birthOfDate: userDataRedux.birthOfDate,
           address: userDataRedux.address,
         };
@@ -116,9 +119,7 @@ const CustomerProfile = ({navigation}) => {
     getToken();
     dispatch(getInfoUser(tokenUser))
   }, []);
-  useEffect(() => {
-    
-  }, []);
+
 
 
         //NOTE - Sửa ảnh
@@ -145,10 +146,12 @@ const CustomerProfile = ({navigation}) => {
     }
   };
 
-  //NOTE - hàm upload cloud viết tạm test
+  //NOTE - hàm upload ảnh
   const handleUpdata = (photo) => {
     const data = new FormData();
     data.append("image", photo);
+    console.log('photo : ', photo)
+    console.log(data)
     fetch("https://nursing-app-api.vercel.app/api/v1/upload", {
       method: "POST",
       body: data,
@@ -167,50 +170,10 @@ const CustomerProfile = ({navigation}) => {
         console.log(err);
       });
   };
-  //NOTE - hàm upload pdf viết tạm test
-  const handleUpPDF = (file) => {
-    const data = new FormData();
-    data.append("cv", file);
-    fetch("https://nursing-app-api.vercel.app/api/v1/upload/pdf", {
-      method: "POST",
-      body: data,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "multipart/form-data",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("có cv : ", data.data.path);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
 
-  // State để lưu file PDF
-  const [pdfFile, setPdfFile] = useState(null);
 
-  const pickPDFFile = async () => {
-    try {
-      const docRes = await DocumentPicker.getDocumentAsync({
-        type: "application/pdf",
-      });
 
-      const { name, uri, type, size } = docRes;
 
-      const file = {
-        name: name.split(".")[0],
-        uri: uri,
-        type: type,
-        size: size,
-      };
-      console.log(file)
-      handleUpPDF(file)
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   //NOTE - Sinh nhật
   // Ngày sinh nhật
@@ -267,7 +230,6 @@ const CustomerProfile = ({navigation}) => {
                 alignItems: "center",
               }}
             >
-
               {/* //NOTE - ảnh đại diện */}
               <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={tempAvatar === '' ? {uri: userDataRedux.avatar} :  {uri : tempAvatar}} />
 
@@ -322,20 +284,10 @@ const CustomerProfile = ({navigation}) => {
               style={{
                 height: 50,
                 width: "100%",
-                marginTop:10
+                marginTop:5
               }}
             >
-              {/* <TextInput
-                onChangeText={(text) =>
-                  setUserDataRedux((prevUserDataRedux) => ({
-                    ...prevUserDataRedux,
-                    fullname: text,
-                  }))
-                }
-                value={userDataRedux.fullname}
-                style={{ height: "100%", width: "100%" }}
-                placeholder="Họ và tên"
-            ></TextInput> */}
+
 
             <Input placeholder={'Họ và tên'} value={userDataRedux.fullname} leftIconName={'user'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
@@ -355,7 +307,7 @@ const CustomerProfile = ({navigation}) => {
             }}
           >
             <View style={{ width: "40%", gap: 4, position:'relative' }}>
-              <Text style={[styles.text,{marginBottom:6}]}>Giới tính</Text>
+              <Text style={[styles.text,{marginBottom:5}]}>Giới tính</Text>
               <TouchableOpacity
                 onPress={()=>setModalPickGender(true)}
                 style={{
@@ -373,8 +325,6 @@ const CustomerProfile = ({navigation}) => {
               >
                 <FontAwesome style={{marginLeft:'10%'}} name="intersex" size={16} color={themes.green}/>
                 <Text style={{marginLeft:10,fontSize:14,fontWeight:'500'}}>{tempGender === 'Male' ? 'Nam' : 'Nữ'}</Text>
-
-                
               </TouchableOpacity>
               {
                 modalPickGender === true && 
@@ -389,7 +339,7 @@ const CustomerProfile = ({navigation}) => {
               
             </View>
             <View style={{ width: "50%", gap: 4 }}>
-              <Text style={[styles.text,{marginBottom:6}]}>Ngày sinh</Text>
+              <Text style={[styles.text,{marginBottom:5}]}>Ngày sinh</Text>
               <View
                 style={{
                   height: 40,
@@ -426,16 +376,11 @@ const CustomerProfile = ({navigation}) => {
               style={{
                 height: 50,
                 width: "100%",
-                marginTop:10
+                marginTop:5
 
               }}
             >
-              {/* <TextInput
-                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, phoneNumber: text }))}
-                value={userDataRedux.phoneNumber}
-                style={{ height: "100%", width: "100%" }}
-                placeholder="Số điện thoại"
-              ></TextInput> */}
+
               <Input placeholder={'Số điện thoại'} value={userDataRedux.phoneNumber} leftIconName={'phone'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     phoneNumber: text,
@@ -454,11 +399,9 @@ const CustomerProfile = ({navigation}) => {
             <Text style={styles.text}>Email</Text>
             <View
               style={{
-
                 height: 50,
                 width: "100%",
-                marginTop:10
-
+                marginTop:5
               }}
             >
               {/* <TextInput
@@ -489,7 +432,7 @@ const CustomerProfile = ({navigation}) => {
                 // height:50,
                 width: "100%",
                 maxHeight: 200,
-                marginTop:10
+                marginTop:5
               }}
             >
               {/* <TextInput
@@ -499,43 +442,10 @@ const CustomerProfile = ({navigation}) => {
                 style={{ width: "100%" }}
                 placeholder="Địa chỉ"
               ></TextInput> */}
-              <Input placeholder={'Địa chỉ'} value={userDataRedux.address} leftIconName={'navigation'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
+              <Input numberOfLines={5} placeholder={'Địa chỉ'} value={userDataRedux.address} leftIconName={'navigation'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     address: text,
                   }))}/>
-            </View>
-          </View>
-          <View
-            style={{
-              width: "100%",
-              paddingLeft: "5%",
-              paddingRight: "5%",
-              gap: 4,
-              marginTop: 30,
-            }}
-          >
-            <Text style={[styles.text,{marginBottom:10}]}>Tải lên hồ sơ cá nhân</Text>
-            <View
-              style={{
-                height: 60,
-                width: "100%",
-                paddingLeft: "1%",
-                paddingRight: "5%",
-                borderRadius:10
-              }}
-            >
-              <TouchableOpacity onPress={pickPDFFile}>
-                <Image
-                  style={{
-                    height: 60,
-                    width: 60,
-                    backgroundColor: themes.gray,
-                    borderRadius:10
-                  }}
-                  resizeMode="contain"
-                  source={require("../../assets/Icon/upload.png")}
-                />
-              </TouchableOpacity>
             </View>
           </View>
 
@@ -564,7 +474,6 @@ const CustomerProfile = ({navigation}) => {
               </Text>
             </TouchableOpacity>
           </View>
-
           {openModalDatePicker && (
             <DateTimePicker
               value={date}
@@ -573,7 +482,6 @@ const CustomerProfile = ({navigation}) => {
               onChange={onChangeDatePicker}
             />
           )}
-
           {
         userDataRedux.loading && 
         (<View style={styles.modal}>

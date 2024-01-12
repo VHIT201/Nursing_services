@@ -27,7 +27,7 @@ import { StatusBar } from "expo-status-bar";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { getListServices } from "../../redux/slices/servicesSlice";
 
 
 const Login = ({navigation}) => {
@@ -49,7 +49,8 @@ const Login = ({navigation}) => {
   const userDataRedux = useSelector((state) => state.user)
   const isLoggedIn = useSelector((state) => state.user.success);
   const error = useSelector((state) => state.user.error)
-
+  const serviceDataRedux = useSelector((state) => state.services)
+  // console.log('service dataredux : ', serviceDataRedux)
   // console.log('error : ',error[0].message)
 
   // console.log('user data redux : ',userDataRedux.user)
@@ -137,7 +138,7 @@ const Login = ({navigation}) => {
     }
     if(user.email.includes('@')){
       const dataLogin = {email:user.email, password:user.password}
-      console.log(dataLogin)
+      // console.log(dataLogin)
       dispatch(loginUser(dataLogin))
     }
 
@@ -150,9 +151,9 @@ const Login = ({navigation}) => {
       console.log(error[0].message)
       setWrongPassword(true)
     }
-    if(userDataRedux.success == true){
-      handleLoginSuccess()
-    }
+    // if(userDataRedux.success == true){
+    //   handleLoginSuccess()
+    // }
     
   }
   const [checkData,setCheckData] = useState('')
@@ -163,7 +164,7 @@ const Login = ({navigation}) => {
       const token = await AsyncStorage.getItem("userToken")
       const stateLoginTemp = await AsyncStorage.getItem("stateLogin")
       let stateLogin = JSON.parse(stateLoginTemp); 
-      console.log('state login : ', stateLogin)
+      // console.log('state login : ', stateLogin)
       setStateLogin(stateLogin)
 
 
@@ -181,18 +182,29 @@ const Login = ({navigation}) => {
   
   useEffect(() => {
     if(userDataRedux.success == true){
+      // console.log('user dataredux : ', userDataRedux.user.role)
       dispatch(getInfoUser(userDataRedux.user.accessToken))
-      navigation.navigate('ChooseRole');
+      if(userDataRedux.user.role == 'user'){
+        dispatch(getListServices())
+        navigation.navigate('CustomerDrawerNavigation')
+        // navigation.navigate('NursingDrawerNavigation')
+      }
+      if(userDataRedux.user.role == 'nurse'){
+        dispatch(getListServices())
+        navigation.navigate('NursingDrawerNavigation')
+      }
+      // navigation.navigate('ChooseRole');
     }
   }, [userDataRedux.success]);
 
   
     
-//NOTE -  xử lý khi login thành công
-  const handleLoginSuccess = () => {
-    dispatch(getInfoUser(userDataRedux.user.accessToken))
-    navigation.navigate('ChooseRole');
-  }
+// //NOTE -  xử lý khi login thành công
+//   const handleLoginSuccess = () => {
+//     dispatch(getInfoUser(userDataRedux.user.accessToken))
+//     dispatch(getListServices())
+//     navigation.navigate('ChooseRole');
+//   }
 
   useEffect(() => {
     if(error[0]?.message === error1) {
@@ -250,19 +262,6 @@ const Login = ({navigation}) => {
     dispatch(forgotPassword(verifyEmail))
     navigation.navigate('ReceiveCode', {verifyEmail});
   }
-
-  const storeData = async (value) => {
-    try {
-      const jsonValue = JSON.stringify(userDataRedux);
-      await AsyncStorage.setItem('userStoreData', jsonValue);
-    } catch (e) {
-      // saving error
-    }
-  };
-
-
-
-
   
 
   return (

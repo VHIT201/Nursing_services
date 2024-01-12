@@ -1,144 +1,625 @@
-import React, { useState,useEffect,useContext} from "react";
+import React, { useState,useEffect } from "react";
 import {
   View,
   StyleSheet,
   TouchableOpacity,
+  KeyboardAvoidingView,
   Text,
   TextInput,
   ScrollView,
   FlatList,
   Dimensions,
   Image,
-  TouchableWithoutFeedback
+  StatusBar,
+  Button
 } from "react-native";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { useSelector,useDispatch } from 'react-redux';
+import { getListServices, getListSubServices, getListSubServicesByIDService } from "../../redux/slices/servicesSlice";
+import { getInfoUser, update, updatePassword, changeRoleNurse } from "../../redux/slices/userSlice";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import Foundation from "react-native-vector-icons/Foundation";
 import Fontisto from "react-native-vector-icons/Fontisto";
 import Entypo from "react-native-vector-icons/Entypo";
 import Feather from "react-native-vector-icons/Feather";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import themes from '../../../themes';
-import { useDispatch,useSelector } from 'react-redux';
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
+import dataService from "../../seeders/dataService";
+import themes from "../../../themes";
 import Header from "../../components/header/Header";
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
+import Input from "../../components/textInput/TextInput";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import moment from "moment";
+import * as DocumentPicker from "expo-document-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 const RegisterAsANurse = ({navigation}) => {
+      //dispatch
+    const dispatch = useDispatch();
+
+    //userData
+     //redux
+    const data = useSelector((state) => state.user.user);
+    const [userDataRedux, setUserDataRedux] = useState(data)
+    const error = useSelector((state) => state.user.error)
+    const [tempAvatar, setTempAvatar] = useState("");
+    const [tempCV, setTempCV] = useState("");
+    const [tempNameCV, setTempNameCV] = useState("");
+
+    const [tempGender, setTempGender] = useState(userDataRedux.gender);
+
+    const [modalPickGender, setModalPickGender] = useState(false)
+    const [tokenUser, setTokenUser] = useState({});
+
+    const [dataUpdatePassword, setDataUpdatePassword] = useState({
+        token: tokenUser,
+        oldPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+
+      const handleGender = () =>{
+        if(tempGender === 'Male'){
+          setTempGender('Female')
+          setModalPickGender(false)
+        }
+        else{
+          setTempGender('Male')
+          setModalPickGender(false)
+        }
+      }
+    //NOTE - Hàm xử lý update
+    const handleUpdateUser = async () => {
+      
+        if(tempGender === 'Nam'){
+          setUserDataRedux((prevUserDataRedux) => ({
+            ...prevUserDataRedux,
+            gender: 'Male',
+          }))
+        }
+        else{
+          setUserDataRedux((prevUserDataRedux) => ({
+            ...prevUserDataRedux,
+            gender: 'Female',
+          }))
+        }
+        let dataUpdateUser = {
+          userId : userDataRedux._id,
+          profile: tempCV !== '' ? tempCV : tempCV,
+          token: tokenUser,
+          // fullname: userDataRedux.fullname,
+          // email: userDataRedux.email,
+          // gender: userDataRedux.gender,
+          // avatar: tempAvatar !== '' ? tempAvatar : userDataRedux.avatar,
+          
+          // birthOfDate: userDataRedux.birthOfDate,
+          // address: userDataRedux.address,
+        };
+    
+        // console.log("Thông tin update : ", dataUpdateUser);
+        
+        dispatch(changeRoleNurse(dataUpdateUser))
+        // dispatch(getInfoUser(tokenUser))
+      };
+
+       //SECTION - Bắt đầu vào trang
+  useEffect(() => {
+    console.log("bắt đầu tìm kiếm data")
+    const getToken = async () => {
+      const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
+      if (value !== null) {
+        const data = JSON.parse(value); 
+        dispatch(getInfoUser(data))  // get info user
+        setTokenUser(data);
+        setDataUpdatePassword((prevDataUpdatePassword) => ({
+          ...prevDataUpdatePassword,
+          token: data,
+        }));
+      }
+    };
+
+    getToken();
+    dispatch(getInfoUser(tokenUser))
+  }, []);
 
 
-  const handleLeftButton = () => {
+
+        //NOTE - Sửa ảnh
+
+  const uploadImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [3, 4],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        const uri = result.assets[0].uri;
+        const name = "avatar";
+        const type = "image/png";
+        const source = { uri, name, type };
+
+        handleUpdata(source);
+      }
+    } catch (error) {
+      console.log("Lỗi khi tải ảnh lên: " + error);
+    }
+  };
+
+  //NOTE - hàm upload ảnh
+  const handleUpdata = (photo) => {
+    const data = new FormData();
+    data.append("image", photo);
+    console.log('photo : ', photo)
+    console.log(data)
+    fetch("https://nursing-app-api.vercel.app/api/v1/upload", {
+      method: "POST",
+      body: data,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "multipart/form-data",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // setPicture(data.url)
+        console.log("có ảnh : ", data.data.path);
+        setTempAvatar(data.data.path);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  //NOTE - hàm upload pdf viết tạm test
+  const handleUpPDF = (file) => {
+    const data = new FormData();
+    data.append("cv", file);
+    console.log('file : ',file)
+    console.log(data);
+    fetch("https://nursing-app-api.vercel.app/api/v1/upload/pdf", {
+      method: "POST",
+      body: data,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "multipart/form-data",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("có cv : ", data.data.path);
+        setTempCV(data.data.path)
+
+        // console.log(data.data.originalname)
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+
+  const pickPDFFile = async () => {
+    try {
+      const docRes = await DocumentPicker.getDocumentAsync({
+        type: "application/pdf",
+      });
+
+      const { name, uri, type, size } = docRes;
+      
+      const file = {
+        name: name.split(".")[0],
+        uri: uri,
+        type: 'application/pdf',
+        size: size,
+      };
+      console.log(file)
+      setTempNameCV(name)
+      handleUpPDF(file)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //NOTE - Sinh nhật
+  // Ngày sinh nhật
+  const [date, setDate] = useState(new Date());
+  const [datePicker, setDatePicker] = useState(new Date());
+  const [openModalDatePicker, setOpenModalDatePicker] = useState(false);
+  const hanldeModalDatapicker = () => {
+    setOpenModalDatePicker(true);
+  };
+
+
+  const onChangeDatePicker = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setDatePicker(currentDate);
+    setOpenModalDatePicker(false);
+    setUser((prevUser) => ({ ...prevUser, dateOfBirth: currentDate }));
+  };
+  
+  //NOTE - Hàm quay trở lại
+  const handleLeftButton = () =>{
     navigation.goBack()
   }
-
-
   return (
-    <View style={[styles.container]}>
-        <Header namePage={'Đăng ký điều dưỡng'} handleLeftButton={handleLeftButton} nameLeftIcon={'chevron-left'}/>
-        <KeyboardAwareScrollView enableOnAndroid={true} enableAutomaticScroll={true} style={{flex:1,width:"100%"}}>
-
-        <View style={{height:30}}></View>
-        <View style={{height:100,width:'100%',justifyContent:"center",alignItems:"center"}}>
-          {/* <TouchableOpacity onPress={uploadImage} style={{height:100,width:100,borderRadius:50,borderWidth:2,borderColor:themes.gray,justifyContent:"center",alignItems:'center'}}> */}
-          <TouchableOpacity  style={{height:100,width:100,borderRadius:50,borderWidth:2,borderColor:themes.gray,justifyContent:"center",alignItems:'center'}}>
-          <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={user.avatar ? {uri: user.avatar} : placeholder} />
-          </TouchableOpacity>
-        </View>
-        <View style={{width:'100%', alignItems:"center",height:20,marginTop:20}}>
-          <Text style={[styles.text,{fontSize:18,color:themes.green,lineHeight:20}]}></Text>
-        </View>
-        <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
-          <Text style={styles.text}>Họ & tên</Text>
-          <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-            <TextInput  style={{height:'100%',width:"100%"}} placeholder="Họ và tên"></TextInput>
+    //SECTION - Container
+    <View style={styles.container}>
+        <StatusBar/>
+        <Header handleLeftButton={handleLeftButton} namePage={'Đăng ký trở thành điều dưỡng'} nameLeftIcon={'chevron-left'}/>
+        <KeyboardAwareScrollView
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          style={{ flex: 1, width: "100%" }}
+        >
+          <View style={{ width: "100%", alignItems: "center",height:30 }}>
           </View>
-        </View>
-        <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10,flexDirection:"row",justifyContent:"space-between"}}>
-        <View style={{width:"40%",gap:4}}>
-        <Text style={styles.text}>Giới tính</Text>
-          <TouchableOpacity style={{borderWidth:1,height:34,position:'relative',width:"100%",paddingLeft:'4%',paddingRight:"4%",flexDirection:"row",alignItems:"center",justifyContent:"space-between"}}>
-            <Text>Nữ</Text>
-            <Ionicons name='person' size={16}/>
-          </TouchableOpacity>
-        </View>
-        <View style={{width:"50%",gap:4}}>
-        <Text style={styles.text}>Ngày sinh</Text>
-          <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'4%',paddingRight:"4%",justifyContent:"space-between",alignItems:"center",flexDirection:"row",paddingRight:'10%'}}>
-            <Text></Text>
-            <TouchableOpacity >
-            {/* <TouchableOpacity onPress={hanldeModalDatapicker}> */}
-              <AntDesign name={'calendar'} size={20} color={themes.green}/>
+
+          <View
+            style={{
+              height: 100,
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                height: 100,
+                overflow: "hidden",
+                position: "relative",
+                width: 100,
+                borderRadius: 50,
+                borderWidth: 2,
+                borderColor: themes.gray,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {/* //NOTE - ảnh đại diện */}
+              <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" source={tempAvatar === '' ? {uri: userDataRedux.avatar} :  {uri : tempAvatar}} />
+
+              <TouchableOpacity
+                onPress={uploadImage}
+                style={{
+                  height: "26%",
+                  width: "100%",
+                  position: "absolute",
+                  bottom: 0,
+                  backgroundColor: "rgba(156, 163, 175, 0.)",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <FontAwesome5
+                  name="camera"
+                  size={14}
+                  color={"rgba(156, 163, 175, 0.6)"}
+                />
+              </TouchableOpacity>
             </TouchableOpacity>
           </View>
-        </View>
-        </View>
-        
-        <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
-          <Text  style={styles.text}>Số điện thoại</Text>
-          <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-            <TextInput  style={{height:'100%',width:"100%"}} placeholder="Số điện thoại"></TextInput>
+          <View
+            style={{
+              width: "100%",
+              alignItems: "center",
+              height: 20,
+              marginTop: 20,
+            }}
+          >
+            <Text
+              style={[
+                styles.text,
+                { fontSize: 18, color: themes.green, lineHeight: 20 },
+              ]}
+            >
+              {userDataRedux.fullname ? userDataRedux.fullname : "Unkown user"}
+            </Text>
           </View>
-        </View>
-        <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
-          <Text style={styles.text}>Email</Text>
-          <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-            <TextInput  style={{height:'100%',width:"100%"}} placeholder="Email"></TextInput>
+          <View
+            style={{
+              width: "100%",
+              paddingLeft: "5%",
+              paddingRight: "5%",
+              gap: 4,
+              marginTop: 10,
+            }}
+          >
+            <Text style={styles.text}>Họ & tên</Text>
+            <View
+              style={{
+                height: 50,
+                width: "100%",
+                marginTop:5
+              }}
+            >
+              {/* <TextInput
+                onChangeText={(text) =>
+                  setUserDataRedux((prevUserDataRedux) => ({
+                    ...prevUserDataRedux,
+                    fullname: text,
+                  }))
+                }
+                value={userDataRedux.fullname}
+                style={{ height: "100%", width: "100%" }}
+                placeholder="Họ và tên"
+            ></TextInput> */}
+
+            <Input readOnly={true} placeholder={'Họ và tên'} value={userDataRedux.fullname} leftIconName={'user'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
+                    ...prevUserDataRedux,
+                    fullname: text,
+                  }))}/>
+            </View>
           </View>
-        </View>
-        <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
-          <Text style={styles.text}>Địa chỉ</Text>
-          <View style={{borderWidth:1,height:34,width:"100%",paddingLeft:'2%',paddingRight:"2%"}}>
-            <TextInput  style={{height:'100%',width:"100%"}} placeholder="Địa chỉ"></TextInput>
+          <View
+            style={{
+              width: "100%",
+              paddingLeft: "5%",
+              paddingRight: "5%",
+              gap: 4,
+              marginTop: 10,
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={{ width: "40%", gap: 4, position:'relative' }}>
+              <Text style={[styles.text,{marginBottom:5}]}>Giới tính</Text>
+              <TouchableOpacity
+                onPress={()=>setModalPickGender(true)}
+                style={{
+                  position: "relative",
+                  height: 40,
+                  width: "100%",
+                  // paddingLeft: "10%",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  borderRadius:10,
+                  backgroundColor:"white",
+                  position:'relative'
+                }}
+              >
+                <FontAwesome style={{marginLeft:'10%'}} name="intersex" size={16} color={themes.green}/>
+                <Text style={{marginLeft:10,fontSize:14,fontWeight:'500'}}>{tempGender === 'Male' ? 'Nam' : 'Nữ'}</Text>
+              </TouchableOpacity>
+              {
+                modalPickGender === true && 
+                  (
+                    <TouchableOpacity onPress={handleGender} style={{height:40,width:'100%',flexDirection: "row",
+                      alignItems: "center",position:'absolute',backgroundColor:"white",borderRadius:10,top:'104%',zIndex:2,backgroundColor:"white",}}>
+                      <FontAwesome style={{marginLeft:'10%'}} name="intersex" size={16} color={themes.gray}/>
+                      <Text style={{marginLeft:10,fontSize:14,fontWeight:'500'}}>{tempGender === 'Male' ? 'Nữ' : 'Nam'}</Text>
+                  </TouchableOpacity>
+                  )
+              }
+              
+            </View>
+            <View style={{ width: "50%", gap: 4 }}>
+              <Text style={[styles.text,{marginBottom:5}]}>Ngày sinh</Text>
+              <View
+                style={{
+                  height: 40,
+                  width: "100%",
+                  paddingLeft: "4%",
+                  paddingRight: "4%",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  flexDirection: "row",
+                  backgroundColor:'white',
+                  borderRadius:10
+                }}
+              >
+                <TouchableOpacity onPress={hanldeModalDatapicker}>
+                    <AntDesign name={"calendar"} size={20} color={themes.green} />
+                </TouchableOpacity>
+                <Text style={{marginLeft:10,fontSize:14,fontWeight:"500"}}>{moment(userDataRedux.dateOfBirth).format("DD/MM/YYYY")}</Text>
+                
+              </View>
+            </View>
           </View>
-        </View>
-        <View style={{width:'100%',paddingLeft:"5%",paddingRight:'5%',gap:4,marginTop:10}}>
-          <Text style={styles.text}>Tải lên hồ sơ cá nhân</Text>
-          <View style={{height:60,width:"100%",paddingLeft:"1%",paddingRight:"5%"}}>
-            {/* <TouchableOpacity onPress={pickPDFFile}> */}
-            <TouchableOpacity >
-              <Image style={{height:60,width:60,backgroundColor:themes.gray}} resizeMode="contain" source={require('../../assets/Icon/upload.png')}/>
+
+          <View
+            style={{
+              width: "100%",
+              paddingLeft: "5%",
+              paddingRight: "5%",
+              gap: 4,
+              marginTop: 10,
+            }}
+          >
+            <Text style={[styles.text]}>Số điện thoại</Text>
+            <View
+              style={{
+                height: 50,
+                width: "100%",
+                marginTop:5
+
+              }}
+            >
+              {/* <TextInput
+                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, phoneNumber: text }))}
+                value={userDataRedux.phoneNumber}
+                style={{ height: "100%", width: "100%" }}
+                placeholder="Số điện thoại"
+              ></TextInput> */}
+              <Input placeholder={'Số điện thoại'} value={userDataRedux.phoneNumber} leftIconName={'phone'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
+                    ...prevUserDataRedux,
+                    phoneNumber: text,
+                  }))}/>
+            </View>
+          </View>
+          <View
+            style={{
+              width: "100%",
+              paddingLeft: "5%",
+              paddingRight: "5%",
+              gap: 4,
+              marginTop: 10,
+            }}
+          >
+            <Text style={styles.text}>Email</Text>
+            <View
+              style={{
+                height: 50,
+                width: "100%",
+                marginTop:5
+              }}
+            >
+              {/* <TextInput
+                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, email: text }))}
+                value={userDataRedux.email}
+                style={{ height: "100%", width: "100%" }}
+                placeholder="Email"
+              ></TextInput> */}
+              <Input placeholder={'Email'} value={userDataRedux.email} leftIconName={'at-sign'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
+                    ...prevUserDataRedux,
+                    email: text,
+                  }))}/>
+            </View>
+          </View>
+          <View
+            style={{
+              width: "100%",
+              paddingLeft: "5%",
+              paddingRight: "5%",
+              gap: 4,
+              marginTop: 10,
+              maxHeight: 72,
+            }}
+          >
+            <Text style={styles.text}>Địa chỉ</Text>
+            <View
+              style={{
+                // height:50,
+                width: "100%",
+                maxHeight: 200,
+                marginTop:5
+              }}
+            >
+              {/* <TextInput
+                multiline
+                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, address: text }))}
+                value={userDataRedux.address}
+                style={{ width: "100%" }}
+                placeholder="Địa chỉ"
+              ></TextInput> */}
+              <Input numberOfLines={5} placeholder={'Địa chỉ'} value={userDataRedux.address} leftIconName={'navigation'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
+                    ...prevUserDataRedux,
+                    address: text,
+                  }))}/>
+            </View>
+          </View>
+          <View
+            style={{
+              width: "100%",
+              paddingLeft: "5%",
+              paddingRight: "5%",
+              marginTop: 30,
+            }}
+          >
+            <Text style={[styles.text,{marginBottom:5,fontSize:10,color:'red'}]}>* Bạn bắt buộc phải thêm CV để xét duyệt và hoạt động điều dưỡng.</Text>
+            <Text style={[styles.text,{marginBottom:5}]}>Tải lên hồ sơ ứng tuyển</Text>
+            <View
+              style={{
+                height: 60,
+                width: "100%",
+                paddingLeft: "1%",
+                paddingRight: "5%",
+                borderRadius:10,
+                flexDirection:'row'
+              }}
+            >
+              <TouchableOpacity onPress={pickPDFFile}>
+                <Image
+                  style={{
+                    height: 60,
+                    width: 60,
+                    backgroundColor: themes.gray,
+                    borderRadius:10
+                  }}
+                  resizeMode="contain"
+                  source={require("../../assets/Icon/upload.png")}
+                />
+              </TouchableOpacity>
+              
+              {
+                tempCV !== '' && (<View style={{
+                    height: 60,
+                    width: 60,
+                    borderRadius:10,
+                    justifyContent:"center",
+                    alignItems:'center',
+                    marginLeft:10,
+                    overflow:'hidden',
+                  }}>
+                  <Image style={{height:"70%",width:"70%"}} resizeMode="contain" source={require('../../assets/Icon/pdf.png')}/>
+                  <View style={{height:"28%",width:'70%',overflow:'hidden',justifyContent:"center",alignItems:'center'}}>
+                    <Text style={{fontSize:10,lineHeight:16}}>{tempNameCV}</Text>
+                  </View>
+                  
+              </View>)
+              }
+
+            </View>
+          </View>
+          <View
+            style={{
+              height: 200,
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              paddingTop: "10%",
+            }}
+          >
+            <TouchableOpacity
+              onPress={handleUpdateUser}
+              style={{
+                height: "30%",
+                width: "90%",
+                backgroundColor: themes.green,
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 10,
+              }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: "500", color: "white" }}>
+                Lưu thay đổi
+              </Text>
             </TouchableOpacity>
           </View>
-        </View>
-        
-        <View style={{height:200,width:"100%",alignItems:"center",justifyContent:"flex-start",paddingTop:"10%"}}>
-          <TouchableOpacity  style={{height:"30%",width:'90%',backgroundColor:themes.green,justifyContent:"center",alignItems:"center",borderRadius:10}}>
-          {/* <TouchableOpacity onPress={handleUpdateUser} style={{height:"30%",width:'90%',backgroundColor:themes.green,justifyContent:"center",alignItems:"center",borderRadius:10}}> */}
-            <Text style={{fontSize:16,fontWeight:"500",color:'white'}}>Lưu thay đổi</Text>
-          </TouchableOpacity>
-        </View>
-
-
-
-
-        {/* {openModalDatePicker && (
-        <DateTimePicker
-          value={datePicker}
-          mode={'date'}
-          display="calendar"
-          onChange={onChangeDatePicker}
-        />
-      )} */}
-        
+          {openModalDatePicker && (
+            <DateTimePicker
+              value={date}
+              mode={"date"}
+              display="calendar"
+              onChange={onChangeDatePicker}
+            />
+          )}
+          {
+        userDataRedux.loading && 
+        (<View style={styles.modal}>
+          <Loading/>
+         </View>)
+      }
         </KeyboardAwareScrollView>
-
-      </View>
+    </View>
   )
 }
 
 export default RegisterAsANurse
 
 const styles = StyleSheet.create({
-  container:{
-    height:windowHeight,
-    width:'100%',
-  },
-  avatar:{
-    height:'20%',
-    width:"100%",
-    justifyContent:"center",
-    alignItems:"center"
-  },
+    container:{
+        flex:1,
+        width:"100%",
+        
+    },
+    text: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: themes.green,
+    },
 })

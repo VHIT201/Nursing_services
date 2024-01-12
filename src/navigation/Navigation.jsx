@@ -30,6 +30,7 @@ import NursesSettings from '../screens/nurses/NursesSettings';
 import NursesStatistic from '../screens/nurses/NursesStatistic';
 import NursesWallet from '../screens/nurses/NursesWallet';
 import JobsReceived from '../screens/nurses/JobsReceived';
+import ChooseBank from '../screens/nurses/Wallet/ChooseBank';
 
 //import Customer View
 import CustomerCalendar from '../screens/customers/CustomerCalendar';
@@ -270,6 +271,7 @@ const Navigation = () => {
             <Stack.Screen options={{headerShown:false}} name='CustomerProfile' component={CustomerProfile}/>
             <Stack.Screen options={{headerShown:false}} name='ServiceForm' component={ServiceForm}/>
             <Stack.Screen options={{headerShown:false}} name='ServiceConfirm' component={ServiceConfirm}/>
+            <Stack.Screen options={{headerShown:false}} name='ChooseBank' component={ChooseBank}/>
             {/* <Stack.Screen options={{headerShown:false}} name='Test' component={Test}/> */}
        
         </Stack.Navigator>

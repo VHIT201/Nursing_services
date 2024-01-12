@@ -139,153 +139,10 @@ useEffect(() => {
   }
 }, [error[0]?.message]);
 
-  //NOTE - sửa thông tin
-
-  //Chỉnh sửa thông tin
-  const handleFullName = (text) => {
-    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, fullname: text }));
-  };
-  const handleChangePhoneNumber = (text) => {
-    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, phoneNumber: text }));
-  };
-  const handleChangeEmail = (text) => {
-    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, email: text }));
-  };
-  const handleChangeAddress = (text) => {
-    setUser((prevUserDataRedux) => ({ ...prevUserDataRedux, address: text }));
-  };
-
-  const [tempAvatar, setTempAvatar] = useState("");
-  const handleUpdateUser = async () => {
-    let dataUpdateUser = {
-      token: tokenUser,
-      fullname: userDataRedux.fullname,
-      email: userDataRedux.email,
-      gender: "Male",
-      avatar: userDataRedux.avatar,
-      birthOfDate: userDataRedux.birthOfDate,
-      address: userDataRedux.address,
-    };
-
-    console.log("Thông tin update : ", dataUpdateUser);
-    dispatch(update(dataUpdateUser))
-  
-   setTempAvatar('')
-    setBeingSelected(1000);
-    dispatch(getInfoUser(tokenUser))
-  };
   useEffect(() => {
     dispatch(getInfoUser(tokenUser))
   }, []);
 
-  //NOTE - Sửa ảnh
-
-  const uploadImage = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [3, 4],
-        quality: 1,
-      });
-
-      if (!result.canceled) {
-        const uri = result.assets[0].uri;
-        const name = "avatar";
-        const type = "image/png";
-        const source = { uri, name, type };
-
-        handleUpdata(source);
-      }
-    } catch (error) {
-      console.log("Lỗi khi tải ảnh lên: " + error);
-    }
-  };
-
-  //NOTE - hàm upload cloud viết tạm test
-  const handleUpdata = (photo) => {
-    const data = new FormData();
-    data.append("image", photo);
-    fetch("https://nursing-app-api.vercel.app/api/v1/upload", {
-      method: "POST",
-      body: data,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "multipart/form-data",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // setPicture(data.url)
-        console.log("có ảnh : ", data.data.path);
-        setTempAvatar(data.data.path);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-  //NOTE - hàm upload pdf viết tạm test
-  const handleUpPDF = (file) => {
-    const data = new FormData();
-    data.append("cv", file);
-    fetch("https://nursing-app-api.vercel.app/api/v1/upload/pdf", {
-      method: "POST",
-      body: data,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "multipart/form-data",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("có cv : ", data.data.path);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  // State để lưu file PDF
-  const [pdfFile, setPdfFile] = useState(null);
-
-  const pickPDFFile = async () => {
-    try {
-      const docRes = await DocumentPicker.getDocumentAsync({
-        type: "application/pdf",
-      });
-
-      const { name, uri, type, size } = docRes;
-
-      const file = {
-        name: name.split(".")[0],
-        uri: uri,
-        type: type,
-        size: size,
-      };
-      console.log(file)
-      handleUpPDF(file)
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  //NOTE - Sinh nhật
-  // Ngày sinh nhật
-  const [date, setDate] = useState(new Date());
-  const [datePicker, setDatePicker] = useState(new Date());
-  const [openModalDatePicker, setOpenModalDatePicker] = useState(false);
-  const hanldeModalDatapicker = () => {
-    setOpenModalDatePicker(true);
-  };
-
-
-  const onChangeDatePicker = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setDatePicker(currentDate);
-    setOpenModalDatePicker(false);
-    setUser((prevUser) => ({ ...prevUser, dateOfBirth: currentDate }));
-  };
-  
 
   const openDrawer = () => {
     navigation.openDrawer();
@@ -306,319 +163,151 @@ useEffect(() => {
   ];
   // console.log(beingSelected)
 
-  if (beingSelected === 0) {
+  if (beingSelected === 1) {
     return (
-      <View style={[styles.container, { paddingTop: 30 }]}>
-        <KeyboardAwareScrollView
-          enableOnAndroid={true}
-          enableAutomaticScroll={true}
-          style={{ flex: 1, width: "100%" }}
+      <View style={styles.container}>
+        <Header
+          handleLeftButton={() => handleLeftButton()}
+          nameLeftIcon={"chevron-left"}
+          namePage={listSettings[beingSelected-1].label}
+        />
+        <View
+          style={{
+            height: 300,
+            width: "100%",
+            paddingTop: "10%",
+            paddingLeft: "5%",
+            paddingRight: "5%",
+          }}
         >
-          <View style={{ width: "100%", alignItems: "center" }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "600",
-                color: themes.green,
-                marginBottom: 20,
-              }}
-            >
-              Thông tin người dùng
-            </Text>
-          </View>
-
           <View
             style={{
-              height: 100,
+              flexDirection: "row",
               width: "100%",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <FontAwesome5 name="lock" size={16} color={themes.green} />
+            <View style={{ width: 10 }}></View>
+            <Text
+              style={{ fontSize: 16, fontWeight: "500", color: themes.green }}
+            >
+              Mật khẩu hiện tại
+            </Text>
+          </View>
+          <View
+            style={{
+              height: 40,
+              width: "100%",
+              marginTop: 6,
+            }}
+          >
+
+            <Input leftIconName={'key'} onChangeText={(text)=> setDataUpdatePassword((prevDataUpdatePassword) => ({
+                    ...prevDataUpdatePassword,
+                    oldPassword: text,
+                    }))}
+                    isTrue={true}
+                    placeholder="Nhập mật khẩu hiện tại"/>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              width: "100%",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              gap: 10,
+              marginTop: 20,
+            }}
+          >
+            <FontAwesome5 name="lock" size={16} color={themes.green} />
+            <View style={{ width: 10 }}></View>
+            <Text
+              style={{ fontSize: 16, fontWeight: "500", color: themes.green }}
+            >
+              Mật khẩu mới
+            </Text>
+          </View>
+          <View
+            style={{
+              height: 40,
+              width: "100%",
+              marginTop: 10,
+              justifyContent: "center",
+              alignItems: "flex-start",
+
+            }}
+          >
+
+            <Input leftIconName={'key'} onChangeText={(text)=> setDataUpdatePassword((prevDataUpdatePassword) => ({
+                    ...prevDataUpdatePassword,
+                    newPassword: text,
+                    }))}
+                    isTrue={true}
+              placeholder="Mật khẩu mới"/>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              width: "100%",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              gap: 10,
+              marginTop: 20,
+            }}
+          >
+            <FontAwesome5 name="lock" size={16} color={themes.green} />
+            <View style={{ width: 10 }}></View>
+            <Text
+              style={{ fontSize: 16, fontWeight: "500", color: themes.green }}
+            >
+              Xác nhận mật khẩu mới
+            </Text>
+          </View>
+          <View
+            style={{
+              height: 40,
+              width: "100%",
+              marginTop: 10,
+              justifyContent: "center",
+              alignItems: "flex-start",
+            }}
+          >
+
+            <Input isTrue={true} leftIconName={'key'} onChangeText={(text)=> setDataUpdatePassword((prevDataUpdatePassword) => ({
+      ...prevDataUpdatePassword,
+      confirmNewPassword: text,
+    }))}
+              placeholder="Xác nhận mật khẩu mới"/>
+          </View>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            width: "100%",
+            justifyContent: "flex-start",
+            alignItems: "center",
+            paddingTop: 20,
+          }}
+        >
+          <TouchableOpacity
+            onPress={handleUpdatePassword}
+            style={{
+              height: "10%",
+              width: "90%",
+              backgroundColor: themes.green,
+              borderRadius: 10,
               justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <TouchableOpacity
-              style={{
-                height: 100,
-                overflow: "hidden",
-                position: "relative",
-                width: 100,
-                borderRadius: 50,
-                borderWidth: 2,
-                borderColor: themes.gray,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-
-              {/* //NOTE - ảnh đại diện */}
-              <Image style={{height: 100, width: 100,borderRadius:50}} resizeMode="contain" 
-              source={tempAvatar !== '' ? {uri : tempAvatar} : {uri: userDataRedux?.avatar}   } />
-
-              <TouchableOpacity
-                onPress={uploadImage}
-                style={{
-                  height: "26%",
-                  width: "100%",
-                  position: "absolute",
-                  bottom: 0,
-                  backgroundColor: "rgba(156, 163, 175, 0.)",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <FontAwesome5
-                  name="camera"
-                  size={14}
-                  color={"rgba(156, 163, 175, 0.6)"}
-                />
-              </TouchableOpacity>
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              width: "100%",
-              alignItems: "center",
-              height: 20,
-              marginTop: 20,
-            }}
-          >
-            <Text
-              style={[
-                styles.text,
-                { fontSize: 18, color: themes.green, lineHeight: 20 },
-              ]}
-            >
-              {userDataRedux.fullname ? userDataRedux.fullname : "Unkown user"}
+            <Text style={{ fontSize: 15, fontWeight: "600", color: "white" }}>
+              Lưu thay đổi
             </Text>
-          </View>
-          <View
-            style={{
-              width: "100%",
-              paddingLeft: "5%",
-              paddingRight: "5%",
-              gap: 4,
-              marginTop: 10,
-            }}
-          >
-            <Text style={styles.text}>Họ & tên</Text>
-            <View
-              style={{
-                height: 50,
-                width: "100%",
-                marginTop:10
-              }}
-            >
-
-            <Input placeholder={'Họ và tên'} value={userDataRedux.fullname} leftIconName={'user'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
-                    ...prevUserDataRedux,
-                    fullname: text,
-                  }))}/>
-            </View>
-          </View>
-          <View
-            style={{
-              width: "100%",
-              paddingLeft: "5%",
-              paddingRight: "5%",
-              gap: 4,
-              marginTop: 10,
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <View style={{ width: "40%", gap: 4 }}>
-              <Text style={[styles.text,{marginBottom:6}]}>Giới tính</Text>
-              <TouchableOpacity
-                style={{
-                  position: "relative",
-                  height: 40,
-                  width: "100%",
-                  paddingLeft: "10%",
-                  paddingRight: "4%",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                  borderRadius:10,
-                  backgroundColor:"white",
-                }}
-              >
-                <FontAwesome name="intersex" size={16} color={themes.gray}/>
-                <Text style={{marginLeft:10,fontSize:14,fontWeight:'500'}}>Nữ</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{ width: "50%", gap: 4 }}>
-              <Text style={[styles.text,{marginBottom:6}]}>Ngày sinh</Text>
-              <View
-                style={{
-                  height: 40,
-                  width: "100%",
-                  paddingLeft: "4%",
-                  paddingRight: "4%",
-                  justifyContent: "flex-start",
-                  alignItems: "center",
-                  flexDirection: "row",
-                  backgroundColor:'white',
-                  borderRadius:10
-                }}
-              >
-                <TouchableOpacity onPress={hanldeModalDatapicker}>
-                    <AntDesign name={"calendar"} size={20} color={themes.green} />
-                </TouchableOpacity>
-                <Text style={{marginLeft:10,fontSize:14,fontWeight:"500"}}>{moment(userDataRedux.dateOfBirth).format("DD/MM/YYYY")}</Text>
-                
-              </View>
-            </View>
-          </View>
-
-          <View
-            style={{
-              width: "100%",
-              paddingLeft: "5%",
-              paddingRight: "5%",
-              gap: 4,
-              marginTop: 10,
-            }}
-          >
-            <Text style={styles.text}>Số điện thoại</Text>
-            <View
-              style={{
-                height: 50,
-                width: "100%",
-                marginTop:10
-
-              }}
-            >
-
-              <Input placeholder={'Số điện thoại'} value={userDataRedux.phoneNumber} leftIconName={'phone'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
-                    ...prevUserDataRedux,
-                    phoneNumber: text,
-                  }))}/>
-            </View>
-          </View>
-          <View
-            style={{
-              width: "100%",
-              paddingLeft: "5%",
-              paddingRight: "5%",
-              gap: 4,
-              marginTop: 10,
-            }}
-          >
-            <Text style={styles.text}>Email</Text>
-            <View
-              style={{
-
-                height: 50,
-                width: "100%",
-                marginTop:10
-
-              }}
-            >
-
-              <Input placeholder={'Email'} value={userDataRedux.email} leftIconName={'at-sign'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
-                    ...prevUserDataRedux,
-                    email: text,
-                  }))}/>
-            </View>
-          </View>
-          <View
-            style={{
-              width: "100%",
-              paddingLeft: "5%",
-              paddingRight: "5%",
-              gap: 4,
-              marginTop: 10,
-              maxHeight: 72,
-            }}
-          >
-            <Text style={styles.text}>Địa chỉ</Text>
-            <View
-              style={{
-                // height:50,
-                width: "100%",
-                maxHeight: 200,
-                marginTop:10
-              }}
-            >
-              <Input placeholder={'Địa chỉ'} value={userDataRedux.address} leftIconName={'navigation'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
-                    ...prevUserDataRedux,
-                    address: text,
-                  }))}/>
-            </View>
-          </View>
-          <View
-            style={{
-              width: "100%",
-              paddingLeft: "5%",
-              paddingRight: "5%",
-              gap: 4,
-              marginTop: 30,
-            }}
-          >
-            <Text style={styles.text}>Tải lên hồ sơ cá nhân</Text>
-            <View
-              style={{
-                height: 60,
-                width: "100%",
-                paddingLeft: "1%",
-                paddingRight: "5%",
-              }}
-            >
-              <TouchableOpacity onPress={pickPDFFile}>
-                <Image
-                  style={{
-                    height: 60,
-                    width: 60,
-                    backgroundColor: themes.gray,
-                  }}
-                  resizeMode="contain"
-                  source={require("../../assets/Icon/upload.png")}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View
-            style={{
-              height: 200,
-              width: "100%",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              paddingTop: "10%",
-            }}
-          >
-            <TouchableOpacity
-              onPress={handleUpdateUser}
-              style={{
-                height: "30%",
-                width: "90%",
-                backgroundColor: themes.green,
-                justifyContent: "center",
-                alignItems: "center",
-                borderRadius: 10,
-              }}
-            >
-              <Text style={{ fontSize: 16, fontWeight: "500", color: "white" }}>
-                Lưu thay đổi
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {openModalDatePicker && (
-            <DateTimePicker
-              value={date}
-              mode={"date"}
-              display="calendar"
-              onChange={onChangeDatePicker}
-            />
-          )}
-
-          {
-        userDataRedux.loading && 
-        (<View style={styles.modal}>
-          <Loading/>
-         </View>)
-      }
-        </KeyboardAwareScrollView>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -628,7 +317,7 @@ useEffect(() => {
         <Header
           handleLeftButton={() => handleLeftButton()}
           nameLeftIcon={"chevron-left"}
-          namePage={listSettings[beingSelected].label}
+          namePage={listSettings[beingSelected-1].label}
         />
         <View
           style={{
@@ -687,7 +376,7 @@ useEffect(() => {
         <Header
           handleLeftButton={() => handleLeftButton()}
           nameLeftIcon={"chevron-left"}
-          namePage={listSettings[beingSelected].label}
+          namePage={listSettings[beingSelected-1].label}
         />
       </View>
     );
@@ -698,7 +387,7 @@ useEffect(() => {
         <Header
           handleLeftButton={() => handleLeftButton()}
           nameLeftIcon={"chevron-left"}
-          namePage={listSettings[beingSelected].label}
+          namePage={listSettings[beingSelected-1].label}
         />
       </View>
     );
@@ -708,10 +397,9 @@ useEffect(() => {
       try {
         setBeingSelected(100);
         await AsyncStorage.removeItem("userToken");
-        await AsyncStorage.removeItem('stateLogin')
+        await AsyncStorage.removeItem("stateLogin")
         const temp = false
         await AsyncStorage.setItem('stateLogin', JSON.stringify(false));
-        alert("Đã đăng xuất");
         navigation.navigate("Login");
       } catch (e) {}
     }

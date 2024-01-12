@@ -49,44 +49,13 @@ const NursesWallet = ({navigation}) => {
             <Entypo name={'wallet'} size={50} color={themes.green}/>
             <Text style={{fontSize:22,fontWeight:'600',color:themes.green}}>500.000 đ</Text>
         </View>
-        <TouchableOpacity onPress={()=>setVisibleModal(true)} style={[styles.btn,{borderBottomWidth:1,borderBlockColor:themes.gray}]}>
+        <TouchableOpacity onPress={()=>navigation.navigate('ChooseBank')} style={[styles.btn,{borderBottomWidth:1,borderBlockColor:themes.gray}]}>
           <Text>Tài khoản nhận tiền</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={()=>setVisibleModal1(true)} style={styles.btn}>
           <Text>Quy định nhận tiền</Text>
         </TouchableOpacity>
       </View>
-      {
-        visibleModal&&(
-          <View style={styles.modal1}>
-          <Header namePage={'Ví tiền'} nameLeftIcon={'chevron-left'} handleLeftButton={handleModalLeftButton}/>
-          <View style={{flex:1,width:'100%',paddingTop:'5%',paddingLeft:"5%",paddingRight:"5%",gap:10}}>
-            <Text style={{fontSize:16,fontWeight:"600", marginBottom:10,color:themes.green}}>Tài khoản nhận tiền</Text>
-            <Text style={{color:themes.green}}>Tên chủ tài khoản</Text>
-            <View style={styles.boxText}>
-              <TextInput style={{height:"100%",width:"100%"}} placeholder="Nhập tên chủ tài khoản">
-
-              </TextInput>
-            </View>
-            <Text style={{color:themes.green}}>Ngân hàng nhận thanh toán</Text>
-            <TouchableOpacity style={[styles.boxText,{flexDirection:"row"}]}>
-              <Text>Ngân hàng</Text>
-
-            </TouchableOpacity>
-            <Text style={{color:themes.green}}>Số tài khoản ngân hàng</Text>
-            <View style={styles.boxText}>
-              <TextInput style={{height:"100%",width:"100%"}} placeholder="Số tài khoản ngân hàng">
-
-              </TextInput>
-                        
-            </View>
-            <TouchableOpacity style={{height:40,marginTop:40,width:"100%",borderRadius:10,justifyContent:"center",alignItems:"center",backgroundColor:themes.green}}>
-              <Text style={{fontSize:15,fontWeight:"500",color:'white'}}>Lưu</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        )
-      }
       {
         visibleModal1&&(
           <View style={styles.modal1}>
@@ -105,7 +74,6 @@ const NursesWallet = ({navigation}) => {
         </View>
         )
       }
-      
     </View>
   )
 }

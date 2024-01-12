@@ -36,6 +36,7 @@ import { getRelativeUser,editRelativeUser,getRelativeUserData,deleteRelativeUser
 import RelativeItem from "../../components/ListRelative/ItemRelative";
 import Loading from "../../components/Progress/Loading";
 import Input from "../../components/textInput/TextInput";
+import Notification from "../../components/Notification/Notification";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const RelativeInfomation = ({navigation}) => {
@@ -520,6 +521,7 @@ useState({  token: '',
           <Loading/>
          </View>)
       }
+
     </View>
   )
 }

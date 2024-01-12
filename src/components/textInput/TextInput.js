@@ -15,7 +15,9 @@ const Input = ({
   height,
   width,
   isTrue,
-  value
+  value,
+  numberOfLines,
+  readOnly
 }) => {
 
     const [text, setText] = useState('');
@@ -56,13 +58,15 @@ const handleFocus = () => {
             <Feather name={leftIconName} size={20} color={(isFocused || text !== '') ? themes.green : (isTrue === false ? themes.red : themes.gray)}/>
           </View>
           <TextInput
-            multiline
+            multiline={true}
             numberOfLines={3}
             placeholder={placeholder}
             onFocus={handleFocus}
             onBlur={handleBlur}
             value={value}
             onChangeText={handleChangeText}
+            scrollEnabled = {true}
+            readOnly = {readOnly}
             style={{ height: '100%', width: '90%', paddingLeft: 4, paddingRight: 20, borderTopRightRadius: 10, borderBottomRightRadius: 10, color: isFocused ? 'black' : 'black' }}
           />
         </View>
