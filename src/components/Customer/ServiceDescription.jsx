@@ -77,11 +77,11 @@ const ServiceDescription = ({handlePress,state}) => {
     <TouchableOpacity onPress={handlePress} style={[styles.container,styles.containerShadowAndroid]}>
       <View style={{width:"94%",height:"100%",flexDirection:"row", borderWidth:1,borderRadius:10,borderColor:themes.gray,}}>
         <View style={[styles.leftContent, {backgroundColor:handleColorState(state)}]}>
-          <View style={[styles.topLeftContent, {backgroundColor:"rgba(63, 185, 80, 0.2)",}]}>
+          <View style={[styles.topLeftContent, ]}>
             <Text style={{color:'white',fontSize:14,fontWeight:'500'}}>22/12/2023</Text>
           </View>
           <View style={{height:'1%',width:"100%",backgroundColor:"white"}}></View>
-          <View style={[styles.bottomLeftContent, {backgroundColor:"rgba(63, 185, 80, 0.2)",}]}>
+          <View style={[styles.bottomLeftContent, ]}>
             <Text style={{fontSize:14,fontWeight:'500',color:'white'}}>9.30 AM</Text>
           </View>
         </View>

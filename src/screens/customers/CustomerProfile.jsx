@@ -107,7 +107,7 @@ const CustomerProfile = ({navigation}) => {
       const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
       if (value !== null) {
         const data = JSON.parse(value); 
-        dispatch(getInfoUser(data))  // get info user
+        // dispatch(getInfoUser(data))  // get info user
         setTokenUser(data);
         setDataUpdatePassword((prevDataUpdatePassword) => ({
           ...prevDataUpdatePassword,
@@ -117,7 +117,6 @@ const CustomerProfile = ({navigation}) => {
     };
 
     getToken();
-    dispatch(getInfoUser(tokenUser))
   }, []);
 
 
@@ -193,9 +192,12 @@ const CustomerProfile = ({navigation}) => {
   };
   
   //NOTE - Hàm quay trở lại
-  const handleLeftButton = () =>{
+  const handleLeftButton = () => {
+    console.log('Quay lại');
     navigation.goBack()
   }
+  
+  
   return (
     //SECTION - Container
     <View style={styles.container}>
@@ -404,12 +406,7 @@ const CustomerProfile = ({navigation}) => {
                 marginTop:5
               }}
             >
-              {/* <TextInput
-                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, email: text }))}
-                value={userDataRedux.email}
-                style={{ height: "100%", width: "100%" }}
-                placeholder="Email"
-              ></TextInput> */}
+
               <Input placeholder={'Email'} value={userDataRedux.email} leftIconName={'at-sign'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     email: text,
@@ -435,13 +432,6 @@ const CustomerProfile = ({navigation}) => {
                 marginTop:5
               }}
             >
-              {/* <TextInput
-                multiline
-                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, address: text }))}
-                value={userDataRedux.address}
-                style={{ width: "100%" }}
-                placeholder="Địa chỉ"
-              ></TextInput> */}
               <Input numberOfLines={5} placeholder={'Địa chỉ'} value={userDataRedux.address} leftIconName={'navigation'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     address: text,

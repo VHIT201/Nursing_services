@@ -49,6 +49,9 @@ useEffect(() => {
        if(message[i].message == 'PhoneNumber Phone number is already exist!'){
         setErrorPhonenumber(false)
        }
+       if(message[i].message == 'Register successful!'){
+        navigation.navigate('Login')
+       }
     }
   }
 }, [message]);

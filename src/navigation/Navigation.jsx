@@ -272,7 +272,7 @@ const Navigation = () => {
             <Stack.Screen options={{headerShown:false}} name='ServiceForm' component={ServiceForm}/>
             <Stack.Screen options={{headerShown:false}} name='ServiceConfirm' component={ServiceConfirm}/>
             <Stack.Screen options={{headerShown:false}} name='ChooseBank' component={ChooseBank}/>
-            {/* <Stack.Screen options={{headerShown:false}} name='Test' component={Test}/> */}
+            <Stack.Screen options={{headerShown:false}} name='Test' component={Test}/>
        
         </Stack.Navigator>
     </NavigationContainer> 

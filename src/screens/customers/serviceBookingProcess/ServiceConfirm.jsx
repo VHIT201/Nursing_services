@@ -17,6 +17,7 @@ import {
 import { useSelector,useDispatch } from 'react-redux';
 import { useRoute } from '@react-navigation/native';
 import { getListServices, getListSubServices, getListSubServicesByIDService } from "../../../redux/slices/servicesSlice";
+import { getAllMedical, createMedical } from "../../../redux/slices/medicalCaseSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import FontAwesome from "react-native-vector-icons/FontAwesome";
@@ -37,24 +38,12 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const ServiceConfirm = ({navigation}) => {
+  const dispatch = useDispatch()
   const route = useRoute();
-  const [dataService, setDataService] = useState(null);
-  useEffect(() => {
-    if (route.params && route.params.startDate && route.params.endTime && route.params.startTime) {
-      const startDate = new Date(route.params.startDate);
-      const endTime = new Date(route.params.endTime);
-      const startTime = new Date(route.params.startTime);
-  
-      setDataService({ ...route.params, startDate, endTime, startTime });
-    }
-  }, [route.params]);
-  
-  
+  // const [dataService, setDataService] = useState(null);
+  const dataService = route.params;
+  console.log(dataService);
 
-  if (!dataService) {
-    return <Text>Loading...</Text>;
-  }
-  console.log('Data Service:', dataService);
 
   //SECTION - Hàm lọc thời gian
   const extractTime = (datetime) => {
@@ -72,6 +61,8 @@ const ServiceConfirm = ({navigation}) => {
 
 //!SECTION
   //SECTION - Hàm lọc ngày
+
+  // lọc để show
   const extractDay = (datetime) => {
     const date = new Date(datetime);
   
@@ -85,14 +76,42 @@ const ServiceConfirm = ({navigation}) => {
   
     return `${formattedDay}/${formattedMonth}/${year}`;
   };
-  
-  
 
-//!SECTION
+
+
 
 const handleCreateMedical = () =>{
-
+  let dataMedicalSubmit = {
+    token : tokenUser,
+    subServiceId: dataService.subServiceId,
+    nurseId: dataService.nurseId,
+    // userRelativeId: dataService.userRelativeId,
+    discountCode:dataService.discountCode,
+    note:dataService.note,
+    status:dataService.status,
+    startDate: new Date(dataService.startTime),
+    endDate: new Date(dataService.endTime),
+    totalPrice: dataService.totalPrice
 }
+    // dispatch(getAllMedical(dataMedicalSubmit))
+    dispatch(createMedical(dataMedicalSubmit))
+}
+
+  const [tokenUser, setTokenUser] = useState('')
+  //SECTION - Get data relatives
+  useEffect(() => {
+    console.log("bắt đầu tìm kiếm token")
+    const getToken = async () => {
+      const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
+      if (value !== null) {
+        const data = JSON.parse(value); 
+        setTokenUser(data)
+      }
+    };
+    getToken()
+  }, []);
+
+  
 
   return (
     <View style={styles.container}>

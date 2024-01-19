@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -25,12 +25,46 @@ import InfoService from "../../components/selectionbar/InfoService";
 import Header from "../../components/header/Header";
 import themes from "../../../themes";
 import ServiceDetails from "../../components/ServiceDetails/ServiceDetails";
+import ServiceDescription from "../../components/Customer/ServiceDescription";
+import { useSelector,useDispatch } from 'react-redux';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getListMedicalByNurseId } from "../../redux/slices/medicalCaseSlice";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const NursesCalendar = ({navigation}) => {
+  const dispatch = useDispatch()
   const [appointmentList,setAppointmentList] = useState(true)
   const [visibleModal, setVisibleModal] = useState(false)
+  const [tokenUser,setTokenUser] = useState('')
+
+
+const userDataRedux = useSelector((state) => state.user)
+console.log(userDataRedux.user._id)
+const idNurse = 
+//SECTION - Bắt đầu
+  useEffect(() => {
+    console.log("bắt đầu tìm kiếm token")
+    const getToken = async () => {
+      const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
+      if (value !== null) {
+        const data = JSON.parse(value); 
+        setTokenUser(data)
+        // console.log('Lấy data điều dưỡng')
+        let values = {
+          token : tokenUser,
+          status : 'waiting',
+          nurseId:idNurse
+        }
+        dispatch(getListMedicalByNurseId(values))
+      }
+    };
+    getToken()
+  }, []);
+//!SECTION
+
+
+
   const openDrawer = ()=>{
     navigation.openDrawer()
   }
@@ -68,12 +102,14 @@ const NursesCalendar = ({navigation}) => {
             (
               <>
               <ScrollView style={{flex:1,width:'100%',paddingLeft:'1%',paddingRight:"1%"}}>
-              <InfoService handlePress={handlePressInfoService} state={'notReceived'}/>
-              <InfoService state={'happening'}/>
-              <InfoService state={'complete'}/>
-              <InfoService state={'cancelled'}/>
-              
-              <View style={{height:100,width:'100%'}}></View>
+                <InfoService handlePress={handlePressInfoService} state={'notReceived'}/>
+                <ServiceDescription state={'waiting'}/>
+                <ServiceDescription state={'waiting'}/>
+                <ServiceDescription state={'waiting'}/>
+                <ServiceDescription state={'waiting'}/>
+                <ServiceDescription state={'waiting'}/>
+                <ServiceDescription state={'waiting'}/>
+                <View style={{height:100,width:'100%'}}></View>
               </ScrollView>
               </>
             )

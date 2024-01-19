@@ -36,15 +36,18 @@ import { getRelativeUser,editRelativeUser,getRelativeUserData,deleteRelativeUser
 import { getInfoUser } from "../../../redux/slices/userSlice";
 import RelativeItem from "../../../components/ListRelative/ItemRelative";
 import ItemNurse from "../../../components/ListNurse/ItemNurse";
-
+import { getListNurseByIDSubservice } from "../../../redux/slices/medicalCaseSlice";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const ServiceForm = ({navigation}) => {
     const dispatch = useDispatch()
     const route = useRoute();
     const { name, id } = route.params;
-
-//SECTION - Hàm lọc thời gian
+    const [tokenUser, setTokenUser] = useState('')
+    const {user} = useSelector((state) => state.user)
+    const userId = user._id;
+    // console.log(userId);
+//SECTION - Hàm lọc thời gian 
   const extractTime = (datetime) => {
     const date = new Date(datetime);
 
@@ -66,9 +69,10 @@ const ServiceForm = ({navigation}) => {
     const [startDate, setStartDate] = useState(new Date())
     const [showStartDate, setShowStartDate] = useState(false)
     const onChangeStartDate = (event, selectedDate ) => {
-        console.log('Hello world')
-        console.log(selectedDate)
+        const formattedDate = `${selectedDate.getFullYear()}-${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}-${selectedDate.getDate().toString().padStart(2, '0')}`;
+        console.log('Ngày được chọn : ', formattedDate)
         setStartDate(selectedDate)
+        setStartTime(selectedDate)
         setEndTime(selectedDate)
         setShowStartDate(false)
     }
@@ -79,10 +83,11 @@ const ServiceForm = ({navigation}) => {
     const [startTime, setStartTime] = useState(startDate)
     const [showStartTime, setShowStartTime] = useState(false)
     const onChangeStartTime = (event, selectedTime ) => {
-        console.log('Thời gian bắt đầu : ', selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      const formattedDate = `${selectedTime .getFullYear()}-${(selectedTime .getMonth() + 1).toString().padStart(2, '0')}-${selectedTime .getDate().toString().padStart(2, '0')}`;
+        console.log('Thời gian bắt đầu : ', formattedDate , ' ', selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         // setStartTime(selectedTime);
-        setStartDate(selectedTime);
-        console.log(startDate)
+        setStartTime(selectedTime);
+        // console.log(startTime)
         setShowStartTime(false);
       }
 //!SECTION
@@ -90,10 +95,16 @@ const ServiceForm = ({navigation}) => {
     const [endTime, setEndTime] = useState(startDate)
     const [showEndTime, setShowEndTime] = useState(false)
     const onChangeEndTime = (event, selectedTime ) => {
-        console.log('Thời gian kết thúc : ', selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-        
+      const formattedDate = `${selectedTime .getFullYear()}-${(selectedTime .getMonth() + 1).toString().padStart(2, '0')}-${selectedTime .getDate().toString().padStart(2, '0')}`;
+        console.log('Thời gian kết thúc : ', formattedDate , ' ', selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        if(startTime>selectedTime){
+          console.log("Giờ bắt đầu nhỏ hơn giờ kết thúc");
+        }
+        if(startTime<selectedTime){
+          console.log('Giờ bắt đầu lớn hơn giờ kết thúc');
+        }
         setEndTime(selectedTime);
-        console.log(endTime)
+        // console.log(endTime)
         setShowEndTime(false);
       }
 //!SECTION
@@ -111,7 +122,7 @@ const ServiceForm = ({navigation}) => {
     const [numberOfLines, setNumberOfLines] = useState(1);
  
 //!SECTION
-
+    
   //SECTION - Get data relatives
   useEffect(() => {
     console.log("bắt đầu tìm kiếm token")
@@ -119,9 +130,11 @@ const ServiceForm = ({navigation}) => {
       const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
       if (value !== null) {
         const data = JSON.parse(value); 
-        // console.log(data)
-        dispatch(getInfoUser(data))
+        setTokenUser(data)
         dispatch(getRelativeUser({token : data}))
+        // console.log('Lấy data điều dưỡng')
+        let values = {token : data, service : id}
+        dispatch(getListNurseByIDSubservice(values)) 
       }
     };
     getToken()
@@ -142,7 +155,7 @@ const [serviceNurse, setServiceNurse] = useState('')
 
 
 const handlePressItemRelative = (id,data) =>{
-  console.log('User : ' ,data)
+  // console.log('User : ' ,data)
   setServiceUsers(data)
   setModalListRelatives(false)
 }
@@ -159,27 +172,58 @@ const ageCalculator = (dateOfBirth) => {
   return ageInYears;
 }
 
+//SECTION - XỬ lý list danh sách by subid
+  const {listNurseBySubID} = useSelector((state) => state.medicals)
+  // console.log(listNurseBySubID);
+
+//!SECTION
+
 //SECTION - Thanh toán
   const [cashPayment,setCashPayment] = useState(false)
 //!SECTION
 
+const [idNurse, setIdNurse] = useState('') 
+ const handleItemListNurseById = (id,data) => {
+  // console.log('data : ',data)
+    setIdNurse(id)
+    setModalListNurse(false)
+ }
+
+
+ const handleChooseNurse = (id,data) => {
+    handleItemListNurseById(id,data)
+    setServiceNurse(data)
+ }
+
 //SECTION - Xử lý xác nhận
 
-  const handleSercive = () =>{
+  const handleService = () =>{
     let dataService = {
+      token: tokenUser,
+      // nurseId: "65688e8002c201f23b1a427d",
+      nurseId: idNurse,
       subServiceId: id,
+      userRelativeId : serviceUsers,
+      discountCode:"HOLIDAY2024",
       nameService : name,
-      startDate : startDate.toISOString(),
-      startTime : startDate.toISOString(),
-      endTime : endTime.toISOString(),
-      serviceUsers : serviceUsers,
       note : note,
+      status:"happening",
+      startDate : startDate.toISOString(),
+      startTime : startTime.toISOString(),
+      endTime : endTime.toISOString(),
+      totalPrice:1000,
+      noteNurse : "",
+// Phần thêm
+      serviceUsers : serviceUsers,
       cashPayment : cashPayment,
-      
+
     }
     navigation.navigate('ServiceConfirm', dataService)
+    // console.log('Data truyền đi : ',dataService);
   }
 //!SECTION
+
+
 
 
   return (
@@ -187,7 +231,7 @@ const ageCalculator = (dateOfBirth) => {
             <Header nameLeftIcon={'chevron-left'} handleLeftButton={()=>navigation.goBack()} namePage={name} /> 
             <ScrollView style={[styles.body]}>
             <View style={[styles.cover,{justifyContent:"center",alignItems:"flex-start"}]}>
-              <Text style={{fontSize:16, fontWeight:'500',color:themes.green,marginBottom:10}}>Chọn thời gian </Text>
+              <Text style={{fontSize:16, fontWeight:'500',color:themes.green,marginBottom:12}}>Chọn thời gian </Text>
               <View style={{width:'90%',height:40,flexDirection:'row',justifyContent:'space-between',marginBottom:10,borderWidth:1,borderRadius:10,borderColor:themes.gray}}>
                 <View style={{width:"30%",height:"100%",justifyContent:"center",alignItems:"center",borderRightWidth:1,borderColor:themes.gray}}>
                   <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>Ngày</Text>
@@ -222,12 +266,12 @@ const ageCalculator = (dateOfBirth) => {
                 </View>
               {
                 serviceUsers == '' && (
-                  <View style={{borderRadius:10, paddingTop:20,paddingBottom:20,justifyContent:"center",alignItems:"center",width:'100%', borderColor:themes.gray}}>
+                  <View style={{borderRadius:10, paddingTop:20,paddingBottom:20,justifyContent:"center",alignItems:"center",width:'100%', borderColor:themes.green}}>
                     {/* <RelativeItem item={data}/> */}
-                    <View style={{height:80,width:"90%",borderRadius:10,borderWidth:1,flexDirection:'row',justifyContent:'center',alignItems:"center",borderColor:themes.gray}}>
+                    <View style={{height:80,width:"90%",borderRadius:10,borderWidth:1,flexDirection:'row',justifyContent:'center',alignItems:"center",borderColor:themes.green}}>
                       <View style={{height:'100%',width:"30%",justifyContent:"center",alignItems:"center"}}>
                         <View style={{height:60,width:60,borderRadius:30}}>
-                          <Image style={{height:'100%',width:'100%',borderRadius:25}} resizeMode="contain" source={{uri:data.avatar}}/>
+                          <Image style={{height:'100%',width:'100%',borderRadius:25}} resizeMode="contain" source={{uri: data.avatar }}/>
                         </View>
                       </View>
                       <View style={{height:'100%',width:"70%",justifyContent:"center",alignItems:"flex-start"}}>
@@ -245,7 +289,7 @@ const ageCalculator = (dateOfBirth) => {
                     <View style={{height:80,width:"90%",borderRadius:10,borderWidth:1,flexDirection:'row',justifyContent:'center',alignItems:"center",borderColor:themes.gray}}>
                       <View style={{height:'100%',width:"30%",justifyContent:"center",alignItems:"center"}}>
                         <View style={{height:60,width:60,borderRadius:30}}>
-                          <Image style={{height:'100%',width:'100%',borderRadius:25}} resizeMode="contain" source={{uri:serviceUsers.avatar}}/>
+                          <Image style={{height:'100%',width:'100%',borderRadius:25}} resizeMode="contain" source={{uri:'../../../assets/Icon/user.png'}}/>
                         </View>
                       </View>
                       <View style={{height:'100%',width:"70%",justifyContent:"center",alignItems:"flex-start"}}>
@@ -257,8 +301,14 @@ const ageCalculator = (dateOfBirth) => {
                 )
               }
               </View>
+              
               <View style={styles.cover}>
-                <Text style={{fontSize:16, fontWeight:'500',color:themes.green}}>Chọn điều dưỡng thực hiện</Text>
+                <View style={{width:"100%",flexDirection:"row", alignItems:"center",justifyContent:'space-between'}}>
+                  <Text style={{fontSize:16, fontWeight:'500',color:themes.green}}>Điều dưỡng thực hiện</Text>
+                  <TouchableOpacity onPress={()=>setModalListNurse(true)}>
+                    <Text style={{fontSize:14,fontWeight:"500",color:themes.green}}>Thay đổi</Text>
+                  </TouchableOpacity>
+                </View>
               {
                 serviceNurse == '' && (
                   <View style={{borderRadius:10, paddingTop:20,paddingBottom:20,justifyContent:"center",alignItems:"center",width:'100%', borderColor:themes.gray}}>
@@ -271,21 +321,14 @@ const ageCalculator = (dateOfBirth) => {
               {
                 serviceNurse !== '' && (
                   <View style={{borderRadius:10, paddingTop:10,paddingBottom:10,justifyContent:"center",alignItems:"center",width:'100%', borderColor:themes.gray}}>
-                    <View style={{width:"100%",paddingTop:10,paddingBottom:10,borderRadius:10,borderWidth:1,borderColor:themes.green,flexDirection:'column',justifyContent:'center',alignItems:"center"}}>
-                        <Text style={{fontSize:14,fontWeight:"500",color:themes.green}}>{`${serviceUsers.fullname}, Tuổi : ${ageCalculator(serviceUsers.dateOfBirth)} `}</Text>
-                        <Text style={{fontSize:14,fontWeight:"500",color:themes.green}}>{`${serviceUsers.address}`}</Text>
-                      </View>
-                    <TouchableOpacity onPress={()=>setModalListNurse(true)} style={{flexDirection:'row',marginTop:10,width:"100%",justifyContent:"center",alignItems:'center',height:40,borderColor:themes.gray,borderWidth:1,borderRadius:10}}>
-                      <Text style={{fontWeight:'600',color:themes.yellow}}>Đổi điều dưỡng thực hiện</Text>
-                    </TouchableOpacity>
-
-              </View>
+                    <ItemNurse fullname={serviceNurse.fullname} urlAva={serviceNurse.avatar} stars={serviceNurse.rating}/>
+                  </View>
                 )
               }
               </View>
               <View style={styles.cover}>
                 <Text style={{fontSize:16, fontWeight:'500',color:themes.green,marginBottom:10}}>Ghi chú :</Text>
-              <View style={{ borderRadius:10, width: "100%", borderWidth: 1, borderColor: themes.gray, justifyContent: "flex-start",alignItems:'center',paddingLeft:'4%',paddingRight:'4%',paddingTop:"4%",paddingBottom:'4%' }}>
+              <View style={{ borderRadius:10, width: "100%",marginBottom:10, borderWidth: 1, borderColor: themes.gray, justifyContent: "flex-start",alignItems:'center',paddingLeft:'4%',paddingRight:'4%',paddingTop:"4%",paddingBottom:'4%' }}>
                 
                 <TextInput
                   style={{ width: "100%" }}
@@ -298,7 +341,7 @@ const ageCalculator = (dateOfBirth) => {
               </View>
               </View>
 
-              <View style={styles.cover}>
+              <View style={[styles.cover]}>
 
                 <Text style={{fontSize:16,fontWeight:"500",marginBottom:10,color:themes.green}}>Chọn phương thức thanh toán :</Text>
                 <TouchableOpacity onPress={()=> setCashPayment(true)} style={{height:20,width:"100%",flexDirection:'row',gap:10,marginBottom:6}}>
@@ -309,10 +352,11 @@ const ageCalculator = (dateOfBirth) => {
                   <Ionicons size={20} name={cashPayment===false?'radio-button-on-outline':'radio-button-off-outline'} color={themes.green}/>
                   <Text>Thanh toán chuyển khoản</Text>
                 </TouchableOpacity>
+                <View style={{height:10}}></View>
               </View>
               <View style={styles.cover}>
               <Text style={{fontSize:16, fontWeight:'500',color:themes.green}}>Chi tiết thanh toán</Text>
-              <View style={{width:'100%',flexDirection:'row',marginTop:10}}>
+              <View style={{width:'100%',flexDirection:'row',marginTop:10,marginBottom:10}}>
                 <View style={{width:'40%',justifyContent:"center",alignItems:'flex-start'}}>
                   <Text style={styles.paymentText}>Giá tiền : </Text>
                   <Text style={styles.paymentText}>Giảm giá : </Text>
@@ -327,7 +371,7 @@ const ageCalculator = (dateOfBirth) => {
               </View>
               <View style={{flex:1,width:"100%",paddingLeft:'5%',paddingRight:"5%",justifyContent:'flex-end',paddingBottom:20}}>
                 <TouchableOpacity 
-                  onPress={handleSercive}
+                  onPress={handleService}
                  style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:themes.green,marginTop:20,borderRadius:10}}>
                   <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
                 </TouchableOpacity>
@@ -405,8 +449,8 @@ const ageCalculator = (dateOfBirth) => {
                               handlePress={()=>handlePressItemRelative(item._id,item)}
                     
                           />
-))
-              }
+                ))
+                        }
                         
                     </View>
                 )
@@ -414,11 +458,22 @@ const ageCalculator = (dateOfBirth) => {
             {
                 modalListNurse && (
                     <View style={{height:"100%",width:'100%',justifyContent:"flex-start",alignItems:"center",position:'absolute',backgroundColor:"white"}}>
-                        <Header handleLeftButton={()=>setModalListRelatives(false)} nameLeftIcon={'chevron-left'} namePage={'Chọn điều dưỡng'} />
-                          <ItemNurse/>
-                          <ItemNurse/>
-                          <ItemNurse/>
-                        
+                        <Header handleLeftButton={()=>setModalListNurse(false)} nameLeftIcon={'chevron-left'} namePage={'Chọn điều dưỡng'} />
+                          {/* <ItemNurse/> */}
+                          <ScrollView style={{flex:1,width:'100%'}}>
+                            {
+                              listNurseBySubID.map((item, index)=>(
+                                <ItemNurse 
+                                  key={item._id || `uniqueKey${index}`} 
+                                  handlePress={()=>handleChooseNurse(item._id,item)} 
+                                  fullname={item.fullname} 
+                                  urlAva={item.avatar} 
+                                  stars={item.rating}
+                                />
+                              ))
+                            }
+                          </ScrollView>
+
                     </View>
                 )
             }

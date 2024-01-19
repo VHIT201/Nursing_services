@@ -260,7 +260,7 @@ const RegisterAsANurse = ({navigation}) => {
 
           <View
             style={{
-              height: 100,
+              height: 80,
               width: "100%",
               justifyContent: "center",
               alignItems: "center",
@@ -336,17 +336,6 @@ const RegisterAsANurse = ({navigation}) => {
                 marginTop:5
               }}
             >
-              {/* <TextInput
-                onChangeText={(text) =>
-                  setUserDataRedux((prevUserDataRedux) => ({
-                    ...prevUserDataRedux,
-                    fullname: text,
-                  }))
-                }
-                value={userDataRedux.fullname}
-                style={{ height: "100%", width: "100%" }}
-                placeholder="Họ và tên"
-            ></TextInput> */}
 
             <Input readOnly={true} placeholder={'Họ và tên'} value={userDataRedux.fullname} leftIconName={'user'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
@@ -439,12 +428,6 @@ const RegisterAsANurse = ({navigation}) => {
 
               }}
             >
-              {/* <TextInput
-                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, phoneNumber: text }))}
-                value={userDataRedux.phoneNumber}
-                style={{ height: "100%", width: "100%" }}
-                placeholder="Số điện thoại"
-              ></TextInput> */}
               <Input placeholder={'Số điện thoại'} value={userDataRedux.phoneNumber} leftIconName={'phone'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     phoneNumber: text,
@@ -468,12 +451,6 @@ const RegisterAsANurse = ({navigation}) => {
                 marginTop:5
               }}
             >
-              {/* <TextInput
-                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, email: text }))}
-                value={userDataRedux.email}
-                style={{ height: "100%", width: "100%" }}
-                placeholder="Email"
-              ></TextInput> */}
               <Input placeholder={'Email'} value={userDataRedux.email} leftIconName={'at-sign'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     email: text,
@@ -499,13 +476,6 @@ const RegisterAsANurse = ({navigation}) => {
                 marginTop:5
               }}
             >
-              {/* <TextInput
-                multiline
-                onChangeText={(text) => setUserDataRedux((prevUserDataRedux) => ({ ...prevUserDataRedux, address: text }))}
-                value={userDataRedux.address}
-                style={{ width: "100%" }}
-                placeholder="Địa chỉ"
-              ></TextInput> */}
               <Input numberOfLines={5} placeholder={'Địa chỉ'} value={userDataRedux.address} leftIconName={'navigation'} isTrue={true} height={'100%'} width={'100%'} onChangeText={(text)=> setUserDataRedux((prevUserDataRedux) => ({
                     ...prevUserDataRedux,
                     address: text,
@@ -517,7 +487,7 @@ const RegisterAsANurse = ({navigation}) => {
               width: "100%",
               paddingLeft: "5%",
               paddingRight: "5%",
-              marginTop: 30,
+              marginTop: 40,
             }}
           >
             <Text style={[styles.text,{marginBottom:5,fontSize:10,color:'red'}]}>* Bạn bắt buộc phải thêm CV để xét duyệt và hoạt động điều dưỡng.</Text>

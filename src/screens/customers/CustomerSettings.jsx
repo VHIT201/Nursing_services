@@ -54,11 +54,7 @@ const CustomerSettings = ({ navigation }) => {
   const now = new Date();
   const time = now.toLocaleTimeString();
 
-  //NOTE - Data user từ async
-  const [user, setUser] = useState({});
-  // useEffect(() => {
-  //   console.log(user);
-  // }, []);
+
 
   const [tokenUser, setTokenUser] = useState({});
   const [userPassword, setUserPassword] = useState("");
@@ -139,9 +135,9 @@ useEffect(() => {
   }
 }, [error[0]?.message]);
 
-  useEffect(() => {
-    dispatch(getInfoUser(tokenUser))
-  }, []);
+  // useEffect(() => {
+  //   dispatch(getInfoUser(tokenUser))
+  // }, []);
 
 
   const openDrawer = () => {
@@ -150,6 +146,11 @@ useEffect(() => {
   const handleLeftButton = () => {
     setBeingSelected(6);
   };
+
+  const handleProfileCustomer = () => {
+    console.log('Chuyển qua trang chi tiết tài khoản');
+    navigation.navigate('CustomerProfile')
+  }
 
 
   const [beingSelected, setBeingSelected] = useState(6);
@@ -422,7 +423,7 @@ useEffect(() => {
           }}
         >
         <TouchableOpacity
-                onPress={() => navigation.navigate('CustomerProfile')}
+                onPress={handleProfileCustomer}
                 style={{
                   height: 60,
                   width: "100%",
@@ -437,7 +438,7 @@ useEffect(() => {
                   Chi tiết tài khoản
                 </Text>
                 <AntDesign name={"right"} />
-              </TouchableOpacity>
+        </TouchableOpacity>
           <FlatList
             data={listSettings}
             renderItem={({ item }) => (

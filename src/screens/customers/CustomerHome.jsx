@@ -36,16 +36,10 @@ const CustomerHome = ({navigation}) => {
   //redux
   const dispatch = useDispatch()
   const [visibleModal,setVisibleModal] = useState(false)
-  const [visibleModal1,setVisibleModal1] = useState(false)
-  const [visibleModal2,setVisibleModal2] = useState(false)
-  const [modal1Name,setModal1Name] = useState('')
-  const [id,setId] = useState('')
-  const [subService, setSubService] = useState([])
-  const [schedule,setSchedule] = useState(1)
-  const [cashPayment,setCashPayment] = useState(true)
- 
 
-
+ const {user} = useSelector((state) => state.user)
+  let userId = user._id
+  // console.log(userId);
   const openDrawer = ()=>{
     navigation.openDrawer()
   }
@@ -103,9 +97,7 @@ const CustomerHome = ({navigation}) => {
                                     )}
           keyExtractor={(item) => item._id} 
         />
-        
       </View>
-
       {
         visibleModal &&(
           <View style={styles.modal}>
@@ -114,7 +106,7 @@ const CustomerHome = ({navigation}) => {
               <FlatList
                   data={listSubService}
                   renderItem={({ item }) => (
-                      <HomeSelectButton handlePress={()=>handlePressItemModal(item.name,item._id)}  nameLeftIcon={'chevron-left'}  title={item.name} />
+                      <HomeSelectButton handlePress={()=>handlePressItemModal(item.name,item._id)}   nameLeftIcon={'chevron-left'}  title={item.name} />
                       )}
                   keyExtractor={(item) => item._id} 
                   />

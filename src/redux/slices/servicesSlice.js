@@ -74,7 +74,7 @@ const initialState = {
         const {data:result} = await http.get(`/services/get-sub-service/${values}`,{
           signal: thunkAPI.signal,          
        });
-        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
           return {
                result
           };
