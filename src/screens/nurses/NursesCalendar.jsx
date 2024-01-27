@@ -29,6 +29,7 @@ import ServiceDescription from "../../components/Customer/ServiceDescription";
 import { useSelector,useDispatch } from 'react-redux';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getListMedicalByNurseId } from "../../redux/slices/medicalCaseSlice";
+import { getInfoUser } from "../../redux/slices/userSlice";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
@@ -40,22 +41,23 @@ const NursesCalendar = ({navigation}) => {
 
 
 const userDataRedux = useSelector((state) => state.user)
-console.log(userDataRedux.user._id)
-const idNurse = 
+// console.log(userDataRedux.user._id)
+const {listMedicalByNurseId} = useSelector((state) => state.medicals)
+console.log('test ' , listMedicalByNurseId);
 //SECTION - Bắt đầu
   useEffect(() => {
-    console.log("bắt đầu tìm kiếm token")
     const getToken = async () => {
       const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
       if (value !== null) {
         const data = JSON.parse(value); 
+        dispatch(getInfoUser(data))
         setTokenUser(data)
-        // console.log('Lấy data điều dưỡng')
         let values = {
           token : tokenUser,
-          status : 'waiting',
-          nurseId:idNurse
+          // status : 'waiting',
+          nurseId: userDataRedux.user._id
         }
+        
         dispatch(getListMedicalByNurseId(values))
       }
     };
@@ -63,6 +65,9 @@ const idNurse =
   }, []);
 //!SECTION
 
+  const handlePressServiceDescription = (idSub) => {
+    navigation.navigate('MedicalDetails', {idSub : idSub});
+  }
 
 
   const openDrawer = ()=>{
@@ -100,25 +105,71 @@ const idNurse =
           {
             appointmentList === true ?
             (
-              <>
+                listMedicalByNurseId!==null ?
+              (
+                <>
               <ScrollView style={{flex:1,width:'100%',paddingLeft:'1%',paddingRight:"1%"}}>
-                <InfoService handlePress={handlePressInfoService} state={'notReceived'}/>
-                <ServiceDescription state={'waiting'}/>
-                <ServiceDescription state={'waiting'}/>
-                <ServiceDescription state={'waiting'}/>
-                <ServiceDescription state={'waiting'}/>
-                <ServiceDescription state={'waiting'}/>
-                <ServiceDescription state={'waiting'}/>
+                {
+                  listMedicalByNurseId.map((item, index) => (
+                    item.status == 'waiting' && (
+                      <ServiceDescription handlePress={()=>handlePressServiceDescription(item._id)} 
+                                          date={item.startDate} 
+                                          subService={item.subServiceId?.name} 
+                                          address={item.userId?.address} 
+                                          name={item.userId.fullname} 
+                                          key={index} 
+                                          state={item.status} />
+                    )
+                  ))
+                }
+
+
                 <View style={{height:100,width:'100%'}}></View>
               </ScrollView>
-              </>
+                </>
+              ) 
+              :
+              (
+                <View style={{flex:1,width:'100%',justifyContent:"center",alignItems:"center",}}> 
+                  <Text style={{color:themes.gray}}>Danh sách lịch trống</Text>
+                  <View style={{height:100}}></View>
+                </View> 
+              )
             )
             :
             (
-              <View style={{flex:1,width:'100%',justifyContent:"center",alignItems:"center",}}> 
-                <Text style={{color:themes.gray}}>Danh sách lịch trống</Text>
-                <View style={{height:100}}></View>
-              </View> 
+                listMedicalByNurseId!==null ?
+                (
+                <>
+              <ScrollView style={{flex:1,width:'100%',paddingLeft:'1%',paddingRight:"1%"}}>
+                {
+                  listMedicalByNurseId.map((item, index) => (
+                    item.status == 'happening' && (
+                      <ServiceDescription handlePress={()=>handlePressServiceDescription(item._id)} 
+                                          date={item.startDate} 
+                                          subService={item.subServiceId?.name} 
+                                          address={item.userId?.address} 
+                                          name={item.userId.fullname} 
+                                          key={index} 
+                                          state={item.status} 
+                                          nurse={item.nurseId?.fullname}
+                                          />
+                    )
+                  ))
+                }
+
+
+                <View style={{height:100,width:'100%'}}></View>
+              </ScrollView>
+                </>
+              ) 
+              :
+              (
+                <View style={{flex:1,width:'100%',justifyContent:"center",alignItems:"center",}}> 
+                  <Text style={{color:themes.gray}}>Danh sách lịch trống</Text>
+                  <View style={{height:100}}></View>
+                </View> 
+              )
             )
           }
           

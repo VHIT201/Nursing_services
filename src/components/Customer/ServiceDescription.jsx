@@ -23,7 +23,8 @@ import Feather from "react-native-vector-icons/Feather";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import themes from "../../../themes";
 
-const ServiceDescription = ({handlePress,state}) => {
+const ServiceDescription = ({handlePress,state,name, age, address, subService, idSub, date, time, nurse}) => {
+  console.log(nurse)
   const handleColorState = (state) =>{
     switch(state) {
       case 'waiting':
@@ -38,6 +39,26 @@ const ServiceDescription = ({handlePress,state}) => {
         return themes.green
     }
   }
+
+  const convertISOtoDDMMYYYY = (isoDateString)=> {
+    const dateObject = new Date(isoDateString);
+    const day = dateObject.getDate().toString().padStart(2, '0');
+    const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+    const year = dateObject.getFullYear();
+    const formattedDate = `${day}/${month}/${year}`;
+    return formattedDate;
+  }
+
+  function convertISOTo24hr(dateTimeString) {
+    const dateObject = new Date(dateTimeString);
+    const hours = dateObject.getHours();
+    const minutes = dateObject.getMinutes();
+    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    return formattedTime;
+  }
+  
+
+
 
   const handleBottom = (state) => {
       if(state == 'waiting'){
@@ -56,12 +77,10 @@ const ServiceDescription = ({handlePress,state}) => {
         return (
           <>
               <View style={{width:'100%',flexDirection:"row",alignItems:"center"}}>
-                <Text style={{fontSize:12, fontWeight:'500',color:'gray'}}>Người thực hiện : Phạm Văn Hoàng</Text>
+                <Text style={{fontSize:12, fontWeight:'500',color:'gray'}}>Người thực hiện : {nurse}</Text>
               </View>
-          
-
               <View style={{width:'100%',flexDirection:"column",alignItems:"flex-start",justifyContent:'center'}}>
-                <Text style={{fontSize:12,fontWeight:"500",color:'gray'}}>Trạng thái : Đã hủy</Text>
+                <Text style={{fontSize:12,fontWeight:"500",color:'gray'}}>Trạng thái : {state == 'happening' ?('đang diễn ra') : ('Đã hủy')}</Text>
               </View>
           </>
         )
@@ -69,7 +88,7 @@ const ServiceDescription = ({handlePress,state}) => {
   }
      
         // waiting yellow
-        // happening blue
+        // happening blue 
         // complete green
         // cancelled red
 
@@ -78,20 +97,20 @@ const ServiceDescription = ({handlePress,state}) => {
       <View style={{width:"94%",height:"100%",flexDirection:"row", borderWidth:1,borderRadius:10,borderColor:themes.gray,}}>
         <View style={[styles.leftContent, {backgroundColor:handleColorState(state)}]}>
           <View style={[styles.topLeftContent, ]}>
-            <Text style={{color:'white',fontSize:14,fontWeight:'500'}}>22/12/2023</Text>
+            <Text style={{color:'white',fontSize:14,fontWeight:'500'}}>{convertISOtoDDMMYYYY(date)}</Text>
           </View>
           <View style={{height:'1%',width:"100%",backgroundColor:"white"}}></View>
           <View style={[styles.bottomLeftContent, ]}>
-            <Text style={{fontSize:14,fontWeight:'500',color:'white'}}>9.30 AM</Text>
+            <Text style={{fontSize:14,fontWeight:'500',color:'white'}}>{convertISOTo24hr(date)}</Text>
           </View>
         </View>
         <View style={styles.rightContent}>
           <View style={{width:'100%',flexDirection:"row",alignItems:"center"}}>
-            <Text style={{fontSize:14,fontWeight:"600",marginRight:4}}>Phạm Văn Hoàng</Text>
+            <Text style={{fontSize:14,fontWeight:"600",marginRight:4}}>{name}</Text>
             <Text style={{fontSize:12,fontWeight:"400", color:'gray'}}>42</Text>
           </View>
           <View style={{width:'100%',flexDirection:"row",alignItems:"center"}}>
-            <Text style={{fontSize:12,fontWeight:"400", color:'gray',fontWeight:"500"}}>297, hẻm 8, tổ 39c, KP11, P.Tân Phong, Biên Hòa, Đồng Nai</Text>
+            <Text style={{fontSize:12,fontWeight:"400", color:'gray',fontWeight:"500"}}>{address}</Text>
           </View>
           <View style={{width:'100%',flexDirection:"row",alignItems:"center"}}>
             <Text style={{fontSize:12,fontWeight:"400", color:'gray',fontWeight:"500"}}>Chăm sóc bệnh nhân tại bệnh viện</Text>
@@ -100,8 +119,6 @@ const ServiceDescription = ({handlePress,state}) => {
         </View>
       </View>
     </TouchableOpacity>
-
-
   )
 }
 

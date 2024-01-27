@@ -94,7 +94,7 @@ export const getInfoUser = createAsyncThunk(
     //  console.log('Data user từ sv : ', userData)
     //  storeData(userData)
     //  storeToken(tokenData)
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
         return {
             user: result.data,
             token: result.data.accessToken,
@@ -117,7 +117,7 @@ export const registerUser = createAsyncThunk(
       const result = await http.post("/users/register", values, {
         signal: thunkAPI.signal
      });
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
         return result.data
     } catch (error) {
       // console.log(
@@ -137,7 +137,7 @@ export const forgotPassword = createAsyncThunk(
       const result = await http.post("/users/forgot-password", values, {
         signal: thunkAPI.signal
      });
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data.message);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data.message);
         return result.data 
     } catch (error) {
       console.log(
@@ -187,7 +187,7 @@ export const update = createAsyncThunk(
         },
 
      });
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
       console.log("đã update user : ",result.data)
         return {
             user: result.data,
@@ -215,7 +215,7 @@ export const updatePassword = createAsyncThunk(
 
         }
      });
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
         return {
             user: result.data,
         };

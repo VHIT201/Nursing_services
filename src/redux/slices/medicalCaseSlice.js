@@ -11,7 +11,8 @@ const initialState = {
     message : '',
     medical : [],
     listNurseBySubID : [],
-    listMedicalByNurseId :[]
+    listMedicalByNurseId :[],
+    medicalDetails : {}
 
   };
 
@@ -23,7 +24,7 @@ const initialState = {
         const {data:result} = await http.get("medical/all", {
           signal: thunkAPI.signal,
        });
-        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
           return {
                result
           };
@@ -49,7 +50,7 @@ export const createMedical = createAsyncThunk(
             Authorization : "Bearer " + values.token,
           }
        });
-        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
           return {
                result
           };
@@ -74,6 +75,9 @@ export const createMedical = createAsyncThunk(
           signal: thunkAPI.signal,
           headers: {
             Authorization : "Bearer " + values.token,
+          },
+          body:{
+            nurseId : values.nurseId
           }
        });
         // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
@@ -98,13 +102,13 @@ export const createMedical = createAsyncThunk(
     async (values, thunkAPI) => {
       try {
         // console.log(values);
-        const { data: result } = await http.get(`/medical/nurse?status=${values.status}`, {
+        const { data: result } = await http.get(`/medical/nurse`, {
           signal: thunkAPI.signal,
           headers: {
             Authorization : "Bearer " + values.token,
           },
        });
-        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.result);
           return {
                result
           };
@@ -118,6 +122,30 @@ export const createMedical = createAsyncThunk(
     }
   );
   //!SECTION -
+
+    //Lấy thông tin ca by id
+    export const getDataMedicalById = createAsyncThunk(
+      "auth/get-data-medical-by-id",
+      async (values, thunkAPI) => {
+        try {
+          // console.log('Get ca by id');
+          // const {data:result} = await http.get(`/medical/${values.id}`,{
+          const {data:result} = await http.get(`/medical/659e39a3cbb06db057b115d4`,{
+            signal: thunkAPI.signal,          
+         });
+          // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+            return {
+                 result
+            };
+        } catch (error) {
+          // console.log(
+          //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+          //   error.response.data.error
+          // );
+          return thunkAPI.rejectWithValue(error.response.data.error);
+        }
+      }
+    );
 
 
   export const medicalSlice = createSlice({
@@ -137,7 +165,7 @@ extraReducers(builder) {
         state.success = false;
       })
       .addCase(getAllMedical.fulfilled, (state, action) => {
-        console.log(action.payload.result)
+        // console.log(action.payload.result)
         state.loading = false
         state.services = action.payload.result.data
         state.message = action.payload.result.message
@@ -153,7 +181,7 @@ extraReducers(builder) {
         state.success = false;
       })
       .addCase(createMedical.fulfilled, (state, action) => {
-        console.log(action.payload.result)
+        // console.log(action.payload.result)
         state.loading = false
         state.message = action.payload.result.message
       })
@@ -168,7 +196,6 @@ extraReducers(builder) {
         state.success = false;
       })
       .addCase(getListNurseByIDSubservice.fulfilled, (state, action) => {
-        console.log('data hàm get list trả về : ',action.payload.result.data)
         state.loading = false
         state.message = action.payload.result.message
         state.listNurseBySubID = action.payload.result.data
@@ -179,6 +206,38 @@ extraReducers(builder) {
         state.error = action.payload;
         console.log(action.payload);
       })    
+      .addCase(getListMedicalByNurseId.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+      })
+      .addCase(getListMedicalByNurseId.fulfilled, (state, action) => {
+        // console.log('data get list medical by status and nurse id : ',action.payload.result.result)
+        state.loading = false
+        state.message = action.payload.result.message
+        state.listMedicalByNurseId = action.payload.result.result
+      })
+      .addCase(getListMedicalByNurseId.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+        console.log(action.payload);
+      })    
+      .addCase(getDataMedicalById.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+      })
+      .addCase(getDataMedicalById.fulfilled, (state, action) => {
+        // console.log('action payload : ',action.payload.result)
+        state.loading = false
+        state.medicalDetails = action.payload.result.result
+        state.message = action.payload.result.message
+      })
+      .addCase(getDataMedicalById.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+        console.log(action.payload);
+      })   
  
     }
 

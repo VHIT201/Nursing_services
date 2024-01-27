@@ -10,7 +10,8 @@ const initialState = {
     error:[],
     message : '',
     services: [],
-    subServices : {}
+    subServices : {},
+    serviceDetail:{}
   };
 
 
@@ -70,11 +71,10 @@ const initialState = {
     "auth/get-list-sub-services-by-id-service",
     async (values, thunkAPI) => {
       try {
-        console.log('Get list subservices')
         const {data:result} = await http.get(`/services/get-sub-service/${values}`,{
           signal: thunkAPI.signal,          
        });
-        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
           return {
                result
           };
@@ -87,6 +87,7 @@ const initialState = {
       }
     }
   );
+
 
 
   export const servicesSlice = createSlice({
@@ -149,6 +150,7 @@ extraReducers(builder) {
         state.error = action.payload;
         console.log(action.payload);
       })    
+ 
     }
 
 })

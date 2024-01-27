@@ -161,7 +161,7 @@ const handleCreateMedical = () =>{
                 </TouchableOpacity>
               </View>
 
-          </View>
+        </View>
   )
 }
 

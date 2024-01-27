@@ -21,6 +21,8 @@ import SelectServices from '../screens/accounts/Nurse/SelectServices';
 import SelectServicesDetail from '../screens/accounts/Nurse/SelectServicesDetail';
 import ReceiveCode from '../screens/accounts/ReceiveCode';
 import ChangePasswordForgot from '../screens/accounts/ChangePasswordForgot';
+import MedicalDetails from '../screens/medical/MedicalDetails';
+
 //import Nurses View
 import NursesCalendar from '../screens/nurses/NursesCalendar';
 import NursesHome from '../screens/nurses/NursesHome';
@@ -272,8 +274,8 @@ const Navigation = () => {
             <Stack.Screen options={{headerShown:false}} name='ServiceForm' component={ServiceForm}/>
             <Stack.Screen options={{headerShown:false}} name='ServiceConfirm' component={ServiceConfirm}/>
             <Stack.Screen options={{headerShown:false}} name='ChooseBank' component={ChooseBank}/>
+            <Stack.Screen options={{headerShown:false}} name='MedicalDetails' component={MedicalDetails}/>
             <Stack.Screen options={{headerShown:false}} name='Test' component={Test}/>
-       
         </Stack.Navigator>
     </NavigationContainer> 
     </Provider>
