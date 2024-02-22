@@ -29,21 +29,42 @@ import Header from "../../components/header/Header";
 import Input from "../../components/textInput/TextInput";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
-import { getDataMedicalById } from "../../redux/slices/medicalCaseSlice";
+import { getDataMedicalById,updateDataMedicalById,updateStatusMedicalById } from "../../redux/slices/medicalCaseSlice";
 import { getInfoUser } from "../../redux/slices/userSlice";
 import { useSelector,useDispatch } from 'react-redux';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const MedicalDetails = ({ route,navigation }) => {
-  const [nurseNote,setNurseNote] = useState(medicalDetails?.noteForNurse)
+  const [tokenUser, setTokenUser] = useState('')
   const { idSub } = route.params;
   // console.log(idSub)
   const dispatch = useDispatch()
-  const {medicalDetails} = useSelector((state) => state.medicals)
   const {user} = useSelector((state) => state.user)
-  // console.log('Đây là role ', user.role)
-  // console.log('vãi lài : ', medicalDetails);
+  const { medicalDetails } = useSelector((state) => state.medicals);
+  const [tempMedicalDetails, setTempMedicalDetails] = useState(medicalDetails)  
+  useEffect(() => {
+    setTempMedicalDetails(medicalDetails);
+  }, [medicalDetails]);
+  // console.log('Thông tin ca bệnh : ', medicalDetails);
+  // console.log(tempMedicalDetails);
+
+  const handleUpdateNoteForNurse = () => {
+    let values = tempMedicalDetails
+    values.token = tokenUser
+    dispatch(updateDataMedicalById(values))
+  }
+  const handleChangeStatus = (status) => {
+    let values = { ...tempMedicalDetails }; 
+    values.token = tokenUser;
+    const updatedValues = {
+      ...values,
+      status: status,
+    };
+    let values1 = {_id : medicalDetails._id, status : status, token : tokenUser}
+  
+    dispatch(updateStatusMedicalById(updatedValues));
+  };
 
   const convertISOtoDDMMYYYY = (isoDateString)=> {
     const dateObject = new Date(isoDateString);
@@ -68,6 +89,7 @@ const MedicalDetails = ({ route,navigation }) => {
           const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
           if (value !== null) {
             const data = JSON.parse(value);
+            setTokenUser(data)
             const values = {id:idSub, token: data} 
               dispatch(getDataMedicalById(values))
               
@@ -75,6 +97,7 @@ const MedicalDetails = ({ route,navigation }) => {
         };
         getToken();
       }, []);
+
 
   return (
     <KeyboardAwareScrollView extraScrollHeight={100} enableOnAndroid={true} enableAutomaticScroll={true} style={{height:windowHeight,width:windowWidth}}>
@@ -84,7 +107,7 @@ const MedicalDetails = ({ route,navigation }) => {
         <ScrollView style={{ flex: 1, width: '100%' }}>
           <View style={{justifyContent:"center",alignItems:'center',paddingTop:20,paddingBottom:20}}>
             <Text style={{fontSize:20,fontWeight:'600',color:themes.green}}>CA DỊCH VỤ BH123</Text>
-            <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>(Thanh toán trực tiếp)</Text>
+            <Text style={{fontSize:14,fontWeight:'600',color:themes.green,marginBottom:4}}>(Thanh toán trực tiếp)</Text>
             <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>Số: 1234567</Text>
             <Text style={{fontSize:14,fontWeight:'600'}}>(✿‿✿)</Text>
           </View>
@@ -222,6 +245,7 @@ const MedicalDetails = ({ route,navigation }) => {
                 <Text style={{fontWeight:"500",color:'gray'}}>{medicalDetails.discountCode?.code}</Text>
               </View>
             </View>
+            
             {/* <View style={{paddingTop:10,paddingBottom:10,width:"100%",marginBottom:10,backgroundColor:"white",borderRadius:10,flexDirection:"row",paddingLeft:"5%",paddingRight:"5%"}}>
               <View style={{width:'10%'}}>
                 <FontAwesome name={'money'} size={20} color={themes.green}/>
@@ -231,6 +255,7 @@ const MedicalDetails = ({ route,navigation }) => {
                 <Text style={{fontWeight:"500",color:'gray'}}>{medicalDetails.totalAfterDiscount}</Text>
               </View>
             </View> */}
+
             <View style={{paddingTop:15,paddingBottom:15,width:"100%",marginBottom:10,backgroundColor:"white",borderRadius:10,flexDirection:"row",paddingLeft:"5%",paddingRight:"5%"}}>
               <View style={{width:'10%'}}>
                 <FontAwesome name={'money'} size={20} color={themes.green}/>
@@ -252,14 +277,40 @@ const MedicalDetails = ({ route,navigation }) => {
               <Text style={{fontSize:16,fontWeight:"600",color:themes.green}}>Điều dưỡng ghi chú thêm</Text>
             </View>
             <View style={{paddingTop:10,paddingBottom:10,width:"100%",borderRadius:10}}>
-              <AutoGrowingTextInput
-                style={styles.textInput}
-                placeholder="Ghi chú"
-                minHeight={80}
-                maxHeight={200}
-                onChangeText={(text) => setNurseNote(text)}
-                value={nurseNote}
-              />
+              <View style={{width:"100%",flexDirection:"row",borderRadius:10,backgroundColor:"white"}}>
+                <AutoGrowingTextInput
+                  style={styles.textInput}
+                  placeholder="Ghi chú"
+                  minHeight={80}
+                  maxHeight={200}
+                  onChangeText={(text) =>   setTempMedicalDetails({
+                                              ...tempMedicalDetails,
+                                              noteForNurse: text
+                                            })}
+                  // color={'gray'}
+                  fontWeight={'400'}
+                  value={tempMedicalDetails.noteForNurse}
+                />
+                <View style={{width:"20%",borderTopRightRadius:10,borderBottomRightRadius:10,justifyContent:"center",alignItems:'center'}}>
+                  {
+                    tempMedicalDetails.noteForNurse !== medicalDetails.noteForNurse ? 
+                    (
+                      <TouchableOpacity onPress={handleUpdateNoteForNurse}>
+                        <Text style={{fontWeight:"500",color:themes.green}}>Lưu</Text>
+                      </TouchableOpacity>
+                    )
+                    :
+                    (
+                      <View>
+                        <Text style={{fontWeight:"500",color:themes.gray}}>Lưu</Text>
+                      </View>
+                    )
+                  }
+
+                  
+                </View>
+              </View>
+
             </View>
           </View>
           {/* //!SECTION */}
@@ -268,23 +319,35 @@ const MedicalDetails = ({ route,navigation }) => {
         </ScrollView>
 
       {user.role == 'nurse' && (
+        medicalDetails.status == 'waiting' ? (
+          <View style={styles.bottomTab}>
+          <TouchableOpacity onPress={()=>handleChangeStatus('cancelled')} style={{height:'70%',width:'46%',backgroundColor:themes.red,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
+            <Text style={{fontSize:16,fontWeight:'600',color:'white'}}>Từ chối</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={()=>handleChangeStatus('happening')} style={{height:'70%',width:'46%',backgroundColor:themes.green,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
+            <Text style={{fontSize:16,fontWeight:'600',color:'white'}}>Xác nhận</Text>
+          </TouchableOpacity>
+      </View>
+        )
+        :(
         <View style={styles.bottomTab}>
-          <TouchableOpacity style={{height:'70%',width:'46%',backgroundColor:themes.red,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
+          <TouchableOpacity onPress={()=>handleChangeStatus('cancelled')} style={{height:'70%',width:'46%',backgroundColor:themes.red,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
             <Text style={{fontSize:16,fontWeight:'600',color:'white'}}>Hủy ca</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={{height:'70%',width:'46%',backgroundColor:themes.green,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
+          <TouchableOpacity onPress={()=>handleChangeStatus('completed')} style={{height:'70%',width:'46%',backgroundColor:themes.green,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
             <Text style={{fontSize:16,fontWeight:'600',color:'white'}}>Kết thúc ca</Text>
           </TouchableOpacity>
       </View>
+        )
       )}
       {user.role == 'user' && (
       <View style={styles.bottomTab}>
-        <View style={{height:'70%',width:'46%',backgroundColor:themes.red,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
+        <TouchableOpacity onPress={()=>handleChangeStatus('cancelled')} style={{height:'70%',width:'46%',backgroundColor:themes.red,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
           <Text style={{fontSize:16,fontWeight:'600',color:'white'}}>Hủy ca</Text>
-        </View>
-        <View style={{height:'70%',width:'46%',backgroundColor:themes.green,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={()=>handleChangeStatus('completed')} style={{height:'70%',width:'46%',backgroundColor:themes.green,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
           <Text style={{fontSize:16,fontWeight:'600',color:'white'}}>Đã thanh toán</Text>
-        </View>
+        </TouchableOpacity>
       </View>
       )}
     </View>
@@ -325,13 +388,11 @@ const styles = StyleSheet.create({
       alignItems:"center"
     },
     textInput: {
-      width: '100%',
-      borderColor: 'gray',
+      width: '80%',
       paddingLeft:'5%',
       paddingRight:'5%',
       paddingTop:10,
       paddingBottom:10,
       borderRadius:10,
-      backgroundColor:'white'
     },
 })

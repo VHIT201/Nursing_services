@@ -43,11 +43,11 @@ const NursesCalendar = ({navigation}) => {
 const userDataRedux = useSelector((state) => state.user)
 // console.log(userDataRedux.user._id)
 const {listMedicalByNurseId} = useSelector((state) => state.medicals)
-console.log('test ' , listMedicalByNurseId);
+// console.log('test ' , listMedicalByNurseId);
 //SECTION - Bắt đầu
   useEffect(() => {
     const getToken = async () => {
-      const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
+      const value = await AsyncStorage.getItem("userToken"); 
       if (value !== null) {
         const data = JSON.parse(value); 
         dispatch(getInfoUser(data))
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   container:{
     height:'100%',
     width:windowWidth,
-    position:'relative'
+    position:'relative',
   },
   body:{
     flex:1,

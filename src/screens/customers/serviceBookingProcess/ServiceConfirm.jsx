@@ -111,36 +111,66 @@ const handleCreateMedical = () =>{
     getToken()
   }, []);
 
-  
+
 
   return (
     <View style={styles.container}>
             <Header nameLeftIcon={'chevron-left'} handleLeftButton={()=>navigation.goBack()} namePage={'Xác nhận dịch vụ'} />
             <View style={[styles.body,{paddingTop:"5%",paddingLeft:"5%",paddingRight:"5%"}]}>
               <Text style={{fontWeight:"600",fontSize:16,color:themes.green}}>Thông tin đặt lịch</Text>
-              <View style={{flexDirection:'row',width:"100%",marginTop:20}}>
-                <View style={{width:"30%",gap:10}}>
-                  <Text style={styles.textBoldBlack}>Mã dịch vụ</Text>
-                  <Text style={styles.textBoldBlack}>Dịch vụ</Text>
-                  <Text style={styles.textBoldBlack}>Nhóm dịch vụ</Text>
-                  <Text style={styles.textBoldBlack}>Ngày bắt đầu</Text>
-                  <Text style={styles.textBoldBlack}>Giờ bắt đầu</Text>
-                  <Text style={styles.textBoldBlack}>Giờ kết thúc</Text>
-                  <Text style={styles.textBoldBlack}>Số ngày</Text>
+              <View style={{flexDirection:'column',width:"100%",marginTop:10,alignItems:'center'}}>
+                <View style={{width:"100%",flexDirection:"row"}}>
+                  <View style={{width:"30%"}}>
+                    <Text style={styles.titleInfoMedical}>Mã dịch vụ : </Text>
+                  </View>
+                  <View style={{width:"70%"}}>
+                    <Text>DV001</Text>
+                  </View>
                 </View>
-                <View style={{width:"70%",gap:10}}>
-                  <Text style={styles.text}>DV001</Text>
-                  <Text style={styles.text}>{dataService.nameService}</Text>
-                  <Text style={styles.text}>Chăm sóc - Điều dưỡng</Text>
-                  <Text style={styles.text}>{extractDay(dataService.startDate)}</Text>
-                  <Text style={styles.text}>{extractTime(dataService.startTime)}</Text>
-                  <Text style={styles.text}>{extractTime(dataService.endTime)}</Text>
-                  <Text style={styles.text}>1</Text>
+                <View style={{width:"100%",flexDirection:"row"}}>
+                  <View style={{width:"30%"}}>
+                    <Text style={styles.titleInfoMedical}>Dịch vụ : </Text>
+                  </View>
+                  <View style={{width:"70%"}}>
+                    <Text>{dataService.nameService}</Text>
+                  </View>
+                </View>
+                <View style={{width:"100%",flexDirection:"row"}}>
+                  <View style={{width:"30%"}}>
+                    <Text style={styles.titleInfoMedical}>Nhóm dịch vụ : </Text>
+                  </View>
+                  <View style={{width:"70%"}}>
+                    <Text >Chăm sóc - điều dưỡng</Text>
+                  </View>
+                </View>
+                <View style={{width:"100%",flexDirection:"row"}}>
+                  <View style={{width:"30%"}}>
+                    <Text style={styles.titleInfoMedical}>Ngày bắt đầu : </Text>
+                  </View>
+                  <View style={{width:"70%"}}>
+                    <Text>{extractDay(dataService.startDate)}</Text>
+                  </View>
+                </View>
+                <View style={{width:"100%",flexDirection:"row"}}>
+                  <View style={{width:"30%"}}>
+                    <Text style={styles.titleInfoMedical}>Giờ bắt đầu : </Text>
+                  </View>
+                  <View style={{width:"70%"}}>
+                    <Text>{extractTime(dataService.startTime)}</Text>
+                  </View>
+                </View>
+                <View style={{width:"100%",flexDirection:"row"}}>
+                  <View style={{width:"30%"}}>
+                    <Text style={styles.titleInfoMedical}>Giờ kết thúc : </Text>
+                  </View>
+                  <View style={{width:"70%"}}>
+                    <Text>{extractTime(dataService.endTime)}</Text>
+                  </View>
                 </View>
               </View>
-              <Text style={{fontWeight:"600",fontSize:15,marginTop:30,color:themes.green,marginBottom:10}}>Người sử dụng dịch vụ</Text>
-              <Text style={{fontSize:15}}>{dataService.serviceUsers.fullname}</Text>
-              <Text style={{fontWeight:"600",fontSize:15,marginTop:30,color:themes.green,marginBottom:10}}>Điều dưỡng</Text>
+              <Text style={{fontWeight:"600",fontSize:15,marginTop:20,color:themes.green,marginBottom:10}}>Người sử dụng dịch vụ</Text>
+              <Text style={{fontSize:15}}>Tên : {dataService.serviceUsers.fullname}</Text>
+              <Text style={{fontWeight:"600",fontSize:15,marginTop:20,color:themes.green,marginBottom:10}}>Điều dưỡng</Text>
               <Text style={{fontSize:15}}>Hiện tại chưa có điều dưỡng nào !</Text>
               <Text style={{fontWeight:"600",fontSize:15,marginTop:20,color:themes.green,marginBottom:10}}>Địa chỉ sử dụng dịch vụ</Text>
               <Text style={{fontSize:15}}>{dataService.serviceUsers.address}</Text>
@@ -174,12 +204,15 @@ const styles = StyleSheet.create({
     backgroundColor:"white",
   },
   textBoldBlack:{
-    color:themes.green,
+    color:'black',
     fontSize:15,
     fontWeight:"500"
   },
   text:{
     fontSize:15,
     fontWeight:'500'
+  },
+  titleInfoMedical:{
+    fontWeight:"600"
   }
 })

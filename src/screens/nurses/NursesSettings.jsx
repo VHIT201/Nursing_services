@@ -419,7 +419,7 @@ useEffect(() => {
             width: "100%",
             paddingLeft: "5%",
             paddingRight: "5%",
-            paddingTop: "5%",
+            paddingTop: "2%",
           }}
         >
         <TouchableOpacity

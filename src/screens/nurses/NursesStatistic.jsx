@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -22,49 +22,151 @@ import Entypo from "react-native-vector-icons/Entypo";
 import Feather from "react-native-vector-icons/Feather";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Header from "../../components/header/Header";
+import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
 import themes from "../../../themes";
+import InfoService from "../../components/selectionbar/InfoService";
+import ServiceDescription from "../../components/Customer/ServiceDescription";
+import CalendarListItem from "../../components/Customer/CalendarListItem";
+import ServiceDetails from "../../components/ServiceDetails/ServiceDetails";
+import { useSelector,useDispatch } from 'react-redux';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getListMedicalByNurseId, getListMedicalByUserId } from "../../redux/slices/medicalCaseSlice";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const NursesStatistic = ({navigation}) => {
+  const [statusList, setStatusList] = useState('waiting')
+  const dispatch = useDispatch()
+  const [isSelecting,setIsSelecting] = useState(0)
+  const [modalVisible,setModalVisible] = useState(false)
+  const [appointmentList,setAppointmentList] = useState(true)
+  const [tokenUser, setTokenUser] = useState('')
+  const listStatus = ['all','waiting', 'happening','complete','cancelled']
   const openDrawer = ()=>{
     navigation.openDrawer()
   }
+// console.log('test ' , listMedicalByNurseId);
+//SECTION - Bắt đầu
+  useEffect(() => {
+    const getToken = async () => {
+      const value = await AsyncStorage.getItem("userToken"); 
+      if (value !== null) {
+        const data = JSON.parse(value); 
+        setTokenUser(data)
+        let values = {
+          token : data,
+          // status : 'waiting',
+          nurseId: userDataRedux.user._id
+        }
+        
+        dispatch(getListMedicalByNurseId(values))
+      }
+    };
+    getToken()
+  }, []);
+//!SECTION
 
+const userDataRedux = useSelector((state) => state.user)
+// console.log(userDataRedux.user._id)
+const {listMedicalByNurseId} = useSelector((state) => state.medicals)
 
+  const handlePressServiceDescription = (idSub) => {
+    navigation.navigate('MedicalDetails', {idSub : idSub});
+  }
+
+  const handleChangeStatus = (status) => {
+    switch(status) {
+      case 'happening':
+        return 'Đang diễn ra'
+      case 'complete':
+        return 'Hoàn thành'
+      case 'cancelled':
+        return 'Đã hủy'
+      case 'waiting':
+        return 'Đang chờ'
+      default:
+        return 'Tất cả'
+}
+  }
+// console.log(statusList);
   return (
-    <View style={styles.container}>
-      <Header namePage={'Thống kê'} nameLeftIcon={'navicon'} handleLeftButton={openDrawer}/>
-      <View style={{flex:1,width:"100%"}}>
-        <View style={{height:'30%',width:'100%',backgroundColor:'white'}}>
-          <View style={{height:"20%",width:"100%",borderWidth:1,borderColor:themes.gray,justifyContent:"center",alignItems:"flex-start",paddingLeft:'4%'}}>
-            <Text style={{fontSize:12,fontWeight:'500'}}>THỐNG KÊ GIAO DỊCH</Text>
-          </View>
-          <View style={{flex:1,width:"100%"}}>
-            <View style={{height:'50%',width:"100%",flexDirection:"row"}}>
-              <TouchableOpacity style={{height:'100%',width:'50%',borderRightWidth:1,borderRightColor:themes.gray,justifyContent:"center",alignItems:"center"}}>
-                <Text style={{fontSize:12}}>TOÀN BỘ VIỆC</Text>
-                <Text style={{fontSize:12}}>20</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={{height:'100%',width:'50%',justifyContent:'center',alignItems:'center'}}>
-                <Text style={{fontSize:12}}>THÀNH CÔNG</Text>
-                <Text style={{fontSize:12}}>10</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{height:'50%',width:"100%",flexDirection:"row",borderTopWidth:1,borderTopColor:themes.gray,borderBottomWidth:1,borderBottomColor:themes.gray}}>
-              <TouchableOpacity style={{height:'100%',width:'50%',borderRightWidth:1,borderRightColor:themes.gray,justifyContent:"center",alignItems:"center"}}>
-                <Text style={{fontSize:12}}>ĐANG XỬ LÝ</Text>
-                <Text style={{fontSize:12}}>5</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={{height:'100%',width:'50%',justifyContent:'center',alignItems:'center'}}>
-                <Text style={{fontSize:12}}>ĐANG CHỜ</Text>
-                <Text style={{fontSize:12}}>5</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          
+    <View style={styles.container}> 
+      <Header nameLeftIcon={'navicon'} namePage={'Thống kê'} handleLeftButton={openDrawer}/>
+      <View style={styles.body}>
+      <ScrollView showsHorizontalScrollIndicator={false}  horizontal style={{ height: "6%", width: "100%" }}>
+        {
+          listStatus.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => setStatusList(item)}
+              style={statusList === item ? [styles.btnAct, { borderBottomColor: themes.green }] : styles.btn}>
+              <Text style={{ fontSize: 12 }}>{handleChangeStatus(item)}</Text>
+            </TouchableOpacity>
+          ))
+        }
+      </ScrollView>
+
+        <View style={{height:"94%",width:"100%",paddingTop:"1%"}}>
+        {
+              listMedicalByNurseId.length !== 0 ?
+              (
+                <>
+                <ScrollView style={{flex:1,width:'100%',paddingLeft:'1%',paddingRight:"1%"}}>
+                    {statusList === 'all' ? (
+                      listMedicalByNurseId.map((item, index) => (
+                        <ServiceDescription
+                          handlePress={() => handlePressServiceDescription(item._id)} 
+                          date={item.startDate} 
+                          subService={item.subServiceId?.name} 
+                          address={item.userId?.address} 
+                          name={item.userId?.fullname} 
+                          key={index} 
+                          state={item.status} 
+                        />
+                      ))
+                    ) : (
+                      <>
+                        {listMedicalByNurseId.filter(item => item.status === statusList).length === 0 && (
+                          <View style={{height:600,width:'100%',justifyContent:"center",alignItems:"center"}}>
+                            <Text style={{textAlign: 'center',color:themes.gray}}>Không có ca bệnh nào</Text>
+                          </View>
+                          
+                        )}
+                        {listMedicalByNurseId.map((item, index) => (
+                          item.status === statusList && (
+                            <ServiceDescription
+                              handlePress={() => handlePressServiceDescription(item._id)} 
+                              date={item.startDate} 
+                              subService={item.subServiceId?.name} 
+                              address={item.userId?.address} 
+                              name={item.userId?.fullname} 
+                              key={index} 
+                              state={item.status} 
+                            />
+                          )
+                        ))}
+                      </>
+                    )}
+                    <View style={{height:100,width:'100%'}}></View>
+                  </ScrollView>
+
+                </>
+              ) 
+              :
+              (
+                <View style={{flex:1,width:'100%',justifyContent:"center",alignItems:"center",}}> 
+                  <Text style={{color:themes.gray}}>Danh sách lịch trống</Text>
+                  <View style={{height:100}}></View>
+                </View> 
+              )
+            
+                }
+
         </View>
       </View>
+
+
+
     </View>
   )
 }
@@ -73,7 +175,37 @@ export default NursesStatistic
 
 const styles = StyleSheet.create({
   container:{
-    height:windowHeight,
-    width:windowWidth,
+    height:"100%",
+    width:"100%",
+    position:"relative"  
   },
+  body:{
+    flex:1,
+    width:"100%",
+    paddingLeft:'1%',
+    paddingRight:"1%"
+  },
+  btn:{
+    height:"100%",
+    width:windowWidth/4,
+    borderBottomWidth:1,
+    borderBottomColor:themes.gray,
+    justifyContent:"center",
+    alignItems:"center"
+  },
+  btnAct:{
+    height:"100%",
+    width:windowWidth/4,
+    borderBottomWidth:1,
+    borderBottomColor:themes.green,
+    justifyContent:"center",
+    alignItems:"center"
+  },
+
+  modal:{
+    height:"100%",
+    width:"100%",
+    backgroundColor:"white",
+    position:"absolute"
+  }
 })

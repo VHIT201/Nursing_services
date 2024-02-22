@@ -19,9 +19,7 @@ const windowHeight = Dimensions.get('window').height;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Waitview = ({navigation}) => {
-    
 
-  
   // console.log('data : ', data)
   const dataUser = useSelector((state) => state.user);
   // console.log('data User : ', dataUser.user.role)
@@ -46,7 +44,7 @@ const Waitview = ({navigation}) => {
         // const stateLogin = await AsyncStorage.getItem('stateLogin')
         const valueToken = await AsyncStorage.getItem('userToken');
         // const isUserLoggedIn = stateLogin ? JSON.parse(stateLogin) : false;
-        // console.log('isUserLoggedIn : ', isUserLoggedIn);and
+        // console.log('isUserLoggedIn : ', isUserLoggedIn);
         console.log('Value token : ', valueToken);
 
         if(valueToken !== null ) {
@@ -56,7 +54,7 @@ const Waitview = ({navigation}) => {
           // console.log('start user data redux : ', userDataRedux)
           dispatch(getInfoUser(data)) 
           dispatch(getListServices())
-
+          
         }
         else {
         // else (isUserLoggedIn != true) {
@@ -83,6 +81,9 @@ useEffect(() => {
   if(dataUser.user.role == 'nurse'){
     navigation.navigate('NursingDrawerNavigation')
   }
+  // if(dataUser.user.role == ''){
+  //   navigation.navigate('Login')
+  // }
 }, [dataUser]);
 
 

@@ -24,7 +24,7 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import themes from "../../../themes";
 
 const ServiceDescription = ({handlePress,state,name, age, address, subService, idSub, date, time, nurse}) => {
-  console.log(nurse)
+  // console.log(nurse)
   const handleColorState = (state) =>{
     switch(state) {
       case 'waiting':

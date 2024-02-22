@@ -92,8 +92,6 @@ export const getInfoUser = createAsyncThunk(
      
      const userData = result.data
     //  console.log('Data user từ sv : ', userData)
-    //  storeData(userData)
-    //  storeToken(tokenData)
       // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
         return {
             user: result.data,

@@ -245,7 +245,7 @@ const [idNurse, setIdNurse] = useState('')
                   <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>Giờ bắt đầu</Text>
                 </View>
                 <TouchableOpacity onPress={()=>setShowStartTime(true)} style={{width:"70%",height:"100%", justifyContent:"center",alignItems:"flex-start",paddingLeft:'10%'}}>
-                  <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>{extractTime(startDate)}</Text>
+                  <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>{extractTime(startTime)}</Text>
                 </TouchableOpacity>
               </View>
               <View style={{width:'90%',height:40,flexDirection:'row',justifyContent:'space-between',marginBottom:10,borderWidth:1,borderRadius:10,borderColor:themes.gray}}>

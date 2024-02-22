@@ -48,7 +48,7 @@ const NursesHome = ({navigation}) => {
         const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
         if (value !== null) {
           const data = JSON.parse(value); 
-          console.log(data)
+          // console.log(data)
           dispatch(getListServices())
           dispatch(getInfoUser(data))
         }
@@ -62,6 +62,7 @@ const NursesHome = ({navigation}) => {
 
     const dataServices = useSelector((state) => state.services)
     const listServices = dataServices.services
+    // console.log(listServices);
     const dataSubService = useSelector((state) => state.services)
     const listSubService = dataSubService.subServices.subService
 
@@ -76,7 +77,7 @@ const NursesHome = ({navigation}) => {
     // findSubServicesById(id)
 
     const idService = id
-    console.log(idService)
+    // console.log(idService)
     // dispatch(getListSubServices(idService))
     dispatch(getListSubServicesByIDService(idService))
     setVisibleModal(true)
@@ -87,8 +88,6 @@ const NursesHome = ({navigation}) => {
 
   const handlePressItemModal = (name,id) =>{
     navigation.navigate('JobsReceived',{name,id})
-    // setVisibleModal1(true)
-    // setModal1Name(name)
   }
 
 {/* <EvilIcons name="navicon" size={30} color={'white'}/> */}
@@ -114,7 +113,7 @@ const NursesHome = ({navigation}) => {
               <FlatList
                   data={listSubService}
                   renderItem={({ item }) => (
-                      <HomeSelectButton handlePress={()=>handlePressItemModal(item.name,item._id)}  nameLeftIcon={'chevron-left'}  title={item.name} />
+                      <HomeSelectButton handlePress={()=>handlePressItemModal(item.name,item._id)} countMedicalExamination={item.countMedicalExamination}  nameLeftIcon={'chevron-left'}  title={item.name} />
                       )}
                   keyExtractor={(item) => item._id} 
                   />

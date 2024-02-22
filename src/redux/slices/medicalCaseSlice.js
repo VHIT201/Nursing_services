@@ -12,6 +12,8 @@ const initialState = {
     medical : [],
     listNurseBySubID : [],
     listMedicalByNurseId :[],
+    listMedicalByUserId :[],
+    listMedicalBySubId : [],
     medicalDetails : {}
 
   };
@@ -37,6 +39,30 @@ const initialState = {
       }
     }
   );
+  export const getMedicalById = createAsyncThunk(
+    "auth/get-medical-by-id",
+    async (values, thunkAPI) => {
+      try {
+        console.log('Lấy ca bằng id sub : ',  values.id);
+        const {data:result} = await http.get(`medical/${values.id}`, {
+          signal: thunkAPI.signal,
+       });
+        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+          return {
+               result
+          };
+      } catch (error) {
+        // console.log(
+        //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+        //   error.response.data.error
+        // );
+        return thunkAPI.rejectWithValue(error.response.data.error);
+      }
+    }
+  );
+
+
+
   //!SECTION - createmedical
 
   //Tạo ca
@@ -122,18 +148,87 @@ export const createMedical = createAsyncThunk(
     }
   );
   //!SECTION -
+  //SECTION - GetListMedicalByUserId
+  export const getListMedicalByUserId = createAsyncThunk(
+    "auth/get-list-medical-by-user-id",
+    async (values, thunkAPI) => {
+      try {
+        // console.log('userId : ', values.userId);
+        // console.log('token : ', values.token);
+        const { data: result } = await http.get(`/medical/user`, {
+          signal: thunkAPI.signal,
+          headers: {
+            Authorization : "Bearer " + values.token,
+          },
+       });
+        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.result);
+          return {
+               result
+          };
+      } catch (error) {
+        // console.log(
+        //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+        //   error.response.data.error
+        // );
+        return thunkAPI.rejectWithValue(error.response.data.error);
+      }
+    }
+  );
+  //!SECTION -
 
     //Lấy thông tin ca by id
     export const getDataMedicalById = createAsyncThunk(
       "auth/get-data-medical-by-id",
       async (values, thunkAPI) => {
         try {
-          // console.log('Get ca by id');
-          // const {data:result} = await http.get(`/medical/${values.id}`,{
-          const {data:result} = await http.get(`/medical/659e39a3cbb06db057b115d4`,{
+          const {data:result} = await http.get(`/medical/${values.id}`,{
             signal: thunkAPI.signal,          
          });
           // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+            return {
+                 result
+            };
+        } catch (error) {
+          // console.log(
+          //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+          //   error.response.data.error
+          // );
+          return thunkAPI.rejectWithValue(error.response.data.error);
+        }
+      }
+    );
+    //update thông tin note for nurse ca by id
+    export const updateDataMedicalById = createAsyncThunk(
+      "auth/update-data-medical-by-id",
+      async (values, thunkAPI) => {
+        try {
+          console.log(values);
+          const {data:result} = await http.patch(`/medical/${values._id}`,{
+            signal: thunkAPI.signal,          
+         });
+          console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+            return {
+                 result
+            };
+        } catch (error) {
+          // console.log(
+          //   "🚀 ~ file: user.slice.ts:47 ~ error:",
+          //   error.response.data.error
+          // );
+          return thunkAPI.rejectWithValue(error.response.data.error);
+        }
+      }
+    );
+    //update thông tin status ca by id
+    export const updateStatusMedicalById = createAsyncThunk(
+      "auth/update-status-medical-by-id",
+      async (values, thunkAPI) => {
+        try {
+          console.log('Thông tin update status : ', values);
+          const {data:result} = await http.patch(`/medical/update-status/${values._id}`,{
+            signal: thunkAPI.signal,          
+         });
+          console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
             return {
                  result
             };
@@ -171,6 +266,23 @@ extraReducers(builder) {
         state.message = action.payload.result.message
       })
       .addCase(getAllMedical.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+        console.log(action.payload);
+      })    
+    .addCase(getMedicalById.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+      })
+      .addCase(getMedicalById.fulfilled, (state, action) => {
+        console.log(action.payload.result)
+        state.loading = false
+        state.services = action.payload.result.data
+        state.message = action.payload.result.message
+        state.listMedicalBySubId = action.payload.result.result
+      })
+      .addCase(getMedicalById.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
         state.error = action.payload;
@@ -222,6 +334,22 @@ extraReducers(builder) {
         state.error = action.payload;
         console.log(action.payload);
       })    
+      .addCase(getListMedicalByUserId.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+      })
+      .addCase(getListMedicalByUserId.fulfilled, (state, action) => {
+        // console.log('data get list medical by status and user id : ',action.payload.result.result)
+        state.loading = false
+        state.message = action.payload.result.message
+        state.listMedicalByUserId = action.payload.result.result
+      })
+      .addCase(getListMedicalByUserId.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+        console.log(action.payload);
+      })    
       .addCase(getDataMedicalById.pending, (state) => {
         state.loading = true;
         state.success = false;
@@ -237,6 +365,36 @@ extraReducers(builder) {
         state.success = false;
         state.error = action.payload;
         console.log(action.payload);
+      })   
+      .addCase(updateDataMedicalById.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+      })
+      .addCase(updateDataMedicalById.fulfilled, (state, action) => {
+        // console.log('action payload : ',action.payload.result)
+        state.loading = false
+        state.message = action.payload.result.message
+      })
+      .addCase(updateDataMedicalById.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+        // console.log(action.payload);
+      })   
+      .addCase(updateStatusMedicalById.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+      })
+      .addCase(updateStatusMedicalById.fulfilled, (state, action) => {
+        // console.log('action payload : ',action.payload.result)
+        state.loading = false
+        state.message = action.payload.result.message
+      })
+      .addCase(updateStatusMedicalById.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload;
+        // console.log(action.payload);
       })   
  
     }

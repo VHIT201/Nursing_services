@@ -28,20 +28,39 @@ import InfoService from "../../components/selectionbar/InfoService";
 import ServiceDescription from "../../components/Customer/ServiceDescription";
 import CalendarListItem from "../../components/Customer/CalendarListItem";
 import ServiceDetails from "../../components/ServiceDetails/ServiceDetails";
+import { useSelector,useDispatch } from 'react-redux';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getListMedicalByNurseId, getListMedicalByUserId } from "../../redux/slices/medicalCaseSlice";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const CustomerServices = ({navigation}) => {
+  const [statusList, setStatusList] = useState('waiting')
+  const dispatch = useDispatch()
   const [isSelecting,setIsSelecting] = useState(0)
   const [modalVisible,setModalVisible] = useState(false)
-  const handleListItem =()=>{
-    setModalVisible(true)
-  }
-  const handleModalLeftButton =()=>{
-    setModalVisible(false)
-  }
+  const [appointmentList,setAppointmentList] = useState(true)
+  const listStatus = ['waiting', 'happening','complete','cancelled']
   const openDrawer = ()=>{
     navigation.openDrawer()
+  }
+  const {listMedicalByUserId} = useSelector((state) => state.medicals)
+  console.log(listMedicalByUserId)
+  const handlePressServiceDescription = (idSub) => {
+    navigation.navigate('MedicalDetails', {idSub : idSub});
+  }
+
+  const handleChangeStatus = (status) => {
+    switch(status) {
+      case 'happening':
+        return 'Đang diễn ra'
+      case 'complete':
+        return 'Hoàn thành'
+      case 'cancelled':
+        return 'Đã hủy'
+      default:
+        return 'Đang chờ'
+}
   }
 
   return (
@@ -49,42 +68,52 @@ const CustomerServices = ({navigation}) => {
       <Header nameLeftIcon={'navicon'} namePage={'Công việc'} handleLeftButton={openDrawer}/>
       <View style={styles.body}>
         <View style={{height:"6%",width:"100%",flexDirection:'row',alignItems:'center',justifyContent:"space-between"}}>
-          <TouchableOpacity onPress={()=>setIsSelecting(0)} style={ isSelecting===0 ?[styles.btnAct,{borderBottomColor:themes.yellow}]:styles.btn}>
-            <Text style={{fontSize:12}}>Đang chờ duyệt</Text>
-          </TouchableOpacity>
-          <View style={{height:"40%",width:1,backgroundColor:themes.gray}}></View>
-          <TouchableOpacity onPress={()=>setIsSelecting(1)} style={ isSelecting===1 ?[styles.btnAct,{borderBottomColor:themes.blue}]:styles.btn}>
-            <Text style={{fontSize:12}}>Đang thực hiện</Text>
-          </TouchableOpacity>
-          <View style={{height:"40%",width:1,backgroundColor:themes.gray}}></View>
-          <TouchableOpacity onPress={()=>setIsSelecting(2)} style={ isSelecting===2 ?styles.btnAct:styles.btn}>
-            <Text style={{fontSize:12}}>Đã hoàn thành</Text>
-          </TouchableOpacity>
-          <View style={{height:"40%",width:1,backgroundColor:themes.gray}}></View>
-          <TouchableOpacity onPress={()=>setIsSelecting(3)} style={ isSelecting===3 ?[styles.btnAct,{borderBottomColor:themes.red}]:styles.btn}>
-            <Text style={{fontSize:12}}>Đã hủy bỏ</Text>
-          </TouchableOpacity>
-          
+        {
+          listStatus.map((item,index)=>(
+            <TouchableOpacity onPress={()=>setStatusList(item)} key={index} style={ statusList == item ?[styles.btnAct,{borderBottomColor:themes.green}]:styles.btn}>
+              <Text style={{fontSize:12}}>{handleChangeStatus(item)}</Text>
+            </TouchableOpacity>
+          ))
+        }
         </View>
         <View style={{height:"94%",width:"100%",paddingTop:"1%"}}>
-          <View style={styles.itemListService}> 
-            <View style={{height:'10%',width:"100%"}}>
-              <CalendarListItem handleOnpress={handleListItem}/>
-              <CalendarListItem handleOnpress={handleListItem}/>
-              <CalendarListItem handleOnpress={handleListItem}/>
-              <CalendarListItem handleOnpress={handleListItem}/>
-              
-            </View>
-          </View>
+        {
+              listMedicalByUserId.length !== 0 ?
+              (
+                <>
+              <ScrollView style={{flex:1,width:'100%',paddingLeft:'1%',paddingRight:"1%"}}>
+                {
+                  listMedicalByUserId.map((item, index) => (
+                    item.status == statusList && (
+                      <ServiceDescription handlePress={()=>handlePressServiceDescription(item._id)} 
+                                          date={item.startDate} 
+                                          subService={item.subServiceId?.name} 
+                                          address={item.userId?.address} 
+                                          name={item.userId.fullname} 
+                                          key={index} 
+                                          state={item.status} />
+                    )
+                  ))
+                }
+
+
+                <View style={{height:100,width:'100%'}}></View>
+              </ScrollView>
+                </>
+              ) 
+              :
+              (
+                <View style={{flex:1,width:'100%',justifyContent:"center",alignItems:"center",}}> 
+                  <Text style={{color:themes.gray}}>Danh sách lịch trống</Text>
+                  <View style={{height:100}}></View>
+                </View> 
+              )
+            
+                }
+
         </View>
       </View>
-      {
-        modalVisible && (
-          <View style={styles.modal}>
-            <ServiceDetails handleHeaderLeftButton={handleModalLeftButton}/>
-          </View>
-        )
-      }
+
 
 
     </View>
@@ -121,10 +150,7 @@ const styles = StyleSheet.create({
     justifyContent:"center",
     alignItems:"center"
   },
-  itemListService:{
-    height:200,
-    width:"100%",
-  },
+
   modal:{
     height:"100%",
     width:"100%",

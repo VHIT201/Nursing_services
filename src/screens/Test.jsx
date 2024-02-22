@@ -10,7 +10,7 @@ const Test = () => {
 
 
   useEffect(() => {
-    console.log("bắt đầu tìm kiếm token")
+    // console.log("bắt đầu tìm kiếm token")
     const getToken = async () => {
       const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
       if (value !== null) {
