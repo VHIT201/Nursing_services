@@ -29,8 +29,8 @@ import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
 import themes from "../../../themes";
 import InfoService from "../../components/selectionbar/InfoService";
 import call from 'react-native-phone-call';
+import * as Clipboard from 'expo-clipboard';
 
-import {Clipboard} from 'react-native';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const NursesWallet = ({navigation}) => {
@@ -45,8 +45,8 @@ const NursesWallet = ({navigation}) => {
   const handleCall = () => {
     Linking.openURL(`tel:${phoneNumber}`);
   };
-  const copyToClipboard = () => {
-    Clipboard.setString('hello world');
+  const copyToClipboard = async () => {
+    await Clipboard.setStringAsync('hello world');
   };
 
   return (
@@ -131,7 +131,7 @@ const NursesWallet = ({navigation}) => {
               </TouchableOpacity>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.bottomView,{paddingTop:10,paddingBottom:10}]}>
+            <TouchableOpacity onPress={()=>navigation.navigate('ChooseBank')} style={[styles.bottomView,{paddingTop:10,paddingBottom:10}]}>
               <Ionicons color={themes.green} size={20} name={'add-sharp'}/>
             </TouchableOpacity>
 

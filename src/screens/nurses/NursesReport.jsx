@@ -33,7 +33,7 @@ const NursesReport = ({navigation}) => {
     navigation.openDrawer()
   }
 
-
+  const [listViewMode, setListViewMode] = useState('both')
   const getCurrentMonth = new Date(); // Lấy tháng hiện tại
   const [currentChooseTime, setCurrentChooseTime] = useState(format(getCurrentMonth, 'MM-yyyy'))
 
@@ -115,7 +115,7 @@ const handleChooseTime = (time) =>{
                   <Text style={{fontWeight:'400',fontSize:13}}>Phạm Văn Hoàng - 35t - Biên Hòa</Text>
                 </View>
                 <View style={{paddingTop:10,width:'40%',justifyContent:"center",alignItems:"flex-end",paddingRight:"5%"}}>
-                  <Text style={{textAlign:'right'}}>200.000</Text>
+                  <Text style={{textAlign:'right'}}>+200.000</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity style={{width:"100%",paddingTop:10,paddingBottom:10,flexDirection:"row",justifyContent:"center",alignItems:'center'}}>
@@ -237,7 +237,8 @@ const styles = StyleSheet.create({
   topItemTotalInfo:{
     height:140,
     width:"94%",
-    backgroundColor:themes.green,
+    // backgroundColor:themes.green,
+    backgroundColor:'#7fc15e',
     marginTop:10,
     borderRadius:10,
     justifyContent:"center",

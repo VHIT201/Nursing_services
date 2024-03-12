@@ -57,7 +57,6 @@ const {listMedicalByNurseId} = useSelector((state) => state.medicals)
           // status : 'waiting',
           nurseId: userDataRedux.user._id
         }
-        
         dispatch(getListMedicalByNurseId(values))
       }
     };

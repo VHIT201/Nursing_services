@@ -262,7 +262,7 @@ export const changeRoleNurse = createAsyncThunk(
 
         }
      });
-      console.log('Đăng ký điều dưỡng thành công')
+      // console.log('Đăng ký điều dưỡng thành công')
       console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
       
         return {
@@ -309,7 +309,7 @@ export const userSlice = createSlice({
         state.success = false;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log('action payload login : ', action.payload)
+        // console.log('action payload login : ', action.payload)
         state.user = action.payload.user
         state.user.accessToken = action.payload.token
         state.loading = false
@@ -414,7 +414,7 @@ export const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(resetPassword.fulfilled, (state, action) => {
-        console.log('payload : ' ,action.payload.result)
+        // console.log('payload : ' ,action.payload.result)
         state.loading = false
         state.message = action.payload.result.message
       })

@@ -82,8 +82,8 @@ const [errorConfirmPassword, setErrorConfirmPassword] = useState(true)
   return (
     <KeyboardAwareScrollView enableOnAndroid={true} enableAutomaticScroll={true} style={{flex:1,width:windowWidth}}>
     <View style={styles.container}>
-        <Image style={{height:100,width:100,marginBottom:10}} resizeMode="contain" source={require('../../assets/Icon/logo.png')}/>
-        <Text style={{fontSize:24,fontWeight:"600",marginBottom:30}}>Tạo tài khoản</Text>
+        <Image style={{height:80,width:80,marginBottom:10}} resizeMode="contain" source={require('../../assets/Icon/logo.png')}/>
+        <Text style={{fontSize:24,fontWeight:"600",marginBottom:30,color:themes.green}}>Tạo tài khoản</Text>
         <View style={styles.coverTextInput}>
           <Input 
             placeholder='Tên' 

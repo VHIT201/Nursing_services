@@ -45,10 +45,10 @@ const Waitview = ({navigation}) => {
         const valueToken = await AsyncStorage.getItem('userToken');
         // const isUserLoggedIn = stateLogin ? JSON.parse(stateLogin) : false;
         // console.log('isUserLoggedIn : ', isUserLoggedIn);
-        console.log('Value token : ', valueToken);
+        // console.log('Value token : ', valueToken);
 
         if(valueToken !== null ) {
-          console.log('Đã đăng nhập');
+          // console.log('Đã đăng nhập');
           const value = await AsyncStorage.getItem('userToken');
           const data = JSON.parse(value); 
           // console.log('start user data redux : ', userDataRedux)
@@ -94,7 +94,11 @@ useEffect(() => {
   return (
     <View style={styles.container}>
       <StatusBar hidden/>
-     
+      <View style={{flex:1,width:"100%",justifyContent:"center",alignItems:"center"}}>
+        <View style={{height:windowHeight*0.05,width:"40%"}}>
+          <Image style={{height:"100%",width:"100%"}} resizeMode='contain' source={require('../../assets/Icon/logo.png')}/>
+        </View>
+      </View>
     </View>
   )
 }
@@ -105,7 +109,7 @@ const styles = StyleSheet.create({
     container:{
         height:windowHeight,
         width:windowWidth,
-        backgroundColor:themes.green,
+        backgroundColor:'white',
         justifyContent:'center',
         alignItems:"center",
         padding:20
