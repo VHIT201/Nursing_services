@@ -26,18 +26,33 @@ import themes from "../../../../themes";
 import Header from "../../../components/header/Header";
 import Input from "../../../components/textInput/TextInput";
 import axios from 'axios';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { update,getInfoUser, updateUser } from "../../../redux/slices/userSlice";
+import { useSelector,useDispatch } from 'react-redux';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const ChooseBank = () => {
+const ChooseBank = ({navigation}) => {
+    const dispatch = useDispatch();
+    
     const [banksList, setBanksList] = useState('')
     const popularBankList = ['Vietcombank','BIDV', 'VietinBank','Techcombank','Agribank','Sacombank','ACB','MBBank']
     const [nurseBank, setNurseBank] = useState('')
+    // console.log("Ngân hàng của điều dưỡng : ", nurseBank.shortName)
     const [numberAccount, setNumberAccount] = useState('')
-    const [accountOwner, setAccountOwner] = useState('')
+    const [nameAccount, setNameAccount] = useState('')
     const [agreeToTerms, setAgreeToTerms] = useState(false)
+    const [tokenUser, setTokenUser] = useState({});
+    const [dataUser, setDataUser] = useState({})
+    const {user} = useSelector((state) => state.user)
+    
+    // console.log(user);
+    useEffect(() => {
+      if (user) {
+          setDataUser(user);
+      }
+  }, [user]); 
 
-    // console.log(nurseBank)
       useEffect(() => {
         async function getBanksData() {
             try {
@@ -55,6 +70,42 @@ const ChooseBank = () => {
           
           getBanksData();
       }, []);
+
+             //SECTION - Bắt đầu vào trang
+  useEffect(() => {
+    const getToken = async () => {
+      const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
+      if (value !== null) {
+        const data = JSON.parse(value); 
+        // dispatch(getInfoUser(data))  // get info user
+        setTokenUser(data);
+        setDataUser(prevDataUser => ({
+          ...prevDataUser, token : data
+        }))
+      }
+    };
+
+    getToken();
+  }, []);
+
+  const handleAddBankAccount = async () => {
+    const newDataUser = { ...dataUser };
+    delete newDataUser.bank;
+    newDataUser.bank = [
+        {
+            "bankName": nurseBank.shortName,
+            "nameAccount": nameAccount,
+            "numberAccount": numberAccount,
+        }
+    ];
+
+    // Cập nhật Redux store và local state với newDataUser
+    dispatch(updateUser(newDataUser));
+    dispatch(update(newDataUser));
+    setDataUser(newDataUser);
+    // Dispatch action để lấy thông tin user mới từ server
+    dispatch(getInfoUser(newDataUser.token));
+}
 
 
 
@@ -101,10 +152,6 @@ const ChooseBank = () => {
               ))
             )
 }
-
-
-
-            
           </View>
         </View>
         <View style={{height:100}}></View>
@@ -126,7 +173,7 @@ const ChooseBank = () => {
             </View>
             <View style={{width:"100%"}}>
               <Text style={{fontSize:14,fontWeight:"500",color:'black',marginBottom:6}}>Chủ tài khoản</Text>
-              <Input onChangeText={(text)=>setAccountOwner(text)} leftIconName={'user'} placeholder={'Chủ tài khoản'} height={40} width={'100%'} isTrue={true}/>
+              <Input onChangeText={(text)=>setNameAccount(text)} leftIconName={'user'} placeholder={'Chủ tài khoản'} height={40} width={'100%'} isTrue={true}/>
             </View>
           </View>
           <View style={[styles.bottomView,{backgroundColor:"#D1FAE5",paddingTop:5,paddingBottom:5,alignItems:'center',justifyContent:"center"}]}>
@@ -153,7 +200,7 @@ const ChooseBank = () => {
 
 
             <View style={{flex:1,width:'100%',alignItems:"center",justifyContent:'flex-end',paddingBottom:20}}>
-              <TouchableOpacity style={{height:windowHeight*0.05,width:"90%",backgroundColor:themes.green,borderRadius:10,justifyContent:'center',alignItems:'center'}}>
+              <TouchableOpacity onPress={handleAddBankAccount} style={{height:windowHeight*0.05,width:"90%",backgroundColor:themes.green,borderRadius:10,justifyContent:'center',alignItems:'center'}}>
                 <Text style={{fontSize:15,fontWeight:"500",color:'white'}}>Tiếp tục</Text>
               </TouchableOpacity>
             </View>

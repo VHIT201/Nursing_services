@@ -123,7 +123,7 @@ extraReducers(builder) {
         state.success = false;
       })
       .addCase(getListSubServices.fulfilled, (state, action) => {
-        console.log('action payload : ',action.payload)
+        // console.log('action payload : ',action.payload)
         state.loading = false
         state.services = action.payload.result.data
         state.message = action.payload.result.message
@@ -139,7 +139,7 @@ extraReducers(builder) {
         state.success = false;
       })
       .addCase(getListSubServicesByIDService.fulfilled, (state, action) => {
-        console.log('action payload : ',action.payload.result.data)
+        // console.log('action payload : ',action.payload.result.data)
         state.loading = false
         state.subServices = action.payload.result.data
         state.message = action.payload.result.message

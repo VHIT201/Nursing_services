@@ -28,7 +28,7 @@ import themes from "../../../themes";
 import InfoService from "../../components/selectionbar/InfoService";
 import dataService from "../../seeders/dataService";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import Loading from "../../components/Progress/Loading";
 import { getListServices, getListSubServicesByIDService } from "../../redux/slices/servicesSlice";
 import { getInfoUser } from "../../redux/slices/userSlice";
 import { useDispatch,useSelector } from 'react-redux';
@@ -41,7 +41,12 @@ const NursesHome = ({navigation}) => {
 
     //redux
     const dispatch = useDispatch()
-
+    const loadingUser = useSelector(state=> state.user.loading)
+    // console.log(loadingUser);
+    const loadingService = useSelector((state)=> state.services.loading)
+    const {user} = useSelector(state=> state.user)
+  
+    // console.log(loadingService);
     //SECTION - Bắt đầu
     useEffect(() => {
       const getToken = async () => {
@@ -95,6 +100,16 @@ const NursesHome = ({navigation}) => {
     <View style={styles.container}>
       <StatusBar/>
       <Header namePage={'Trang chủ'} handleLeftButton={openDrawer} nameLeftIcon={'navicon'}/>
+      {
+        user.wallet <= 500000 && (
+          <View style={{height:30,width:"100%",justifyContent:"center",alignItems:"center",flexDirection:'row'}}>
+        <Text style={{fontSize:12, fontWeight:'500',color:"red"}}>Số tiền trong tài khoản không đủ điều kiện giao dịch, </Text>
+        <TouchableOpacity onPress={()=>navigation.navigate('NursesWallet')} style={{height:30,justifyContent:"center",alignItems:"center"}}>
+          <Text style={{fontSize:12, fontWeight:'500',textDecorationLine:"underline",color:'red'}}>xem tại đây !</Text>
+        </TouchableOpacity>
+      </View>
+        )
+      }
       <View style={{flex:1,width:'100%',paddingLeft:"5%",paddingRight:"5%",marginTop:4}}>
       <FlatList
           data={listServices}
@@ -103,7 +118,6 @@ const NursesHome = ({navigation}) => {
                                     )}
           keyExtractor={(item) => item._id} 
         />
-        
       </View>
       {
         visibleModal &&(
@@ -121,7 +135,16 @@ const NursesHome = ({navigation}) => {
           </View>
         )
       }
-      
+      {
+        loadingUser == true && (
+          <Loading/>
+        )
+      }
+      {
+        loadingService == true && (
+          <Loading/>
+        )
+      }
     </View>
   )
 }

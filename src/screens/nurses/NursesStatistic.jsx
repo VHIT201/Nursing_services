@@ -31,6 +31,8 @@ import ServiceDetails from "../../components/ServiceDetails/ServiceDetails";
 import { useSelector,useDispatch } from 'react-redux';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getListMedicalByNurseId, getListMedicalByUserId } from "../../redux/slices/medicalCaseSlice";
+import { getTransaction } from "../../redux/slices/nurseSlice";
+import Loading from "../../components/Progress/Loading";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
@@ -45,6 +47,9 @@ const NursesStatistic = ({navigation}) => {
   const openDrawer = ()=>{
     navigation.openDrawer()
   }
+
+  const loadingMedicalCase = useSelector(state=> state.medicals.loading)
+  
 // console.log('test ' , listMedicalByNurseId);
 //SECTION - Bắt đầu
   useEffect(() => {
@@ -58,7 +63,6 @@ const NursesStatistic = ({navigation}) => {
           // status : 'waiting',
           nurseId: userDataRedux.user._id
         }
-        
         dispatch(getListMedicalByNurseId(values))
       }
     };
@@ -165,7 +169,11 @@ const {listMedicalByNurseId} = useSelector((state) => state.medicals)
         </View>
       </View>
 
-
+      {
+        loadingMedicalCase == true && (
+          <Loading/>
+        )
+      }
 
     </View>
   )

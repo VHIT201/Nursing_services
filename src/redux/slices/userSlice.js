@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import http from "../../utils/http";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDispatch,useSelector, } from 'react-redux';
-
 
 // khởi tạo các biến
 
@@ -14,6 +12,8 @@ const initialState = {
     phoneNumber: "",
     avatar: "",
     role: "",
+    bank:[],
+    
   },
   loading: false,
   success: false,
@@ -21,7 +21,8 @@ const initialState = {
   message:'',
   messsageVerifyOtp:"",
   dataRelativeUser : [],
-  RelativeUserDetails:{}
+  RelativeUserDetails:{},
+  transactions : []
 };
 
 
@@ -174,7 +175,6 @@ export const update = createAsyncThunk(
   "auth/update",
   
   async (values, thunkAPI) => {
-    // console.log('values in update : ',values)
     try {
       const {data:result} = await http.patch("/users/update", values, {
         signal: thunkAPI.signal,
@@ -186,7 +186,7 @@ export const update = createAsyncThunk(
 
      });
       // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
-      console.log("đã update user : ",result.data)
+
         return {
             user: result.data,
         };
@@ -280,7 +280,56 @@ export const changeRoleNurse = createAsyncThunk(
 
 //NOTE - Đăng xuất
 
+ // get list transactions
+ export const getTransaction = createAsyncThunk(
+  "auth/transaction",
+  async (values, thunkAPI) => {
+    try {
+      console.log(values.date);
+      const {data:result} = await http.get(`transaction?date=${values.date}`, {
+        signal: thunkAPI.signal,
+        headers: {
+          Authorization : "Bearer " + values.token,
+        }
+     });
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+        return {
+             result
+        };
+    } catch (error) {
+      console.log(
+        "🚀 ~ file: user.slice.ts:47 ~ error:",
+        error.response.data.error
+      );
+      return thunkAPI.rejectWithValue(error.response.data.error);
+    }
+  }
+);
 
+ export const updateBank = createAsyncThunk(
+  "auth/updateBank",
+  async (values, thunkAPI) => {
+    try {
+      const {data:result} = await http.put("users/bank/",values, {
+        signal: thunkAPI.signal,
+        headers: {
+          Authorization : "Bearer " + values.token,
+        }
+     });
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+        return {
+             result
+        };
+    } catch (error) {
+      console.log(
+        "🚀 ~ file: user.slice.ts:47 ~ error:",
+        error.response.data.error
+      );
+
+      return thunkAPI.rejectWithValue(error.response.data.error);
+    }
+  }
+);
 
 
 
@@ -289,7 +338,7 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     updateUser: (state, action) => {
-      const { accessToken, _id, fullname, email, phoneNumber, avatar, role } =
+      const { accessToken, _id, fullname, email, phoneNumber, avatar, role,bank } =
         action.payload;
       state.token = accessToken;
       state.id = _id;
@@ -298,6 +347,7 @@ export const userSlice = createSlice({
       state.phoneNumber = phoneNumber;
       state.avatar = avatar;
       state.role = role;
+      state.bank = bank
     },
   },
 
@@ -385,9 +435,10 @@ export const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(update.fulfilled, (state, action) => {
-        console.log('payload : ' ,action.payload)
+        // console.log('payload : ' ,action.payload.user.bank)
         state.loading = false
         state.message = action.payload.message
+        state.user.bank = action.payload.user.bank
         // state.success = true
       })
       .addCase(update.rejected, (state, action) => {
@@ -419,6 +470,35 @@ export const userSlice = createSlice({
         state.message = action.payload.result.message
       })
       .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      //NOTE - get list transactions
+      .addCase(getTransaction.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getTransaction.fulfilled, (state, action) => {
+        // console.log('payload : ' ,action.payload.result.data)
+        state.loading = false
+        state.message = action.payload.result.message
+        state.transactions = action.payload.result.data
+      })
+      .addCase(getTransaction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      //NOTE - put update bank 
+      .addCase(updateBank.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateBank.fulfilled, (state, action) => {
+        console.log('payload : ' ,action.payload)
+        state.loading = false
+        state.message = action.payload.result.message
+        state.transactions = action.payload.result.data
+      })
+      .addCase(updateBank.rejected, (state, action) => {
+        console.log(action.payload)
         state.loading = false;
         state.error = action.payload;
       })

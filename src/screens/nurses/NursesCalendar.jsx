@@ -32,7 +32,7 @@ import { getListMedicalByNurseId } from "../../redux/slices/medicalCaseSlice";
 import { getInfoUser } from "../../redux/slices/userSlice";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-
+import Loading from "../../components/Progress/Loading";
 const NursesCalendar = ({navigation}) => {
   const dispatch = useDispatch()
   const [appointmentList,setAppointmentList] = useState(true)
@@ -41,7 +41,9 @@ const NursesCalendar = ({navigation}) => {
 
 
 const userDataRedux = useSelector((state) => state.user)
-// console.log(userDataRedux.user._id)
+const loadingUser = useSelector((state) => state.user.loading)
+const loadingMedicals = useSelector((state) => state.medicals.loading)
+
 const {listMedicalByNurseId} = useSelector((state) => state.medicals)
 // console.log('test ' , listMedicalByNurseId);
 //SECTION - Bắt đầu
@@ -171,14 +173,22 @@ const {listMedicalByNurseId} = useSelector((state) => state.medicals)
               )
             )
           }
-          
-        
       </View>
       {
         visibleModal&&(
           <View style={styles.modal}>
             <ServiceDetails handleHeaderLeftButton={hanldeModalButton}/>
           </View>
+        )
+      }
+      {
+        loadingUser == true && (
+          <Loading/>
+        )
+      }
+      {
+        loadingMedicals == true && (
+          <Loading/>
         )
       }
       

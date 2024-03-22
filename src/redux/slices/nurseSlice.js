@@ -10,6 +10,7 @@ const initialState = {
     error:[],
     message : '',
     medical : [],
+    transactions : [],
 
   };
 
@@ -60,6 +61,8 @@ export const createMedical = createAsyncThunk(
     }
   );
 
+  
+
 
   export const medicalSlice = createSlice({
     name: "medical", //tên
@@ -105,6 +108,8 @@ extraReducers(builder) {
         state.error = action.payload;
         console.log(action.payload);
       })    
+ 
+  
  
     }
 

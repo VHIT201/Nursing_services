@@ -68,6 +68,7 @@ const ServiceForm = ({navigation}) => {
 //SECTION - Chọn ngày bắt đầu
     const [startDate, setStartDate] = useState(new Date())
     const [showStartDate, setShowStartDate] = useState(false)
+    const [eligible, setEligible] = useState()
     const onChangeStartDate = (event, selectedDate ) => {
         const formattedDate = `${selectedDate.getFullYear()}-${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}-${selectedDate.getDate().toString().padStart(2, '0')}`;
         console.log('Ngày được chọn : ', formattedDate)
@@ -98,13 +99,16 @@ const ServiceForm = ({navigation}) => {
       const formattedDate = `${selectedTime .getFullYear()}-${(selectedTime .getMonth() + 1).toString().padStart(2, '0')}-${selectedTime .getDate().toString().padStart(2, '0')}`;
         console.log('Thời gian kết thúc : ', formattedDate , ' ', selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         if(startTime>selectedTime){
-          console.log("Giờ bắt đầu nhỏ hơn giờ kết thúc");
+          // console.log("Giờ bắt đầu nhỏ hơn giờ kết thúc");
+          setEligible(false)
         }
         if(startTime<selectedTime){
-          console.log('Giờ bắt đầu lớn hơn giờ kết thúc');
+          // console.log('Giờ bắt đầu lớn hơn giờ kết thúc');
+          setEligible(true)
         }
         setEndTime(selectedTime);
         // console.log(endTime)
+        
         setShowEndTime(false);
       }
 //!SECTION
@@ -125,7 +129,7 @@ const ServiceForm = ({navigation}) => {
     
   //SECTION - Get data relatives
   useEffect(() => {
-    console.log("bắt đầu tìm kiếm token")
+    // console.log("bắt đầu tìm kiếm token")
     const getToken = async () => {
       const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
       if (value !== null) {
@@ -204,7 +208,7 @@ const [idNurse, setIdNurse] = useState('')
       nurseId: idNurse,
       subServiceId: id,
       userRelativeId : serviceUsers,
-      discountCode:"HOLIDAY2024",
+      // discountCode:"HOLIDAY2024",
       nameService : name,
       note : note,
       status:"happening",
@@ -229,6 +233,14 @@ const [idNurse, setIdNurse] = useState('')
   return (
     <View style={styles.container}>
             <Header nameLeftIcon={'chevron-left'} handleLeftButton={()=>navigation.goBack()} namePage={name} /> 
+            {
+              eligible == false && (
+                <View style={{height:20,width:'100%',justifyContent:"center",alignItems:'center',backgroundColor:"white"}}>
+                  <Text style={{fontSize:12,fontWeight:"500",color:"red"}}>Giờ bắt đầu phải bé hơn giờ kết thúc !</Text>
+                </View>
+              )
+            }
+
             <ScrollView style={[styles.body]}>
             <View style={[styles.cover,{justifyContent:"center",alignItems:"flex-start"}]}>
               <Text style={{fontSize:16, fontWeight:'500',color:themes.green,marginBottom:12}}>Chọn thời gian </Text>
@@ -370,11 +382,21 @@ const [idNurse, setIdNurse] = useState('')
               </View>
               </View>
               <View style={{flex:1,width:"100%",paddingLeft:'5%',paddingRight:"5%",justifyContent:'flex-end',paddingBottom:20}}>
-                <TouchableOpacity 
-                  onPress={handleService}
-                 style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:themes.green,marginTop:20,borderRadius:10}}>
-                  <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
-                </TouchableOpacity>
+                {
+                  eligible == false ? (
+                  <View style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:'gray',marginTop:20,borderRadius:10}}>
+                    <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
+                  </View>
+                  )
+                  :
+                  (
+                    <TouchableOpacity  
+                      onPress={handleService}
+                      style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:themes.green,marginTop:20,borderRadius:10}}>
+                      <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
+                    </TouchableOpacity>
+                  )
+                }
               </View>
               <View style={{height:40}}></View>
               
@@ -477,9 +499,9 @@ const [idNurse, setIdNurse] = useState('')
                     </View>
                 )
             }
+            
 
-
-
+            
           </View>
   )
 }

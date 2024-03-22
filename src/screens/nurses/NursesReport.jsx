@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -24,20 +24,25 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import InfoService from "../../components/selectionbar/InfoService";
 import Header from "../../components/header/Header";
 import themes from "../../../themes";
-import { format, addMonths, subMonths } from 'date-fns';
+import { useSelector,useDispatch } from 'react-redux';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getListMedicalByNurseId, getListMedicalByUserId } from "../../redux/slices/medicalCaseSlice";
+import { getTransaction } from "../../redux/slices/userSlice";
+import { format, addMonths, subMonths,parse } from 'date-fns';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-
+import Loading from "../../components/Progress/Loading";
 const NursesReport = ({navigation}) => {
   const openDrawer = () =>{
     navigation.openDrawer()
   }
 
-  const [listViewMode, setListViewMode] = useState('both')
   const getCurrentMonth = new Date(); // Lấy tháng hiện tại
+  const [tokenUser, setTokenUser] = useState('')
   const [currentChooseTime, setCurrentChooseTime] = useState(format(getCurrentMonth, 'MM-yyyy'))
-
-
+  const getCurrentDay = format(new Date(), 'MM/dd/yyyy');
+  const dispatch = useDispatch()
+  
 const startMonth = subMonths(getCurrentMonth, 12); // Tháng bắt đầu là tháng hiện tại trừ đi 12 tháng
 const endMonth = addMonths(getCurrentMonth, 12); // Tháng kết thúc là tháng hiện tại cộng thêm 12 tháng
 
@@ -50,8 +55,87 @@ for (let date = startMonth; date <= endMonth; date = addMonths(date, 1)) {
 // console.log(monthList); // In ra danh sách các tháng
 
 const handleChooseTime = (time) =>{
-  setCurrentChooseTime(time)
+  setCurrentChooseTime(time);
+  const parsedTime = parse(time, 'MM-yyyy', new Date());
+  const formattedTime = format(parsedTime, 'yyyy-MM');
+  console.log(formattedTime);
+  let values = {
+    token : tokenUser,
+    nurseId: userDataRedux.user._id,
+    date : formattedTime
+  }
+  dispatch(getTransaction(values))
 }
+
+const userDataRedux = useSelector((state) => state.user)
+const {transactions} = useSelector((state) => state.user)
+const loadingMedical = useSelector((state) => state.medicals.loading)
+const loadingUser = useSelector(state=>state.user.loading)
+// console.log(loadingMedical);
+// console.log(transactions)
+
+function convertDateFormat(dateString) {
+  // Kiểm tra định dạng hiện tại của chuỗi đầu vào
+  if (dateString.match(/^\d{2}-\d{4}$/)) {
+    // Nếu định dạng là MM-yyyy, chuyển sang yyyy-MM
+    let [month, year] = dateString.split('-');
+    month = parseInt(month, 10);
+    return `${year}-${String(month).padStart(2, '0')}`;
+  } else if (dateString.match(/^\d{4}-\d{2}$/)) {
+    // Nếu định dạng là yyyy-MM, chuyển sang MM-yyyy
+    let [year, month] = dateString.split('-');
+    month = parseInt(month, 10);
+    return `${String(month).padStart(2, '0')}-${year}`;
+  } else {
+    // Nếu không phải là định dạng hợp lệ, trả về null
+    return null;
+  }
+}
+
+//SECTION - Bắt đầu
+useEffect(() => {
+  const getToken = async () => {
+    const value = await AsyncStorage.getItem("userToken"); 
+    let currentDay = format(new Date(), 'MM-yyyy');
+    if (value !== null) {
+      const data = JSON.parse(value); 
+      setTokenUser(data)
+      
+      let values = {
+        token : data,
+        // status : 'waiting',
+        date : convertDateFormat(currentDay),
+        nurseId: userDataRedux.user._id
+      }
+      dispatch(getListMedicalByNurseId(values))
+      dispatch(getTransaction(values))
+    }
+  };
+  getToken()
+}, []);
+
+const groupedTransactions = transactions.reduce((acc, transaction) => {
+  // Lấy thời gian tạo giao dịch
+  const createdAt = new Date(transaction.createdAt);
+  // Định dạng thời gian theo dạng "DD/MM/YYYY"
+  const date = format(createdAt, 'MM/dd/yyyy');
+  
+  // Kiểm tra xem ngày đã được thêm vào mảng chưa
+  if (!acc[date]) {
+    acc[date] = [];
+  }
+  // Thêm giao dịch vào mảng tương ứng với ngày của nó
+  acc[date].push(transaction);
+
+  return acc;
+}, {});
+
+
+const formatAmount = (amount) => {
+  // Sử dụng hàm toLocaleString() để định dạng số thành chuỗi với dấu phân cách
+  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
 
   return (
     <View style={styles.container}>
@@ -74,7 +158,7 @@ const handleChooseTime = (time) =>{
         </View>
         <ScrollView style={styles.listDetails}>
             <View style={{flex:1,width:"100%",alignItems:"center"}}>
-              <View style={styles.topItemTotalInfo}>
+              {/* <View style={styles.topItemTotalInfo}>
                 <View style={{width:"90%",flexDirection:"row",justifyContent:'space-between'}}>
                   <Text style={styles.textInTopBanner}>Tiền vào</Text>
                   <Text style={styles.textInTopBanner}>400.000</Text>
@@ -90,57 +174,70 @@ const handleChooseTime = (time) =>{
                   <Text style={styles.textInTopBanner}></Text>
                   <Text style={styles.textInTopBanner}>200.000</Text>
                 </View>
-              </View>
+              </View> */}
 
-            {/* //SECTION - ItemListDayInMonth */}
-            <View style={styles.coverOfDay}>
-              <View style={{height:50,width:"100%",borderRadius:10,flexDirection:"row"}}>
-                <View style={{height:"100%",width:"14%",justifyContent:"center",alignItems:"flex-start",paddingLeft:"5%"}}>
-                  <Text style={[styles.textInTopBanner,{color:"#f0883e",fontSize:20}]}>20</Text>
-                </View>
-                <View style={{height:"100%",width:"56%",justifyContent:"center",alignItems:"flex-start"}}>
-                  <Text style={{fontWeight:'400'}}>Hôm nay</Text>
-                  <Text style={{fontWeight:'400'}}>tháng 02-2024</Text>
-                </View>
-                <View style={{height:"100%",width:"30%",justifyContent:"center",alignItems:"flex-end",paddingRight:"5%"}}>
-                  <Text style={[styles.textInTopBanner,{color:"red"}]}>200.000</Text>
-                </View>
-              </View>
-              <View style={{height:1,width:"90%",backgroundColor:themes.gray,marginTop:10}}></View>
+            
+              {
+                Object.keys(groupedTransactions).length === 0 ? (
+                  <View style={{ height:windowHeight*0.7, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{fontSize:14,fontWeight:"500",color:"gray"}}>Không có giao dịch</Text>
+                  </View>
+                )
+                :
+                (
+                  Object.keys(groupedTransactions).map(date => (
+                  <View key={date} style={styles.coverOfDay}>
+                    <View  style={{height:50,width:"100%",borderRadius:10,flexDirection:"row"}}>
+                      <View style={{height:"100%",width:"14%",justifyContent:"center",alignItems:"flex-start",paddingLeft:"5%"}}>
+                        <Text style={[styles.textInTopBanner,{color:"#f0883e",fontSize:20}]}>{date.substring(3, 5)}</Text>
+                      </View>
+                    <View style={{height:"100%",width:"56%",justifyContent:"center",alignItems:"flex-start"}}>
+                    <Text style={{fontWeight:'400'}}>
+                      {getCurrentDay == date ? "Hôm nay" : (`Ngày ${date.substring(3,5)}`)}
+                    </Text>
+                      <Text style={{fontWeight:'400'}}>{`tháng ${date.substring(0, date.indexOf('/'))} năm ${date.substring(date.indexOf('/') + 4)}`}</Text>
+                    </View>
+                    <View style={{height:"100%",width:"30%",justifyContent:"center",alignItems:"flex-end",paddingRight:"5%"}}>
+                      <Text style={[styles.textInTopBanner,{color:"red"}]}>{date.amount}</Text>
+                    </View>
+                  </View>
+                  <View style={{height:1,width:"90%",backgroundColor:themes.gray,marginTop:10}}></View>
 
-            {/* //SECTION - ItemofListInDay */}
-              <TouchableOpacity style={{width:"100%",paddingTop:10,paddingBottom:10,flexDirection:"row",justifyContent:"center",alignItems:'center'}}>
-                <View style={{paddingTop:10,width:'60%',paddingLeft:"5%"}}>
-                  <Text style={{fontWeight:'500',marginBottom:2}}>Ca bệnh BH1500</Text>
-                  <Text style={{fontWeight:'400',fontSize:13}}>Phạm Văn Hoàng - 35t - Biên Hòa</Text>
-                </View>
-                <View style={{paddingTop:10,width:'40%',justifyContent:"center",alignItems:"flex-end",paddingRight:"5%"}}>
-                  <Text style={{textAlign:'right'}}>+200.000</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity style={{width:"100%",paddingTop:10,paddingBottom:10,flexDirection:"row",justifyContent:"center",alignItems:'center'}}>
-                <View style={{paddingTop:10,width:'60%',paddingLeft:"5%"}}>
-                  <Text style={{fontWeight:'500',marginBottom:2}}>Rút tiền khỏi tài khoản</Text>
-                  <Text style={{fontWeight:'400',fontSize:13}}>Phạm Văn Hoàng - 19:30pm</Text>
-                </View>
-                <View style={{paddingTop:10,width:'40%',justifyContent:"center",alignItems:"flex-end",paddingRight:"5%"}}>
-                  <Text style={{color:"red",textAlign:'right'}}>-200.000</Text>
-                </View>
-              </TouchableOpacity>
+                  {groupedTransactions[date].map(transaction => (
+                    <TouchableOpacity key={transaction._id} style={{width:"100%",paddingTop:10,paddingBottom:10,flexDirection:"row",justifyContent:"center",alignItems:'center'}}>
+                    <View style={{paddingTop:10,width:'60%',paddingLeft:"5%"}}>
+                      <Text style={{fontWeight:'500',marginBottom:2}}>{transaction.type == 'deposit' ? ('Nạp tiền vào tài khoản'): ('Ca bệnh BH1500')}</Text>
+                      <Text style={{fontWeight:'400',fontSize:13}}>Phạm Văn Hoàng - 35t - Biên Hòa</Text>
+                    </View>
+                    <View style={{paddingTop:10,width:'40%',justifyContent:"center",alignItems:"flex-end",paddingRight:"5%"}}>
+                    <Text style={{ textAlign: 'right', fontWeight: '500', color: transaction.type === 'deposit' ? themes.green : 'red' }}>
+                      {transaction.type === 'deposit' ? `+ ${formatAmount(transaction.amount)}` : ` ${formatAmount(transaction.amount)} `}
+                    </Text>
 
-            {/* //!SECTION */}
-            </View>
-             {/* //!SECTION */}
-
-
-
+                    </View>
+                  </TouchableOpacity>
+                  ))}
+  
+                </View>
+                ))
+                )
+              }
             <View style={{height:100}}></View>
             </View>
           </ScrollView>
 
         
       </View>
-      
+      {
+        loadingMedical == true && (
+          <Loading/>
+        )
+      }
+      {
+        loadingUser == true && (
+          <Loading/>
+        )
+      }
     </View>
   )
 }

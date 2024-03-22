@@ -28,7 +28,7 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Header from "../../components/header/Header";
 import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
-
+import Loading from "../../components/Progress/Loading";
 import themes from "../../../themes";
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -38,14 +38,14 @@ const CustomerHome = ({navigation}) => {
   const [visibleModal,setVisibleModal] = useState(false)
 
  const {user} = useSelector((state) => state.user)
-  let userId = user._id
+const userLoading = useSelector((state) => state.user.loading)
+const serviceLoading = useSelector((state) => state.services.loading)
+console.log(serviceLoading);
   // console.log(userId);
   const openDrawer = ()=>{
     navigation.openDrawer()
   }
   const handleHomeButton = (id) =>{
-    // findSubServicesById(id)
-
     const idService = id
     // console.log(idService)
     // dispatch(getListSubServices(idService))
@@ -111,10 +111,20 @@ const CustomerHome = ({navigation}) => {
                   keyExtractor={(item) => item._id} 
                   />
             </View>
+            
           </View>
         )
       }
-
+      {
+        userLoading == true && (
+          <Loading/>
+        )
+      }
+      {
+        serviceLoading == true && (
+          <Loading/>
+        )
+      }
     </View>
   )
 }

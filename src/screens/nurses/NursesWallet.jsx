@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -29,17 +29,29 @@ import HomeSelectButton from "../../components/selectionbar/HomeSelectButton";
 import themes from "../../../themes";
 import InfoService from "../../components/selectionbar/InfoService";
 import call from 'react-native-phone-call';
+import { update, getInfoUser,updateBank } from "../../redux/slices/userSlice";
+import { useSelector,useDispatch } from 'react-redux';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from 'expo-clipboard';
+import axios from 'axios';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const NursesWallet = ({navigation}) => {
+  const dispatch = useDispatch();
+  const [banksList, setBanksList] = useState('')
+  const [tokenUser, setTokenUser] = useState({});
+  const [dataUser, setDataUser] = useState()
+  const [amountToWithdraw, setAmountToWithdraw] = useState()
+  const {user} = useSelector((state) => state.user)
+  // console.log(user);
   const openDrawer = ()=>{
     navigation.openDrawer()
   }
   const [chooseItemListBank, setChooseItemListBank] = useState('')
-  const handleChooseBankProfile = (number) => {
-    setChooseItemListBank(number)
+  const handleChooseBankProfile = (item) => {
+    console.log(item);
+    setChooseItemListBank(item)
   }
   const phoneNumber = '0382823785';
   const handleCall = () => {
@@ -47,12 +59,66 @@ const NursesWallet = ({navigation}) => {
   };
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync('hello world');
-  };
+  };  
+  const data = useSelector((state) => state.user.user);
+  const accountBankList = data.bank
+  // console.log(accountBankList);
+  useEffect(() => {
+    if(data)
+      setDataUser(data)
+  }, [data]);
+
+
+  //SECTION - Bắt đầu vào trang
+  useEffect(() => {
+    // console.log("bắt đầu tìm kiếm data")
+    const getToken = async () => {
+      const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
+      if (value !== null) {
+        const data = JSON.parse(value); 
+        dispatch(getInfoUser(data))  // get info user
+        setTokenUser(data);
+      }
+    };
+    getToken();
+  }, []);
+  useEffect(() => {
+    async function getBanksData() {
+        try {
+          const response = await axios.get('https://test-payment.momo.vn/v2/gateway/api/bankcodes');
+          // console.log(response.data);
+          setBanksList(Object.entries(response.data).map(([key, value]) => ({
+            id: key, 
+            ...value
+        })));
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      getBanksData();
+  }, []);
+  // console.log(banksList);
+  const findBankByShortName = (shortName, bankList) => {
+    for (const bank of bankList) {
+        if (bank.shortName == shortName) {
+            return bank.bankLogoUrl;
+        }
+    }
+    return null; // Trả về null nếu không tìm thấy
+};
+
+const handleWithdrawMoney = () => {
+  // console.log(amountToWithdraw);
+  // console.log(chooseItemListBank);
+  let values = {...chooseItemListBank, money : -amountToWithdraw, token : tokenUser}
+  // console.log(values);
+  dispatch(updateBank(values))
+}
+
 
   return (
     <View style={styles.container}>
       <Header namePage={'Ví tiền'} nameLeftIcon={'navicon'} handleLeftButton={openDrawer}/>
-
       <ScrollView style={styles.body}>
         <View style={{flex:1,width:'100%',alignItems:"center"}}>
           <View style={styles.topView}>
@@ -62,7 +128,7 @@ const NursesWallet = ({navigation}) => {
               </View>
               <View style={{height:"100%",width:"90%",justifyContent:"center",paddingLeft:'3%'}}>
                 <Text style={{fontSize:14, color:'gray', fontWeight:"500"}}>Số dư ví : 
-                  <Text style={{color:'black'}}>{`  500.000đ`}</Text>
+                  <Text style={{color:themes.green,fontSize:14}}>{`   ${user.wallet} đ`}</Text>
                 </Text>
               </View>
               
@@ -71,74 +137,70 @@ const NursesWallet = ({navigation}) => {
               <View style={{padding:5,backgroundColor:'white',justifyContent:"center",alignItems:'center',position:'absolute',top:'-40%',left:'6%'}}>
                 <Text style={{fontSize:12,color:'gray',fontWeight:'500'}}>Số tiền cần rút</Text>
               </View>
-              <TextInput keyboardType="number-pad" placeholder="0đ" style={{height:windowHeight*0.045,width:'86%',fontSize:17,fontWeight:'500'}}>
+              <TextInput onChangeText={(text=> setAmountToWithdraw(text))} keyboardType="number-pad" placeholder="0đ" style={{height:windowHeight*0.045,width:'86%',fontSize:17,fontWeight:'500'}}>
 
               </TextInput>
             </View>
-            <View style={{width:"90%",alignItems:"flex-start",marginTop:6}}>
-              <Text style={{fontSize:11,color:'red'}}>Số tiền trong ví phải lớn hơn 500.000đ để tiếp tục công việc !</Text>
+            <View style={{width:"90%",alignItems:"center",marginTop:10}}>
+              <Text style={{fontSize:12,color:'red'}}>Số tiền trong ví phải lớn hơn 500.000đ để tiếp tục công việc !</Text>
             </View>
             </View>
             
             <View style={{flexDirection:'row',width:'90%',marginTop:30,alignItems:'center',justifyContent:"space-between"}}>
               <Text style={{fontSize:15,color:"#424242",fontWeight:'500'}}>PHƯƠNG THỨC NHẬN TIỀN</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={()=>navigation.navigate('NursesReport')}>
                 <Text style={{fontSize:12,color:themes.green,fontWeight:'500'}}>Lịch sử giao dịch</Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity style={[styles.bottomView, {flexDirection: "row", borderColor: chooseItemListBank == 1 ? themes.green : themes.gray}]}>
-              <View style={{height:windowHeight*0.06,width:'18%',justifyContent:"center",alignItems:"center"}}>
-                <Image style={{height:'100%',width:'100%'}} resizeMode="cover" source={require('../../assets/Icon/MB.png')}/>
-              </View>
-              <View style={{height:windowHeight*0.06,justifyContent:"center",width:'62%',paddingLeft:"2%"}}>
-                <Text style={{fontWeight:'600',fontSize:15,color:"#424242",marginBottom:2}}>MB Bank</Text>
-                <Text style={{fontSize:12,fontWeight:'500',color:"#424242",lineHeight:16}}>PHẠM VĂN HOÀNG</Text>
-              </View>
-              <TouchableOpacity onPress={()=>handleChooseBankProfile(1)} style={{height:windowHeight*0.06,width:'20%',justifyContent:"center",alignItems:"flex-end"}}>
+            {
+              user.bank ? (
+                <>
                 {
-                  chooseItemListBank == 1 ?
-                  (
-                    <Ionicons color={themes.green} size={22} name={'radio-button-on-sharp'}/>
-                  )
-                  :
-                  (
-                    <Ionicons size={22} name={'radio-button-off-sharp'}/>
-                  )
+                  user.bank.map((item,key)=>(
+                    <TouchableOpacity  key={key}
+                  style={[styles.bottomView, {flexDirection: "row", borderColor: chooseItemListBank == 1 ? themes.green : themes.gray}]}
+                >
+                  <View style={{height:windowHeight*0.06,width:'18%',justifyContent:"center",alignItems:"center"}}>
+                    <Image style={{height:'100%',width:'100%'}} resizeMode="cover" 
+                      source={{uri : findBankByShortName(item.bankName, banksList)}}/>
+                  </View>
+                  <View style={{height:windowHeight*0.06,justifyContent:"center",width:'62%',paddingLeft:"2%"}}>
+                    <Text style={{fontWeight:'600',fontSize:15,color:"#424242",marginBottom:2}}>{item.bankName}</Text>
+                    <Text style={{fontSize:12,fontWeight:'500',color:"#424242",lineHeight:16}}>{item.nameAccount}</Text>
+                  </View>
+                  <TouchableOpacity onPress={()=>handleChooseBankProfile(item)} 
+                  style={{height:windowHeight*0.06,width:'20%',justifyContent:"center",alignItems:"flex-end"}}>
+                    {
+                      chooseItemListBank.numberAccount == item.numberAccount && chooseItemListBank.nameAccount == item.nameAccount ?
+                      (
+                        <Ionicons color={themes.green} size={22} name={'radio-button-on-sharp'}/>
+                      )
+                      :
+                      (
+                        <Ionicons size={22} name={'radio-button-off-sharp'}/>
+                      )
+                    }
+                  </TouchableOpacity>
+                </TouchableOpacity>
+                  ))
                 }
-
-              </TouchableOpacity>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.bottomView, {flexDirection: "row", borderColor: chooseItemListBank == 2 ? themes.green : themes.gray}]}>
-              <View style={{height:windowHeight*0.06,width:'18%',justifyContent:"center",alignItems:"center"}}>
-                <Image style={{height:'100%',width:'100%'}} resizeMode="cover" source={require('../../assets/Icon/MB.png')}/>
-              </View>
-              <View style={{height:windowHeight*0.06,justifyContent:"center",width:'62%',paddingLeft:"2%"}}>
-                <Text style={{fontWeight:'600',fontSize:15,color:"#424242",marginBottom:2}}>MB Bank</Text>
-                <Text style={{fontSize:12,fontWeight:'500',color:"#424242",lineHeight:16}}>PHẠM VĂN HOÀNG</Text>
-              </View>
-              <TouchableOpacity onPress={()=>handleChooseBankProfile(2)} style={{height:windowHeight*0.06,width:'20%',justifyContent:"center",alignItems:"flex-end"}}>
-                {
-                  chooseItemListBank == 2 ?
-                  (
-                    <Ionicons color={themes.green} size={22} name={'radio-button-on-sharp'}/>
-                  )
-                  :
-                  (
-                    <Ionicons size={22} name={'radio-button-off-sharp'}/>
-                  )
-                }
-
-              </TouchableOpacity>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={()=>navigation.navigate('ChooseBank')} style={[styles.bottomView,{paddingTop:10,paddingBottom:10}]}>
-              <Ionicons color={themes.green} size={20} name={'add-sharp'}/>
-            </TouchableOpacity>
-
+ 
+                <TouchableOpacity onPress={()=>navigation.navigate('ChooseBank')} style={[styles.bottomView,{paddingTop:10,paddingBottom:10}]}>
+                  <Text style={{fontSize:13,fontWeight:'400',color:themes.green}}>Nhấn để thêm tài khoản mới</Text>
+                </TouchableOpacity>
+                </>
+                
+              ) : 
+              (
+                <TouchableOpacity onPress={()=>navigation.navigate('ChooseBank')} style={[styles.bottomView,{paddingTop:10,paddingBottom:10}]}>
+                  <Text style={{fontSize:13,fontWeight:'400',color:themes.green}}>Nhấn để thêm tài khoản mới</Text>
+                </TouchableOpacity>
+              )
+}
 
             <View style={{flexDirection:'row',width:'90%',marginTop:30,alignItems:'center',justifyContent:"space-between"}}>
               <Text style={{fontSize:15,color:"#424242",fontWeight:'500'}}>PHƯƠNG THỨC NẠP TIỀN</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={()=>navigation.navigate('NursesReport')}>
                 <Text style={{fontSize:12,color:themes.green,fontWeight:'500'}}>Lịch sử giao dịch</Text>
               </TouchableOpacity>
             </View>
@@ -179,7 +241,7 @@ const NursesWallet = ({navigation}) => {
       </ScrollView>
       
       <View style={styles.bottomContainButton}>
-        <TouchableOpacity  style={{height:windowHeight*0.06,width:"90%",backgroundColor:themes.green,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
+        <TouchableOpacity onPress={()=>handleWithdrawMoney()} style={{height:windowHeight*0.06,width:"90%",backgroundColor:themes.green,borderRadius:10,justifyContent:"center",alignItems:"center"}}>
           <Text style={{fontSize:15,fontWeight:"500",color:'white'}}>Rút tiền</Text>
         </TouchableOpacity>
       </View>
