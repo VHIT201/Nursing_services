@@ -381,23 +381,8 @@ const [idNurse, setIdNurse] = useState('')
                 </View>
               </View>
               </View>
-              <View style={{flex:1,width:"100%",paddingLeft:'5%',paddingRight:"5%",justifyContent:'flex-end',paddingBottom:20}}>
-                {
-                  eligible == false ? (
-                  <View style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:'gray',marginTop:20,borderRadius:10}}>
-                    <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
-                  </View>
-                  )
-                  :
-                  (
-                    <TouchableOpacity  
-                      onPress={handleService}
-                      style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:themes.green,marginTop:20,borderRadius:10}}>
-                      <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
-                    </TouchableOpacity>
-                  )
-                }
-              </View>
+
+
               <View style={{height:40}}></View>
               
             </ScrollView>
@@ -499,6 +484,22 @@ const [idNurse, setIdNurse] = useState('')
                     </View>
                 )
             }
+            
+            {
+                  eligible == false ? (
+                  <View style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:'gray',marginTop:20,borderRadius:10}}>
+                    <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
+                  </View>
+                  )
+                  :
+                  (
+                    <TouchableOpacity  
+                      onPress={handleService}
+                      style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:themes.green,marginTop:20,borderRadius:10}}>
+                      <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
+                    </TouchableOpacity>
+                  )
+                }
             
 
             

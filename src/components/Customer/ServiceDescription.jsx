@@ -113,7 +113,7 @@ const ServiceDescription = ({handlePress,state,name, age, address, subService, i
             <Text style={{fontSize:12,fontWeight:"400", color:'gray',fontWeight:"500"}}>{address}</Text>
           </View>
           <View style={{width:'100%',flexDirection:"row",alignItems:"center"}}>
-            <Text style={{fontSize:12,fontWeight:"400", color:'gray',fontWeight:"500"}}>Chăm sóc bệnh nhân tại bệnh viện</Text>
+            <Text style={{fontSize:12,fontWeight:"400", color:'gray',fontWeight:"500"}}>{subService}</Text>
           </View>
           {handleBottom(state)}
         </View>
@@ -132,12 +132,10 @@ const styles = StyleSheet.create({
         alignItems:"center",
         marginTop:10,
         borderRadius:10,
-
-
-
+        
     },
     containerShadowAndroid :{
-      
+
     },
     text:{
       fontWeight:'500',

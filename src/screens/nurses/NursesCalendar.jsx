@@ -45,7 +45,6 @@ const loadingUser = useSelector((state) => state.user.loading)
 const loadingMedicals = useSelector((state) => state.medicals.loading)
 
 const {listMedicalByNurseId} = useSelector((state) => state.medicals)
-// console.log('test ' , listMedicalByNurseId);
 //SECTION - Bắt đầu
   useEffect(() => {
     const getToken = async () => {
@@ -119,7 +118,9 @@ const {listMedicalByNurseId} = useSelector((state) => state.medicals)
                                           address={item.userId?.address} 
                                           name={item.userId.fullname} 
                                           key={index} 
-                                          state={item.status} />
+                                          state={item.status} 
+                                          
+                                          />
                     )
                   ))
                 }

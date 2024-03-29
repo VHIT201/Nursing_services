@@ -87,14 +87,14 @@ const CustomerSettings = ({ navigation }) => {
   };
 
   const handleUpdatePassword = async () => {
-    console.log("data update password : ", dataUpdatePassword);
+    // console.log("data update password : ", dataUpdatePassword);
     dispatch(updatePassword(dataUpdatePassword));
     // setBeingSelected(1000);
   };
 
   //SECTION - Bắt đầu vào trang
   useEffect(() => {
-    console.log("bắt đầu tìm kiếm data")
+    // console.log("bắt đầu tìm kiếm data")
     const getToken = async () => {
       const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
       if (value !== null) {
@@ -135,9 +135,7 @@ useEffect(() => {
   }
 }, [error[0]?.message]);
 
-  // useEffect(() => {
-  //   dispatch(getInfoUser(tokenUser))
-  // }, []);
+
 
 
   const openDrawer = () => {
@@ -148,7 +146,6 @@ useEffect(() => {
   };
 
   const handleProfileCustomer = () => {
-    console.log('Chuyển qua trang chi tiết tài khoản');
     navigation.navigate('CustomerProfile')
   }
 

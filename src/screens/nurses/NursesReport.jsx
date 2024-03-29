@@ -58,7 +58,7 @@ const handleChooseTime = (time) =>{
   setCurrentChooseTime(time);
   const parsedTime = parse(time, 'MM-yyyy', new Date());
   const formattedTime = format(parsedTime, 'yyyy-MM');
-  console.log(formattedTime);
+  // console.log(formattedTime);
   let values = {
     token : tokenUser,
     nurseId: userDataRedux.user._id,
@@ -69,6 +69,7 @@ const handleChooseTime = (time) =>{
 
 const userDataRedux = useSelector((state) => state.user)
 const {transactions} = useSelector((state) => state.user)
+// console.log(transactions)
 const loadingMedical = useSelector((state) => state.medicals.loading)
 const loadingUser = useSelector(state=>state.user.loading)
 // console.log(loadingMedical);
@@ -117,7 +118,7 @@ useEffect(() => {
 const groupedTransactions = transactions.reduce((acc, transaction) => {
   // Lấy thời gian tạo giao dịch
   const createdAt = new Date(transaction.createdAt);
-  // Định dạng thời gian theo dạng "DD/MM/YYYY"
+  // Định dạng thời gian theo dạng "MM/dd/yyyy"
   const date = format(createdAt, 'MM/dd/yyyy');
   
   // Kiểm tra xem ngày đã được thêm vào mảng chưa
@@ -129,6 +130,18 @@ const groupedTransactions = transactions.reduce((acc, transaction) => {
 
   return acc;
 }, {});
+
+// Chuyển các khóa của đối tượng thành mảng các cặp key-value
+const sortedDates = Object.entries(groupedTransactions)
+  // Sắp xếp các cặp key-value theo ngày, từ lớn nhất đến nhỏ nhất
+  .sort((a, b) => new Date(b[0]) - new Date(a[0]))
+  // Chuyển lại thành đối tượng
+  .reduce((acc, [key, value]) => {
+    acc[key] = value;
+    return acc;
+  }, {});
+
+console.log(sortedDates);
 
 
 const formatAmount = (amount) => {
@@ -157,26 +170,7 @@ const formatAmount = (amount) => {
 
         </View>
         <ScrollView style={styles.listDetails}>
-            <View style={{flex:1,width:"100%",alignItems:"center"}}>
-              {/* <View style={styles.topItemTotalInfo}>
-                <View style={{width:"90%",flexDirection:"row",justifyContent:'space-between'}}>
-                  <Text style={styles.textInTopBanner}>Tiền vào</Text>
-                  <Text style={styles.textInTopBanner}>400.000</Text>
-                </View>
-                <View style={{height:10}}></View>
-                <View style={{width:"90%",flexDirection:"row",justifyContent:'space-between'}}>
-                  <Text style={[styles.textInTopBanner]}>Tiền ra</Text>
-                  <Text style={[styles.textInTopBanner, {color:'red'}]}>200.000</Text>
-                </View>
-                <View style={{height:10}}></View>
-                <View style={{height:1,width:"90%",backgroundColor:'#f0f6fc'}}></View>
-                <View style={{width:"90%",flexDirection:"row",justifyContent:'space-between',marginTop:10}}>
-                  <Text style={styles.textInTopBanner}></Text>
-                  <Text style={styles.textInTopBanner}>200.000</Text>
-                </View>
-              </View> */}
-
-            
+            <View style={{flex:1,width:"100%",alignItems:"center"}}>            
               {
                 Object.keys(groupedTransactions).length === 0 ? (
                   <View style={{ height:windowHeight*0.7, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
@@ -185,7 +179,7 @@ const formatAmount = (amount) => {
                 )
                 :
                 (
-                  Object.keys(groupedTransactions).map(date => (
+                  Object.keys(sortedDates).map(date => (
                   <View key={date} style={styles.coverOfDay}>
                     <View  style={{height:50,width:"100%",borderRadius:10,flexDirection:"row"}}>
                       <View style={{height:"100%",width:"14%",justifyContent:"center",alignItems:"flex-start",paddingLeft:"5%"}}>
@@ -203,20 +197,22 @@ const formatAmount = (amount) => {
                   </View>
                   <View style={{height:1,width:"90%",backgroundColor:themes.gray,marginTop:10}}></View>
 
-                  {groupedTransactions[date].map(transaction => (
+                  {sortedDates[date].map(transaction => (
                     <TouchableOpacity key={transaction._id} style={{width:"100%",paddingTop:10,paddingBottom:10,flexDirection:"row",justifyContent:"center",alignItems:'center'}}>
-                    <View style={{paddingTop:10,width:'60%',paddingLeft:"5%"}}>
-                      <Text style={{fontWeight:'500',marginBottom:2}}>{transaction.type == 'deposit' ? ('Nạp tiền vào tài khoản'): ('Ca bệnh BH1500')}</Text>
-                      <Text style={{fontWeight:'400',fontSize:13}}>Phạm Văn Hoàng - 35t - Biên Hòa</Text>
-                    </View>
-                    <View style={{paddingTop:10,width:'40%',justifyContent:"center",alignItems:"flex-end",paddingRight:"5%"}}>
-                    <Text style={{ textAlign: 'right', fontWeight: '500', color: transaction.type === 'deposit' ? themes.green : 'red' }}>
-                      {transaction.type === 'deposit' ? `+ ${formatAmount(transaction.amount)}` : ` ${formatAmount(transaction.amount)} `}
-                    </Text>
-
-                    </View>
-                  </TouchableOpacity>
+                      <View style={{paddingTop:10,width:'60%',paddingLeft:"5%"}}>
+                        <Text style={{fontWeight:'500',marginBottom:2}}>{transaction.type == 'deposit' ? 'Nạp tiền vào tài khoản' : 'Ca bệnh'}</Text>
+                        <Text style={{fontWeight:'400',fontSize:13}}>
+                          {`${transaction.userId.fullname} - ${transaction.userId.address}`}
+                        </Text>
+                      </View>
+                      <View style={{paddingTop:10,width:'40%',justifyContent:"center",alignItems:"flex-end",paddingRight:"5%"}}>
+                        <Text style={{ textAlign: 'right', fontWeight: '500', color: transaction.type === 'deposit' ? themes.green : 'red' }}>
+                          {transaction.type == 'deposit' ? `+ ${formatAmount(transaction.amount)}` : ` ${formatAmount(transaction.amount)} `}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
                   ))}
+
   
                 </View>
                 ))

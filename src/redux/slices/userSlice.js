@@ -92,7 +92,6 @@ export const getInfoUser = createAsyncThunk(
      });
      
      const userData = result.data
-    //  console.log('Data user từ sv : ', userData)
       // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
         return {
             user: result.data,
@@ -112,7 +111,6 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async (values, thunkAPI) => {
     try {
-        console.log('hello')
       const result = await http.post("/users/register", values, {
         signal: thunkAPI.signal
      });
@@ -132,7 +130,7 @@ export const forgotPassword = createAsyncThunk(
   "auth/forgot-password",
   async (values, thunkAPI) => {
     try {
-        console.log('forgot-password')
+        // console.log('forgot-password')
       const result = await http.post("/users/forgot-password", values, {
         signal: thunkAPI.signal
      });
@@ -152,11 +150,11 @@ export const verifyCode = createAsyncThunk(
   "auth/verify-otp",
   async (values, thunkAPI) => {
     try {
-        console.log('verify-otp')
+        // console.log('verify-otp')
       const result = await http.post("/users/verify-otp", values, {
         signal: thunkAPI.signal
      });
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data.message);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data.message);
         return result.data 
     } catch (error) {
       console.log(
@@ -235,7 +233,7 @@ export const resetPassword = createAsyncThunk(
       const {data:result} = await http.put("/users/reset-password", values, {
         signal: thunkAPI.signal,
      });
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
 
         return {
           result
@@ -254,7 +252,7 @@ export const changeRoleNurse = createAsyncThunk(
   "auth/change-role-nurse",
   async (values, thunkAPI) => {
     try {
-      console.log('data update điều dưỡng : ', values)
+      // console.log('data update điều dưỡng : ', values)
       const {data:result} = await http.patch("/users/change-role-nurse", values, {
         signal: thunkAPI.signal,
         headers: {
@@ -263,7 +261,7 @@ export const changeRoleNurse = createAsyncThunk(
         }
      });
       // console.log('Đăng ký điều dưỡng thành công')
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
       
         return {
           result
@@ -285,7 +283,7 @@ export const changeRoleNurse = createAsyncThunk(
   "auth/transaction",
   async (values, thunkAPI) => {
     try {
-      console.log(values.date);
+      // console.log(values.date);
       const {data:result} = await http.get(`transaction?date=${values.date}`, {
         signal: thunkAPI.signal,
         headers: {

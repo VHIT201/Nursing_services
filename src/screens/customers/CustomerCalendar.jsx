@@ -41,9 +41,8 @@ const CustomerCalendar = ({navigation}) => {
 
 
 const userDataRedux = useSelector((state) => state.user)
-// console.log(userDataRedux.user._id)
+const userId = userDataRedux.user._id
 const {listMedicalByUserId} = useSelector((state) => state.medicals)
-// console.log('test ' , listMedicalByUserId);
 //SECTION - Bắt đầu
   useEffect(() => {
     const getToken = async () => {
@@ -56,7 +55,7 @@ const {listMedicalByUserId} = useSelector((state) => state.medicals)
           token : data,
           // status : 'waiting',
           // userId: userDataRedux.user._id
-          userId: '65a0efd0bdaeb7771662fdd1'
+          userId: userId
         }
         
         dispatch(getListMedicalByUserId(values))

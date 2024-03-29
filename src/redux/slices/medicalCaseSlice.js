@@ -43,11 +43,11 @@ const initialState = {
     "auth/get-medical-by-id",
     async (values, thunkAPI) => {
       try {
-        console.log('Lấy ca bằng id sub : ',  values.id);
+        // console.log('Lấy ca bằng id sub : ',  values.id);
         const {data:result} = await http.get(`medical/${values.id}`, {
           signal: thunkAPI.signal,
        });
-        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
           return {
                result
           };
@@ -161,7 +161,7 @@ export const createMedical = createAsyncThunk(
             Authorization : "Bearer " + values.token,
           },
        });
-        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.result);
+        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.result);
           return {
                result
           };
@@ -202,11 +202,11 @@ export const createMedical = createAsyncThunk(
       "auth/update-data-medical-by-id",
       async (values, thunkAPI) => {
         try {
-          console.log(values);
+          // console.log(values);
           const {data:result} = await http.patch(`/medical/${values._id}`,{
             signal: thunkAPI.signal,          
          });
-          console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+          // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
             return {
                  result
             };
@@ -224,11 +224,10 @@ export const createMedical = createAsyncThunk(
       "auth/update-status-medical-by-id",
       async (values, thunkAPI) => {
         try {
-          console.log('Thông tin update status : ', values);
           const {data:result} = await http.patch(`/medical/update-status/${values._id}`,{
             signal: thunkAPI.signal,          
          });
-          console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
+          // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result.data);
             return {
                  result
             };
@@ -276,7 +275,7 @@ extraReducers(builder) {
         state.success = false;
       })
       .addCase(getMedicalById.fulfilled, (state, action) => {
-        console.log(action.payload.result)
+        // console.log(action.payload.result)
         state.loading = false
         state.services = action.payload.result.data
         state.message = action.payload.result.message
@@ -355,7 +354,7 @@ extraReducers(builder) {
         state.success = false;
       })
       .addCase(getDataMedicalById.fulfilled, (state, action) => {
-        // console.log('action payload : ',action.payload.result)
+        // console.log('action payload : ',action.payload.result.result)
         state.loading = false
         state.medicalDetails = action.payload.result.result
         state.message = action.payload.result.message

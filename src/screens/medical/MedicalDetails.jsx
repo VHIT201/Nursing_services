@@ -91,8 +91,7 @@ const MedicalDetails = ({ route,navigation }) => {
             const data = JSON.parse(value);
             setTokenUser(data)
             const values = {id:idSub, token: data} 
-              dispatch(getDataMedicalById(values))
-              
+            dispatch(getDataMedicalById(values))
           }
         };
         getToken();
@@ -100,22 +99,35 @@ const MedicalDetails = ({ route,navigation }) => {
 
 
   return (
-    <KeyboardAwareScrollView extraScrollHeight={100} enableOnAndroid={true} enableAutomaticScroll={true} style={{height:windowHeight,width:windowWidth}}>
+    <KeyboardAwareScrollView extraScrollHeight={100} enableOnAndroid={true} enableAutomaticScroll={true} style={{height:windowHeight,width:windowWidth,backgroundColor:"white"}}>
     <View style={styles.container}>
         <StatusBar/>
         <Header handleLeftButton={()=>navigation.goBack()} namePage={'Chi tiết ca dịch vụ'} nameLeftIcon={'chevron-left'}/>
         <ScrollView style={{ flex: 1, width: '100%' }}>
           <View style={{justifyContent:"center",alignItems:'center',paddingTop:20,paddingBottom:20}}>
-            <Text style={{fontSize:20,fontWeight:'600',color:themes.green}}>CA DỊCH VỤ BH123</Text>
+            <Text style={{fontSize:20,fontWeight:'600',color:themes.green}}>CA DỊCH VỤ</Text>
             <Text style={{fontSize:14,fontWeight:'600',color:themes.green,marginBottom:4}}>(Thanh toán trực tiếp)</Text>
-            <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>Số: 1234567</Text>
+            <Text style={{fontSize:14,fontWeight:'600',color:themes.green}}>{convertISOtoDDMMYYYY(medicalDetails.startDate)}</Text>
             <Text style={{fontSize:14,fontWeight:'600'}}>(✿‿✿)</Text>
           </View>
           <View style={{width:"100%",paddingTop:10,paddingBottom:10,alignItems:"center",paddingLeft:"5%",paddingRight:'5%'}}>
             <View style={{width:'100%',marginBottom:10}}>
               <Text style={{fontSize:16,fontWeight:"600",color:themes.green}}>Thông tin điều dưỡng</Text>
             </View>
-            <View style={{paddingTop:10,paddingBottom:10,width:'100%',paddingLeft:"5%",paddingRight:'5%',backgroundColor:'white',borderColor:themes.gray,borderRadius:10}}>
+            <View style={{paddingTop:10,
+                          paddingBottom:10,
+                          width:'100%',
+                          paddingLeft:"5%",
+                          paddingRight:'5%',
+                          backgroundColor:'white',
+                          borderColor:themes.gray,
+                          borderRadius:10,
+                          shadowColor: '#000', 
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.25,
+                          shadowRadius: 3,
+                          elevation: 5, 
+                                  }}>
               <View style={styles.item}>
                 <View style={{width:"30%"}}>
                   <Text style={styles.innerLeftText}>Tên</Text>
@@ -157,7 +169,18 @@ const MedicalDetails = ({ route,navigation }) => {
             <View style={{width:'100%',marginBottom:10}}>
               <Text style={{fontSize:16,fontWeight:"600",color:themes.green}}>Thông tin khách hàng</Text>
             </View>
-            <View style={{paddingTop:10,paddingBottom:10,width:'100%',paddingLeft:"5%",paddingRight:'5%',backgroundColor:'white',borderColor:themes.gray,borderRadius:10}}>
+            <View style={{paddingTop:10,
+                          paddingBottom:10,
+                          width:'100%',
+                          paddingLeft:"5%",
+                          paddingRight:'5%',
+                          backgroundColor:'white',
+                          borderColor:themes.gray,
+                          borderRadius:10,    shadowColor: '#000', 
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.25,
+                          shadowRadius: 3,
+                          elevation: 5, }}>
               <View style={styles.item}>
                 <View style={{width:"30%"}}>
                   <Text style={styles.innerLeftText}>Tên</Text>
@@ -209,7 +232,7 @@ const MedicalDetails = ({ route,navigation }) => {
               <Text style={{fontSize:16,fontWeight:"600",color:themes.green}}>Thông tin dịch vụ</Text>
             </View>
 
-            <View style={{paddingTop:10,paddingBottom:10,marginBottom:10,width:"100%",backgroundColor:"white",borderRadius:10,flexDirection:"row",paddingLeft:"5%",paddingRight:"5%"}}>
+            <View style={styles.containerItem}>
               <View style={{width:'10%'}}>
                 <Feather name={'clipboard'} size={20} color={themes.green}/>
               </View>
@@ -218,7 +241,7 @@ const MedicalDetails = ({ route,navigation }) => {
                 <Text style={{fontWeight:"500",color:'gray'}}>{medicalDetails.subServiceId?.serviceId.name}</Text>
               </View>
             </View>
-            <View style={{paddingTop:10,paddingBottom:10,width:"100%",marginBottom:10,backgroundColor:"white",borderRadius:10,flexDirection:"row",paddingLeft:"5%",paddingRight:"5%"}}>
+            <View style={styles.containerItem}>
               <View style={{width:'10%'}}>
                 <Feather name={'clipboard'} size={20} color={themes.green}/>
               </View>
@@ -227,7 +250,7 @@ const MedicalDetails = ({ route,navigation }) => {
                 <Text style={{fontWeight:"500",color:'gray'}}>{medicalDetails.subServiceId?.name}</Text>
               </View>
             </View>
-            <View style={{paddingTop:10,paddingBottom:10,width:"100%",marginBottom:10,backgroundColor:"white",borderRadius:10,flexDirection:"row",paddingLeft:"5%",paddingRight:"5%"}}>
+            <View style={styles.containerItem}>
               <View style={{width:'10%'}}>
                 <Feather name={'clock'} size={20} color={themes.green}/>
               </View>
@@ -236,7 +259,7 @@ const MedicalDetails = ({ route,navigation }) => {
                 <Text style={{fontWeight:"500",color:'gray'}}>{convertISOtoDDMMYYYY(medicalDetails?.startDate)} | {convertISOTo24hr(medicalDetails.startDate)}</Text>
               </View>
             </View>
-            <View style={{paddingTop:10,paddingBottom:10,width:"100%",marginBottom:10,backgroundColor:"white",borderRadius:10,flexDirection:"row",paddingLeft:"5%",paddingRight:"5%"}}>
+            <View style={styles.containerItem}>
               <View style={{width:'10%'}}>
                 <Fontisto name={'shopping-sale'} size={20} color={themes.green}/>
               </View>
@@ -246,7 +269,7 @@ const MedicalDetails = ({ route,navigation }) => {
               </View>
             </View>
             
-            {/* <View style={{paddingTop:10,paddingBottom:10,width:"100%",marginBottom:10,backgroundColor:"white",borderRadius:10,flexDirection:"row",paddingLeft:"5%",paddingRight:"5%"}}>
+            {/* <View style={{styles.containerItem}}>
               <View style={{width:'10%'}}>
                 <FontAwesome name={'money'} size={20} color={themes.green}/>
               </View>
@@ -256,7 +279,7 @@ const MedicalDetails = ({ route,navigation }) => {
               </View>
             </View> */}
 
-            <View style={{paddingTop:15,paddingBottom:15,width:"100%",marginBottom:10,backgroundColor:"white",borderRadius:10,flexDirection:"row",paddingLeft:"5%",paddingRight:"5%"}}>
+            <View style={styles.containerItem}>
               <View style={{width:'10%'}}>
                 <FontAwesome name={'money'} size={20} color={themes.green}/>
               </View>
@@ -276,8 +299,12 @@ const MedicalDetails = ({ route,navigation }) => {
             <View style={{width:'100%'}}>
               <Text style={{fontSize:16,fontWeight:"600",color:themes.green}}>Điều dưỡng ghi chú thêm</Text>
             </View>
-            <View style={{paddingTop:10,paddingBottom:10,width:"100%",borderRadius:10}}>
-              <View style={{width:"100%",flexDirection:"row",borderRadius:10,backgroundColor:"white"}}>
+            <View style={{paddingTop:10,paddingBottom:10,width:"100%",borderRadius:10,}}>
+              <View style={{width:"100%",flexDirection:"row",borderRadius:10,backgroundColor:"white",shadowColor: '#000', 
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 3,
+                            elevation: 5, }}>
                 <AutoGrowingTextInput
                   style={styles.textInput}
                   placeholder="Ghi chú"
@@ -361,7 +388,7 @@ const styles = StyleSheet.create({
     container:{
         height:windowHeight,
         width:windowWidth,
-        position:"relative"
+        position:"relative",
     },
     innerRightText:{
       color:'gray',
@@ -376,6 +403,7 @@ const styles = StyleSheet.create({
     item:{
       flexDirection:"row",
       marginBottom:6,
+      
     },
     bottomTab:{
       position:"absolute",
@@ -394,5 +422,22 @@ const styles = StyleSheet.create({
       paddingTop:10,
       paddingBottom:10,
       borderRadius:10,
+      
     },
+    containerItem:{
+      paddingTop:10,
+      paddingBottom:10,
+      width:"100%",
+      marginBottom:10,
+      backgroundColor:"white",
+      borderRadius:10,
+      flexDirection:"row",
+      paddingLeft:"5%",
+      paddingRight:"5%",
+      shadowColor: '#000', 
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3,
+      elevation: 5, 
+    }
 })
