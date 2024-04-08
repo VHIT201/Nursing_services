@@ -41,6 +41,8 @@ const NursesCalendar = ({navigation}) => {
 
 
 const userDataRedux = useSelector((state) => state.user)
+const {_id} = useSelector(state => state.user.user)
+// console.log(_id);
 const loadingUser = useSelector((state) => state.user.loading)
 const loadingMedicals = useSelector((state) => state.medicals.loading)
 
@@ -54,9 +56,9 @@ const {listMedicalByNurseId} = useSelector((state) => state.medicals)
         dispatch(getInfoUser(data))
         setTokenUser(data)
         let values = {
-          token : tokenUser,
+          token : value,
           // status : 'waiting',
-          nurseId: userDataRedux.user._id
+          nurseId: _id
         }
         dispatch(getListMedicalByNurseId(values))
       }

@@ -126,6 +126,7 @@ export const createMedical = createAsyncThunk(
   export const getListMedicalByNurseId = createAsyncThunk(
     "auth/get-list-medical-by-nurse-id",
     async (values, thunkAPI) => {
+      
       try {
         // console.log(values);
         const { data: result } = await http.get(`/medical/nurse`, {
@@ -354,7 +355,7 @@ extraReducers(builder) {
         state.success = false;
       })
       .addCase(getDataMedicalById.fulfilled, (state, action) => {
-        // console.log('action payload : ',action.payload.result.result)
+        console.log('action payload : ',action.payload.result.result)
         state.loading = false
         state.medicalDetails = action.payload.result.result
         state.message = action.payload.result.message

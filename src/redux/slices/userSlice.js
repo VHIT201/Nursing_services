@@ -13,6 +13,7 @@ const initialState = {
     avatar: "",
     role: "",
     bank:[],
+    wallet : 0,
     
   },
   loading: false,
@@ -22,7 +23,8 @@ const initialState = {
   messsageVerifyOtp:"",
   dataRelativeUser : [],
   RelativeUserDetails:{},
-  transactions : []
+  transactions : [],
+  notification:''
 };
 
 
@@ -336,7 +338,7 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     updateUser: (state, action) => {
-      const { accessToken, _id, fullname, email, phoneNumber, avatar, role,bank } =
+      const { accessToken, _id, fullname, email, phoneNumber, avatar, role,bank,wallet } =
         action.payload;
       state.token = accessToken;
       state.id = _id;
@@ -346,6 +348,14 @@ export const userSlice = createSlice({
       state.avatar = avatar;
       state.role = role;
       state.bank = bank
+      state.wallet = wallet
+    },
+    pdateNotifications: (state, action) => {
+      if (action.payload === "Giao dịch thành công") {
+        state.notification = "";
+      } else if (action.payload === "Giao dịch lỗi") {
+        state.notification = "Đã có lỗi";
+      }
     },
   },
 
@@ -392,7 +402,7 @@ export const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
-        console.log(action.payload)
+        // console.log(action.payload)
         state.loading = false
         state.success = false
       })
@@ -406,7 +416,7 @@ export const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(forgotPassword.fulfilled, (state, action) => {
-        console.log('payload : ' ,action.payload)
+        // console.log('payload : ' ,action.payload)
         state.loading = false
         // state.success = true
       })
@@ -419,7 +429,7 @@ export const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(verifyCode.fulfilled, (state, action) => {
-        console.log('payload : ' ,action.payload)
+        // console.log('payload : ' ,action.payload)
         state.loading = false
         state.message = action.payload.message
         // state.success = true
@@ -448,7 +458,7 @@ export const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(updatePassword.fulfilled, (state, action) => {
-        console.log('payload : ' ,action.payload)
+        // console.log('payload : ' ,action.payload)
         state.loading = false
         state.message = action.payload.message
         // state.success = true
@@ -490,15 +500,18 @@ export const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(updateBank.fulfilled, (state, action) => {
-        console.log('payload : ' ,action.payload)
+        // console.log('payload : ' ,action.payload.result.message)
         state.loading = false
         state.message = action.payload.result.message
-        state.transactions = action.payload.result.data
+        // state.transactions = action.payload.result.result
+        state.notification = action.payload.result.message
+        state.user = action.payload.result.result
       })
       .addCase(updateBank.rejected, (state, action) => {
         console.log(action.payload)
         state.loading = false;
         state.error = action.payload;
+        
       })
       
 

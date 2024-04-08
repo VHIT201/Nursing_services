@@ -39,9 +39,6 @@ const windowHeight = Dimensions.get('window').height;
 const NursesStatistic = ({navigation}) => {
   const [statusList, setStatusList] = useState('waiting')
   const dispatch = useDispatch()
-  const [isSelecting,setIsSelecting] = useState(0)
-  const [modalVisible,setModalVisible] = useState(false)
-  const [appointmentList,setAppointmentList] = useState(true)
   const [tokenUser, setTokenUser] = useState('')
   const listStatus = ['all','waiting', 'happening','complete','cancelled']
   const openDrawer = ()=>{

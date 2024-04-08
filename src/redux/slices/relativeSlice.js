@@ -1,26 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import http from "../../utils/http";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
-//List users
-const storeRelativeUser = async (value) => {
-  try {
-    const jsonValue = JSON.stringify(value);
-    await AsyncStorage.setItem('relativeUser', jsonValue);
-  } catch (e) {
-    // saving error
-  }
-};
-//User cụ thể
-const storeDataRelativeUser = async (value) => {
-  try {
-    const jsonValue = JSON.stringify(value);
-    await AsyncStorage.setItem('relativeUserData', jsonValue);
-  } catch (e) {
-    // saving error
-  }
-};
 
 // khởi tạo các biến
 
@@ -46,7 +25,7 @@ export const createRelativeUser = createAsyncThunk(
           Authorization : "Bearer " + values.token,
         }
      });
-      console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+      // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
 
         return {
              result
@@ -97,7 +76,7 @@ export const getRelativeUserData = createAsyncThunk(
         const {data:result} = await http.get(`/relatives/${values}`, {
           signal: thunkAPI.signal,
        });
-        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);  
+        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);  
         
           return {
                result
@@ -123,7 +102,7 @@ export const deleteRelativeUser = createAsyncThunk(
             Authorization : "Bearer " + values.tokenUser,
           }
        });
-        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
   
           return {
                result
@@ -142,9 +121,6 @@ export const editRelativeUser = createAsyncThunk(
     "auth/edit-relative-user",
     async (values, thunkAPI) => {
       try {
-        // console.log(values._id)
-        console.log('data sửa :', values)
-
         const {data:result} = await http.patch(`/relatives/${values._id}`,values ,{
           signal: thunkAPI.signal,
           headers: {
@@ -152,7 +128,7 @@ export const editRelativeUser = createAsyncThunk(
           },
 
        });
-        console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
+        // console.log("🚀 ~ file: user.slice.ts:41 ~ result:", result);
   
           return {
                result
@@ -183,7 +159,7 @@ export const editRelativeUser = createAsyncThunk(
             state.success = false;
           })
           .addCase(deleteRelativeUser.fulfilled, (state, action) => {
-            console.log(action.payload)
+            // console.log(action.payload)
             state.loading = false
           })
           .addCase(deleteRelativeUser.rejected, (state, action) => {
@@ -197,7 +173,7 @@ export const editRelativeUser = createAsyncThunk(
             state.loading = true;
           })
           .addCase(getRelativeUser.fulfilled, (state, action) => {
-            console.log('payload : ' , action.payload.result.data)
+            // console.log('payload : ' , action.payload.result.data)
             state.loading = false
             state.dataRelativeUser = action.payload.result.data
             state.message = action.payload.message
@@ -213,7 +189,7 @@ export const editRelativeUser = createAsyncThunk(
             state.loading = true;
           })
           .addCase(getRelativeUserData.fulfilled, (state, action) => {
-            console.log('payload get data đơn : ' , action.payload.result.data)
+            // console.log('payload get data đơn : ' , action.payload.result.data)
             state.loading = false
             state.RelativeUserDetails = action.payload.result.data
             state.message = action.payload.message
@@ -230,7 +206,7 @@ export const editRelativeUser = createAsyncThunk(
             state.loading = true;
           })
           .addCase(editRelativeUser.fulfilled, (state, action) => {
-            console.log('payload : ' ,action.payload)
+            // console.log('payload : ' ,action.payload)
             state.loading = false
             state.dataRelativeUser = action.payload.data
             state.message = action.payload.message          
@@ -244,7 +220,7 @@ export const editRelativeUser = createAsyncThunk(
             state.loading = true;
           })
           .addCase(createRelativeUser.fulfilled, (state, action) => {
-            console.log('payload : ' ,action.payload)
+            // console.log('payload : ' ,action.payload)
             state.loading = false
             state.message = action.payload.message
             // state.success = true

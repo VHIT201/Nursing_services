@@ -12,7 +12,8 @@ import {
   Image,
   StatusBar,
   Button,
-  Linking
+  Linking,
+  Alert
 } from "react-native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import FontAwesome from "react-native-vector-icons/FontAwesome";
@@ -42,15 +43,17 @@ const NursesWallet = ({navigation}) => {
   const [banksList, setBanksList] = useState('')
   const [tokenUser, setTokenUser] = useState({});
   const [dataUser, setDataUser] = useState()
+  const [showNotification, setShowNotification] = useState(false);
   const [amountToWithdraw, setAmountToWithdraw] = useState()
   const {user} = useSelector((state) => state.user)
-  // console.log(user);
+  const {notification} = useSelector(state => state.user)
+ 
   const openDrawer = ()=>{
     navigation.openDrawer()
   }
   const [chooseItemListBank, setChooseItemListBank] = useState('')
   const handleChooseBankProfile = (item) => {
-    console.log(item);
+    // console.log(item);
     setChooseItemListBank(item)
   }
   const phoneNumber = '0382823785';
@@ -61,6 +64,8 @@ const NursesWallet = ({navigation}) => {
     await Clipboard.setStringAsync('hello world');
   };  
   const data = useSelector((state) => state.user.user);
+  const {wallet} = useSelector((state) => state.user.user)
+  // console.log(wallet);
   const accountBankList = data.bank
   // console.log(accountBankList);
   useEffect(() => {
@@ -75,7 +80,7 @@ const NursesWallet = ({navigation}) => {
     const getToken = async () => {
       const value = await AsyncStorage.getItem("userToken"); //Lấy token từ store
       if (value !== null) {
-        const data = JSON.parse(value); 
+        const data = JSON.parse(value);
         dispatch(getInfoUser(data))  // get info user
         setTokenUser(data);
       }
@@ -108,12 +113,19 @@ const NursesWallet = ({navigation}) => {
 };
 
 const handleWithdrawMoney = () => {
-  // console.log(amountToWithdraw);
-  // console.log(chooseItemListBank);
   let values = {...chooseItemListBank, money : -amountToWithdraw, token : tokenUser}
-  // console.log(values);
   dispatch(updateBank(values))
 }
+useEffect(() => {
+  if (notification === "Update wallet successfully!") {
+    setShowNotification(true);
+    const timeout = setTimeout(() => {
+      setShowNotification(false);
+    }, 5000); // 5 giây
+    dispatch()
+    return () => clearTimeout(timeout);
+  }
+}, [notification]);
 
 
   return (
@@ -128,7 +140,7 @@ const handleWithdrawMoney = () => {
               </View>
               <View style={{height:"100%",width:"90%",justifyContent:"center",paddingLeft:'3%'}}>
                 <Text style={{fontSize:14, color:'gray', fontWeight:"500"}}>Số dư ví : 
-                  <Text style={{color:themes.green,fontSize:14}}>{`   ${user.wallet} đ`}</Text>
+                  <Text style={{color:themes.green,fontSize:14}}>{`   ${wallet} đ`}</Text>
                 </Text>
               </View>
               
@@ -246,6 +258,26 @@ const handleWithdrawMoney = () => {
         </TouchableOpacity>
       </View>
 
+      {showNotification && (
+        <View style={styles.notificationContainer}>
+          <View
+            style={{
+              height: windowHeight * 0.04,
+              width: "40%",
+              backgroundColor: "white",
+              borderRadius: 10,
+              justifyContent: "center",
+              alignItems: "center",
+              borderColor: "gray",
+            }}
+          >
+            <Text style={{ fontSize: 15, fontWeight: "500", color: themes.green, fontSize: 12 }}>Giao dịch thành công</Text>
+          </View>
+        </View>
+      )}
+
+
+
     </View>
   )
 }
@@ -258,7 +290,8 @@ const styles = StyleSheet.create({
     height:windowHeight,
     width:windowWidth,
     backgroundColor:"white",
-    position:'relative'
+    position:'relative',
+
   },
   bottomContainButton:{
     width:"100%",
@@ -267,6 +300,13 @@ const styles = StyleSheet.create({
     bottom:0,
     justifyContent:"center",
     paddingBottom:10
+  },
+  notificationContainer:{
+    width:"100%",
+    flexDirection:"row",
+    position:'absolute',
+    top:'9%',
+    justifyContent:"center",
   },
   btn:{
     height:"6%",

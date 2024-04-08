@@ -40,7 +40,7 @@ const CustomerHome = ({navigation}) => {
  const {user} = useSelector((state) => state.user)
 const userLoading = useSelector((state) => state.user.loading)
 const serviceLoading = useSelector((state) => state.services.loading)
-console.log(serviceLoading);
+// console.log(serviceLoading);
   // console.log(userId);
   const openDrawer = ()=>{
     navigation.openDrawer()

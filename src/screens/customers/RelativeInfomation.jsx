@@ -59,7 +59,7 @@ const [tokenUser, setTokenUser] = useState({})
 //List người thân
 const [relatives, setRelatives] = useState([])
 const [tempGender, setTempGender] = useState('');
-console.log(tempGender)
+// console.log(tempGender)
 //1 người thân
 const [relativesData, setRelativesData] = useState({})
 const [tempData, setTempData] = useState(null)
@@ -224,7 +224,7 @@ useState({  token: '',
   }
   //SECTION -  Hàm sửa data
   const handleChangeRelative = ()=>{
-    console.log('relativesData : ',relativesData)
+    // console.log('relativesData : ',relativesData)
     dispatch(editRelativeUser(relativesData))
     // userRelativesData();
     dispatch(getRelativeUser({token : tokenUser}))

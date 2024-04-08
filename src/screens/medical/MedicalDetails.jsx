@@ -279,7 +279,7 @@ const MedicalDetails = ({ route,navigation }) => {
               </View>
             </View> */}
 
-            <View style={styles.containerItem}>
+            <View style={[styles.containerItem,{paddingTop:20,paddingBottom:20}]}>
               <View style={{width:'10%'}}>
                 <FontAwesome name={'money'} size={20} color={themes.green}/>
               </View>

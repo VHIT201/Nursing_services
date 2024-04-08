@@ -43,7 +43,7 @@ const NursesReport = ({navigation}) => {
   const getCurrentDay = format(new Date(), 'MM/dd/yyyy');
   const dispatch = useDispatch()
   
-const startMonth = subMonths(getCurrentMonth, 12); // Tháng bắt đầu là tháng hiện tại trừ đi 12 tháng
+const startMonth = subMonths(getCurrentMonth, 24); // Tháng bắt đầu là tháng hiện tại trừ đi 12 tháng
 const endMonth = addMonths(getCurrentMonth, 12); // Tháng kết thúc là tháng hiện tại cộng thêm 12 tháng
 
 const monthList = [];
@@ -72,8 +72,6 @@ const {transactions} = useSelector((state) => state.user)
 // console.log(transactions)
 const loadingMedical = useSelector((state) => state.medicals.loading)
 const loadingUser = useSelector(state=>state.user.loading)
-// console.log(loadingMedical);
-// console.log(transactions)
 
 function convertDateFormat(dateString) {
   // Kiểm tra định dạng hiện tại của chuỗi đầu vào
@@ -141,7 +139,7 @@ const sortedDates = Object.entries(groupedTransactions)
     return acc;
   }, {});
 
-console.log(sortedDates);
+// console.log(sortedDates);
 
 
 const formatAmount = (amount) => {
