@@ -50,7 +50,6 @@ const ServiceForm = ({navigation}) => {
 //SECTION - Hàm lọc thời gian 
   const extractTime = (datetime) => {
     const date = new Date(datetime);
-
     const hours = date.getHours();
     const h = hours % 12 || 12; // Đảm bảo giờ không bao giờ lớn hơn 12
     const formattedHours = h < 10 ? `0${h}` : h; // Thêm số 0 nếu giờ là một chữ số
@@ -68,20 +67,18 @@ const ServiceForm = ({navigation}) => {
 //SECTION - Chọn ngày bắt đầu
     const [startDate, setStartDate] = useState(new Date())
     const [showStartDate, setShowStartDate] = useState(false)
-    const [eligible, setEligible] = useState()
+    const [eligible, setEligible] = useState(true)
     const onChangeStartDate = (event, selectedDate ) => {
         const formattedDate = `${selectedDate.getFullYear()}-${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}-${selectedDate.getDate().toString().padStart(2, '0')}`;
         console.log('Ngày được chọn : ', formattedDate)
         setStartDate(selectedDate)
-        setStartTime(selectedDate)
-        setEndTime(selectedDate)
         setShowStartDate(false)
     }
 //!SECTION
 
 
 //SECTION - Chọn giờ bắt đầu
-    const [startTime, setStartTime] = useState(startDate)
+    const [startTime, setStartTime] = useState(new Date())
     const [showStartTime, setShowStartTime] = useState(false)
     const onChangeStartTime = (event, selectedTime ) => {
       const formattedDate = `${selectedTime .getFullYear()}-${(selectedTime .getMonth() + 1).toString().padStart(2, '0')}-${selectedTime .getDate().toString().padStart(2, '0')}`;
@@ -93,32 +90,22 @@ const ServiceForm = ({navigation}) => {
       }
 //!SECTION
 //SECTION - Chọn giờ kết thúc
-    const [endTime, setEndTime] = useState(startDate)
+    const [endTime, setEndTime] = useState(new Date())
     const [showEndTime, setShowEndTime] = useState(false)
+
     const onChangeEndTime = (event, selectedTime ) => {
       const formattedDate = `${selectedTime .getFullYear()}-${(selectedTime .getMonth() + 1).toString().padStart(2, '0')}-${selectedTime .getDate().toString().padStart(2, '0')}`;
         console.log('Thời gian kết thúc : ', formattedDate , ' ', selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         if(startTime>selectedTime){
-          // console.log("Giờ bắt đầu nhỏ hơn giờ kết thúc");
           setEligible(false)
         }
-        if(startTime<selectedTime){
-          // console.log('Giờ bắt đầu lớn hơn giờ kết thúc');
-          setEligible(true)
+        else{
+          setEligible(false)
+          setEndTime(selectedTime);
+          setShowEndTime(true);
         }
-        setEndTime(selectedTime);
-        // console.log(endTime)
-        
-        setShowEndTime(false);
-      }
-//!SECTION
-//SECTION - Chọn số ngày
-    const [showDays, setShowDays] = useState(false)
-      const [days,setDays] = useState(0)
 
-    const handleInputDays = () => {
-        setShowDays(false)
-    }
+      }
 //!SECTION
 
 //SECTION - Ghi chú
@@ -402,7 +389,7 @@ const [idNurse, setIdNurse] = useState('')
             {
                 showStartTime && (
                     <DateTimePicker 
-                        value={startDate}
+                        value={startTime}
                         mode="time"
                         onChange={onChangeStartTime}
                         onTouchCancel={()=>{
@@ -423,27 +410,7 @@ const [idNurse, setIdNurse] = useState('')
                     />
                 )
             }
-            {
-                showDays && (
-                    <View style={{height:"100%",width:'100%',position:"absolute",justifyContent:"center",alignItems:"center"}}>
-                        <TouchableOpacity onPress={()=>setShowDays(false)} style={{flex:1,width:'100%',backgroundColor:"rgba(1, 1, 1, 0.5)"}}>
 
-                        </TouchableOpacity>
-                        <View style={{height:220,width:"100%",backgroundColor:'white',justifyContent:"center",alignItems:"center"}}>
-                            <Text style={{fontSize:16,fontWeight:"500",color:themes.green,marginBottom:20}}>Nhập số ngày</Text>
-                            <View style={{height:'30%',width:'14%',borderWidth:1,borderRadius:10,borderColor:themes.green}}>
-                                <TextInput autoFocus={true} value={days} onChangeText={(text)=>setDays(text)} keyboardType="number-pad" style={{height:"100%",width:'100%',textAlign:'center',fontSize:16}}/>
-                            </View>
-                            <TouchableOpacity onPress={handleInputDays} style={{height:40,width:'90%',backgroundColor:themes.green,borderRadius:10,marginTop:20,justifyContent:"center",alignItems:"center"}}>
-                                <Text style={{fontSize:14,fontWeight:'500',color:'white'}}>Xác nhận</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <TouchableOpacity onPress={()=>setShowDays(false)} style={{flex:1,width:'100%',backgroundColor:"rgba(1, 1, 1, 0.5)"}}>
-
-                        </TouchableOpacity>
-                    </View>
-                )
-            }
             {
                 modalListRelatives && (
                     <View style={{height:"100%",width:'100%',justifyContent:"flex-start",alignItems:"center",position:'absolute',backgroundColor:"white"}}>
@@ -487,24 +454,24 @@ const [idNurse, setIdNurse] = useState('')
             
             {
                   eligible == false ? (
-                  <View style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:'gray',marginTop:20,borderRadius:10}}>
-                    <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
-                  </View>
+                    <View style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:themes.gray,borderRadius:10,position:'absolute',width:"90%",bottom:20,}}>
+                      <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
+                    </View>
                   )
                   :
                   (
                     <TouchableOpacity  
                       onPress={handleService}
-                      style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:themes.green,marginTop:20,borderRadius:10}}>
+                      style={{flexDirection:'row',justifyContent:"center",alignItems:'center',height:50,backgroundColor:themes.green,borderRadius:10,position:'absolute',width:"90%",bottom:20,}}>
                       <Text style={{fontWeight:'600',color:'white',fontSize:16}}>Tiếp theo</Text>
                     </TouchableOpacity>
                   )
                 }
-            
-
-            
+                <View style={{height:100}}></View>
           </View>
+          
   )
+  
 }
 
 export default ServiceForm
@@ -513,6 +480,8 @@ const styles = StyleSheet.create({
     container :{
         height:windowHeight,
         width:"100%",
+        position:'relative',
+        alignItems:"center"
     },
     body:{
         flex:1,
